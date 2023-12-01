@@ -14,6 +14,33 @@ def load_labels(path: str):
 def load_mcm(path: str):
     return np.loadtxt(path, dtype=str)
 
+def load_all_data_and_mcms(iterator,__mcm_filename_format,__data_filename_format):
+    """
+    Load MCMs and data for all categories
+    :param path:
+    :param iterator:
+    :param __mcm_filename_format:
+    :param __data_filename_format:
+    :return:
+    """
+    MCM = []
+    for k in iterator:
+        # Add MCM to list
+        try:
+            mcm = load_mcm(f"INPUT/MCMs/{__mcm_filename_format.format(k)}")
+            MCM.append(mcm)
+        except:
+            # Throw error if MCM file not found
+            raise FileNotFoundError(f"Could not find MCM file for category {k}")
+
+        # Load data
+        try:
+            data = load_data(f"INPUT/data/{__data_filename_format.format(k)}")
+        except:
+            # Throw error if data file not found
+            raise FileNotFoundError(f"Could not find data file for category {k}")
+    return MCM, data
+
 ## Helpers
 
 
