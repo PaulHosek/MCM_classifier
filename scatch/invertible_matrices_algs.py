@@ -10,6 +10,15 @@ def filter_invertible_matrices(matrices):
     invertible_matrices = [matrix for matrix in matrices if np.linalg.det(matrix) != 0]
     return invertible_matrices
 
+def generate_invertible(rank):
+    """
+    Generate all invertible matrices
+    :param rank: side length of the square matrix
+    :return:
+    """
+    return filter_invertible_matrices(generate_binary_matrices((rank,rank)))
+
+
 # Example: Generate all 2x2 invertible binary matrices
 shape = (2, 2)
 all_matrices = generate_binary_matrices(shape)

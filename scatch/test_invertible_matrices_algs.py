@@ -26,5 +26,10 @@ class TestInvertibleMatrices(unittest.TestCase):
         for matrix in invertible_matrices:
             self.assertNotEqual(np.linalg.det(matrix), 0)
 
+    # def test_against_brute_force(self):
+    #     valid = filter_invertible_matrices(generate_binary_matrices((3,3)))
+    #     to_validate = generate_invertible((3,3))
+    #     for i in range(len(valid)):
+
 if __name__ == '__main__':
     unittest.main()
