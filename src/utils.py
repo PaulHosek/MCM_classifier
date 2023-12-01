@@ -23,7 +23,7 @@ def gauge_transform_xor(M, G):
 
     return result
 
-
+## Generate all invertible matrices ##
 def generate_binary_matrices(shape):
     possibilities = list(product([0, 1], repeat=shape[0]*shape[1]))
     matrices = [np.array(matrix).reshape(shape) for matrix in possibilities]
