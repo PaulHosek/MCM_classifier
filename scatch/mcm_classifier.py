@@ -1,3 +1,5 @@
+import subprocess
+
 import numpy as np
 import os
 import platform
@@ -85,7 +87,9 @@ class MCM_Classifier:
              max_no_improvement: int = 10_000, n_samples: int = 0):
 
         ##### Generate bootstrapped samples from the data in the data folder ####
+        # since in the default setting n_samples is 0, no new samples will be generated
         folder = os.fsencode(data_path)
+
         sorted_folder = sorted(os.listdir(folder))
         processes = []
         saa_args_list = []
@@ -119,3 +123,55 @@ class MCM_Classifier:
 
             saa_args = self.__construct_args(file,greedy, max_iter, max_no_improvement)
             saa_args_list.append(saa_args)
+
+            for saa_args in saa_args_list:
+                f = open(os.devnull, "w")
+                p = run_saa(saa_args)
+                processes.append((p,f))
+
+            for p,f in processes:
+                status = p.wait()
+                f.close()
+                if status == 0:
+                    print(f"\N{check mark} SAA for {saa_args_list[processes.index((p, f))][3].split('/')[-1]} finished successfully")
+
+            print("\N{check mark} Done!")
+
+            self.__construct_P()
+    def __construct_args(self, filename: str, greedy:,bool, max_iter: int, max_no_improvement: int) -> tuple:
+        """
+        Build the argument tuple to pass to the simulated annealing algorithm based on the settings we want.
+
+        :param filename:
+        :param greedy:
+        :param bool:
+        :param max_iter:
+        :param max_no_improvement:
+        :return:
+        """
+        operating_system = platform.system()
+        g = "-g" if greedy else ""
+        sa_file = "../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if operating_system == "Windows" else "../MinCompSpin_SimulatedAnnealing/bin/saa.out"
+        saa_args = [sa_file, str(self.n_variables),"-i", filename, g, "--max", str(max_iter), "--stop", str(max_no_improvement)]
+        saa_args = tuple(filter(None, saa_args))
+        return saa_args
+
+    def run_saa(saa_args: tuple):
+        """Runs the MinCompSpin_SimulatedAnnealing algorithm
+
+        Args:
+            saa_args (tuple): The arguments for the algorithm
+
+        Returns:
+            int: The return code of the algorithm
+        """
+        try:
+            p = subprocess.Popen(saa_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt("MinCompSpin_SimulatedAnnealing interrupted")
+        except SystemExit:
+            raise SystemExit("MinCompSpin_SimulatedAnnealing failed")
+        except Exception:
+            raise Exception("MinCompSpin_SimulatedAnnealing failed")
+
+        return p
