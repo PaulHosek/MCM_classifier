@@ -8,10 +8,7 @@ class TestInvertibleMatrices(unittest.TestCase):
         shape = (2, 2)
         matrices = generate_binary_matrices(shape)
 
-        # Check if the number of generated matrices is correct
         self.assertEqual(len(matrices), 2**(shape[0]*shape[1]))
-
-        # Check if all matrices have the correct shape
         for matrix in matrices:
             self.assertEqual(matrix.shape, shape)
 
@@ -25,10 +22,7 @@ class TestInvertibleMatrices(unittest.TestCase):
 
         invertible_matrices = filter_invertible_matrices(matrices)
 
-        # Check if only invertible matrices are retained
         self.assertEqual(len(invertible_matrices), 2)
-
-        # Check if all matrices in the result are indeed invertible
         for matrix in invertible_matrices:
             self.assertNotEqual(np.linalg.det(matrix), 0)
 
