@@ -34,7 +34,7 @@ class MCM_Classifier:
         Construct Probability distribution over all MCMs/ categories/ digits
         :return:
         """
-        P = [] # Probability distributions for each category
+        P = [] # Probability distributions of Icc configurations for each category
         MCM, data = clf_utils_pp.load_all_data_and_mcms(range(self.n_categories),
                                                         self.__mcm_filename_format,
                                                         self.__data_filename_format)
@@ -70,6 +70,7 @@ class MCM_Classifier:
                 # now each observed state/configuration has been identified with an integer
                 # get counts of each configuration [values] [counts] e.g., [0,1,6] [422,1,2]
                 u,c = np.unique(icc_strings, return_counts=True)
+                # for each possible configuration, fill in the observed probabilities
                 p_icc[u] = c/np.sum(c)
                 pk.append(p_icc)
             P.append(pk)
@@ -83,3 +84,38 @@ class MCM_Classifier:
     def fit(self, data_path: str = "INPUT/data", greedy: bool = False, max_iter: int = 10_000,
              max_no_improvement: int = 10_000, n_samples: int = 0):
 
+        ##### Generate bootstrapped samples from the data in the data folder ####
+        folder = os.fsencode(data_path)
+        sorted_folder = sorted(os.listdir(folder))
+        processes = []
+        saa_args_list = []
+
+        for file in sorted_folder:
+            filename = os.fsdecode(file)
+            if not filename.endswith("_bootstrap.dat") and filename.endswith(".dat"):
+                # Remove the .dat extension
+                filename = filename[:-4]
+                if (n_samples != 0):
+                    # create new folder for bootstrap samples
+                    # if no _bootstrap in filename, add it
+                    if "_bootstrap" not in filename:
+                        bootstrap_name = filename + "_bootstrap"
+                    else:
+                        bootstrap_name = filename
+                    # os.makedirs("INPUT/data/bootstrap/", exist_ok=True)
+                    clf_utils_pp.generate_bootstrap_samples(clf_utils_pp.load_data("INPUT/data/" + filename + ".dat"), bootstrap_name, n_samples)
+                    filename = bootstrap_name
+                else:
+                    if "_bootstrap" not in filename:
+                        bootstrap_name = filename + "_bootstrap"
+                    else:
+                        bootstrap_name = filename
+                    clf_utils_pp.generate_bootstrap_samples(clf_utils_pp.load_data("INPUT/data/" + filename + ".dat"), bootstrap_name, len(load_data("INPUT/data/" + filename + ".dat")))
+                    filename = bootstrap_name
+
+            #################################
+
+            file = "mcm_classifier/input/data" + filename
+
+            saa_args = self.__construct_args(file,greedy, max_iter, max_no_improvement)
+            saa_args_list.append(saa_args)
