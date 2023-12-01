@@ -175,3 +175,42 @@ class MCM_Classifier:
             raise Exception("MinCompSpin_SimulatedAnnealing failed")
 
         return p
+
+    def classify(self, state: np.ndarray = np.array([])) -> tuple:
+        # p is list of
+        p = self.__get_probs(state)
+        pred = np.argmax(p)
+
+        return pred, p
+
+    def __get_probs(self,state: np.ndarray) -> list:
+        """Give list of MCM probabilities for some state."""
+        all_probs = []
+
+        for i in range(self.n_categories):
+            prob = self.__prob_MCM(state,i)
+            all_probs.append(prob)
+
+    def __prob_MCM(self, state: np.ndarray, cat_index: int) -> float:
+        """
+        P(state|MCM_k)
+        Probability of this state, given a specific MCM.
+        :param state:
+        :param cat_index:
+        :return:
+        """
+        prob = 1
+        MCM = self.MCM[cat_index]
+        P = self.__P[cat_index]
+
+        # Calculate the product of the individual probabilities of the configuration ICCs in the MCM
+        for j, icc in enumerate(MCM):
+
+            # P(state| icc_j)
+            # Extrac the state
+            p_icc = P[j]
+            idx = [i for i in range(self.n_variables) if icc[i] == "1"]
+            sm = int("".join([str(s) for s in state[idx]]), base=2)
+
+            prob *= p_icc[sm]
+
