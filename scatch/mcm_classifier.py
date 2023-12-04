@@ -200,7 +200,7 @@ class MCM_Classifier:
         :return:
         """
         prob = 1
-        MCM = self.MCM[cat_index]
+        MCM = self.__MCM[cat_index] # MCM is list of p_icc
         P = self.__P[cat_index]
 
         # Calculate the product of the individual probabilities of the configuration ICCs in the MCM
@@ -208,9 +208,23 @@ class MCM_Classifier:
 
             # P(state| icc_j)
             # Extrac the state
+            # p_icc is an array of probabilities for the state
+            # of the binary version of the index e.g., p_icc = [0,0.22,0.12,0...,0.01]
             p_icc = P[j]
+
+            # get the index of that stat in the p_icc array,
+            # to extract the probability of the state given this icc
+
             idx = [i for i in range(self.n_variables) if icc[i] == "1"]
             sm = int("".join([str(s) for s in state[idx]]), base=2)
 
+            # Here happens the 0 probabilities, if the state has never been seen before,
+            # then since we initialize the p_icc array with 0s we get 0 for p_icc[sm]
+            # this leads the probability of the MCM to to be 0 in total
+            # log does not help since then we have -inf = P[log(0)]
             prob *= p_icc[sm]
+        return prob
+
+
+
 
