@@ -19,24 +19,24 @@ def gauge_transform_product(M, G):
     return np.fmod(np.dot(M, G), 2)
 
 
-def gauge_transform_xor_np(M, G):
-    """
-    Compute the XOR matrix product of two binary matrices.
-
-    Parameters:
-    - M: Binary matrix
-    - G: Binary matrix
-
-    Returns:
-    - XOR matrix product of M and G
-    """
-    result = np.zeros((M.shape[0], G.shape[1]), dtype=int)
-
-    for i in range(M.shape[0]):
-        for j in range(G.shape[1]):
-            result[i, j] = np.bitwise_xor.reduce(np.bitwise_xor(M[i, :], G[:, j]))
-
-    return result
+# def gauge_transform_xor_np(M, G):
+#     """
+#     Compute the XOR matrix product of two binary matrices.
+#
+#     Parameters:
+#     - M: Binary matrix
+#     - G: Binary matrix
+#
+#     Returns:
+#     - XOR matrix product of M and G
+#     """
+#     result = np.zeros((M.shape[0], G.shape[1]), dtype=int)
+#
+#     for i in range(M.shape[0]):
+#         for j in range(G.shape[1]):
+#             result[i, j] = np.bitwise_xor.reduce(np.bitwise_xor(M[i, :], G[:, j]))
+#
+#     return result
 
 def gauge_transform_xor(M, G):
     """
@@ -61,22 +61,22 @@ def gauge_transform_xor(M, G):
     return result
 
 
-def xor_matrix_product(M, G):
-    """
-    Compute the XOR matrix product of two binary matrices.
-
-    Parameters:
-    - M: Binary matrix
-    - G: Binary matrix
-
-    Returns:
-    - XOR matrix product of M and G
-    """
-    result = np.zeros((M.shape[0], G.shape[1]), dtype=int)
-
-    for i in range(M.shape[0]):
-        for j in range(G.shape[1]):
-            # xor over operator and then NAND is the same as dot product + modulo 2
-            result[i, j] = np.bitwise_xor.reduce(np.bitwise_and(M[i, :], G[:, j]))
-
-    return result
+# def xor_matrix_product(M, G):
+#     """
+#     Compute the XOR matrix product of two binary matrices.
+#
+#     Parameters:
+#     - M: Binary matrix
+#     - G: Binary matrix
+#
+#     Returns:
+#     - XOR matrix product of M and G
+#     """
+#     result = np.zeros((M.shape[0], G.shape[1]), dtype=int)
+#
+#     for i in range(M.shape[0]):
+#         for j in range(G.shape[1]):
+#             # xor over operator and then NAND is the same as dot product + modulo 2
+#             result[i, j] = np.bitwise_xor.reduce(np.bitwise_and(M[i, :], G[:, j]))
+#
+#     return result

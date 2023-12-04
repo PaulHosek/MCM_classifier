@@ -19,10 +19,10 @@ def generate_invertible(rank):
     return filter_invertible_matrices(generate_binary_matrices((rank,rank)))
 
 
-# Example: Generate all 2x2 invertible binary matrices
-shape = (2, 2)
-all_matrices = generate_binary_matrices(shape)
-invertible_matrices = filter_invertible_matrices(all_matrices)
-
-for matrix in invertible_matrices:
-    print(matrix)
+# # Example: Generate all 2x2 invertible binary matrices
+# shape = (2, 2)
+# all_matrices = generate_binary_matrices(shape)
+# invertible_matrices = filter_invertible_matrices(all_matrices)
+#
+# for matrix in invertible_matrices:
+#     print(matrix)
