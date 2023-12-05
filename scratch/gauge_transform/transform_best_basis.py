@@ -10,9 +10,41 @@ from inversion.invertible_matrices_algs import generate_invertible
 # apply all gauge transforms
 # find the one that is
 
+class best_basis():
+    def __init__(self, m) -> None:
+        self.m = m
+        self.len = len(m)
+        self.scores = defaultdict(list)
+        self.best_g = np.array([]) 
+        self.best_g_score = 0
+        self.all_best = []
 
-def reconstruct_gauge_tranform(m1,m2):
-    pass
+    def find_best(self) -> None:
+        """
+        Find the best basis for some matrix m.
+        Generate all possible invertible gauge transform matrices G and multipy them with m.
+        Scores the gauge transforms and bucket sorts them.
+
+
+        :param m: _description_
+        :type m: _type_
+        """
+        __score_bases(m)
+        self.best_g_score = np.min(self.scores)
+        self.all_best = self.scores[self.best_g_score]
+        self.best_g = self.all_best[0]
+
+    def __score_bases(self, m) -> None:
+        t = generate_invertible(len(m))
+        t2 = np.empty(shape(len(t), size, size))
+
+        for i, g_i in enumerate(t):
+            m2 = np.array(gauge_transform_xor(m, g_i))
+            t2[i,:,:] = m2
+
+            self.scores[np.sum(m2)].append(m2) # FIXME: Note: Placeholder scoring function.
+       
+        
 
 
 if __name__ == "__main__":
