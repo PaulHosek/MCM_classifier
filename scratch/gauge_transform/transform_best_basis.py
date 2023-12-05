@@ -1,9 +1,6 @@
 import numpy as np
 from collections import defaultdict
-
 from itertools import product
-from transform.gauge_transform_algs import gauge_transform_xor
-from inversion.invertible_matrices_algs import generate_invertible
 
 
 class Best_basis():
@@ -52,6 +49,15 @@ class Best_basis():
 
             score  = self.__scoring_sum(m2)
             self.scores[score].append(m2) # FIXME: Note: Placeholder scoring function.
+    
+    def __generate_invertible(self, rank):
+        """
+        Generate all invertible matrices
+        :param rank: side length of the square matrix
+        :return:
+        """
+        return self.__filter_invertible_matrices(self.__generate_binary_matrices((rank,rank)))
+
 
     @staticmethod
     def __scoring_sum(m2) -> float:
@@ -90,17 +96,6 @@ class Best_basis():
     def __filter_invertible_matrices(matrices):
         invertible_matrices = [matrix for matrix in matrices if np.linalg.det(matrix) != 0]
         return invertible_matrices
-    
-    @staticmethod
-    def __generate_invertible(rank):
-        """
-        Generate all invertible matrices
-        :param rank: side length of the square matrix
-        :return:
-        """
-        return filter_invertible_matrices(generate_binary_matrices((rank,rank)))
-
-
 
 
 if __name__ == "__main__":
