@@ -10,7 +10,7 @@ from inversion.invertible_matrices_algs import generate_invertible
 # apply all gauge transforms
 # find the one that is
 
-class best_basis():
+class Best_basis():
     def __init__(self, m) -> None:
         self.m = m
         self.len = len(m)
@@ -42,10 +42,10 @@ class best_basis():
         :param m: square binary matrix
         :type m: _type_
         """
-        assert set(m) <= {0,1}, "values outside 0, 1"
+        assert np.all(np.logical_or(m == 1,m == 0)), "values not 0 or 1"
         assert m.shape[0] == m.shape[1], "m is not square"
         assert len(m.shape) == 2, "m is not 2d"
-        
+
         t = generate_invertible(len(m))
         t2 = np.empty(shape = (len(t), size, size))
 
@@ -67,8 +67,9 @@ if __name__ == "__main__":
     size = 3
     # m = np.random.randint(0,2,(3,3),dtype=int)
     m = np.identity(size,dtype=int)
-    B = best_basis(m)
+    B = Best_basis(m)
     B.find_best()
+    print(B)
     
     [print(i,"\n") for i in B.all_best]
     # FIXME: these are all the same matrix that can be reached with elementary row and column operations,
