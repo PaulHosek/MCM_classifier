@@ -1,10 +1,11 @@
+from typing import Iterable
 import numpy as np
 from collections import defaultdict
 from itertools import product
 
 
 class Best_basis():
-    def __init__(self, m) -> None:
+    def __init__(self, m: np.ndarray) -> None:
         self.m = m
         self.len = len(m)
         self.scores = defaultdict(list)
@@ -28,7 +29,7 @@ class Best_basis():
         self.best_m = self.all_best[0]
 
 
-    def __score_bases(self, m) -> None:
+    def __score_bases(self, m: np.ndarray) -> None:
         """
         Generate and score alternative bases.
         Do GM = M' for all g in {g}.
@@ -50,7 +51,7 @@ class Best_basis():
             score  = self.__scoring_sum(m2)
             self.scores[score].append(m2) # FIXME: Note: Placeholder scoring function.
     
-    def __generate_invertible(self, rank):
+    def __generate_invertible(self, rank: int):
         """
         Generate all invertible matrices
         :param rank: side length of the square matrix
@@ -60,11 +61,19 @@ class Best_basis():
 
 
     @staticmethod
-    def __scoring_sum(m2) -> float:
+    def __scoring_sum(m2: np.ndarray) -> int:
+        """
+        Placeholder scoring function for a basis.
+
+        :param m2: new basis
+        :type m2: np.ndarray
+        :return: score, lower = better
+        :rtype: int
+        """
         return np.sum(m2)
        
     @staticmethod    
-    def __gauge_transform_xor(m, g):
+    def __gauge_transform_xor(m: np.ndarray, g: np.ndarray):
         """
         Compute the XOR matrix product of two binary matrices.
 
@@ -87,13 +96,13 @@ class Best_basis():
         return result
 
     @staticmethod
-    def __generate_binary_matrices(shape):
+    def __generate_binary_matrices(shape: tuple[int, int]):
         possibilities = list(product([0, 1], repeat=shape[0]*shape[1]))
         matrices = [np.array(matrix).reshape(shape) for matrix in possibilities]
         return matrices
     
     @staticmethod
-    def __filter_invertible_matrices(matrices):
+    def __filter_invertible_matrices(matrices: Iterable[np.ndarray]):
         invertible_matrices = [matrix for matrix in matrices if np.linalg.det(matrix) != 0]
         return invertible_matrices
 
