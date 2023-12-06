@@ -4,6 +4,27 @@ import numpy as np
 from itertools import product, combinations
 from collections import defaultdict
 
+### Build up IM up to order K ###
+def find_best_basis(s_dataset,k):
+    basis = list()
+    n = s_dataset.shape[1]
+    ba_combs = generate_binary_combinations(n,k)
+    exclude_mask = np.ones(ba_combs.shape[0],dtype=bool)
+
+
+    for r in range(1, n+1):
+        best_ba, best_idx, ll = select_most_biased_ba(s_dataset, k, ba_combs[exclude_mask])
+        
+        basis.append(best_ba)
+        exclude_mask[best_idx] = False
+
+        # after there are 2 elements in the basis, exclude combinations
+        if len(basis)>1:
+            exc = excluded_combinations(basis)
+            # update exclude mask with the rows/binary vectors that are in the new combinations of the selected basis elements    
+            exclude_mask = exclude_mask & ~(ba_combs[:, None] == excluded_combinations(basis)).all(-1).any(-1) # improvement: do not need to check the ones that are already in the exclude mask, would be smarter to just change the exclude mask directly with the all_ba
+    return basis
+
 ##### IM LL ####
 def im_ll(ba, s_dataset):
     """log P(s_hat|g_hat,M)
@@ -30,45 +51,10 @@ def h_func(m):
     """Eq. 19"""
     return -1*(1+m/2)*np.log(1+m/2) - (1-m/2)*np.log(1-m/2)
 
-### Build up IM up to order K ###
-def find_best_basis(s_dataset,k):
-    basis = list()
-    n = s_dataset.shape[0]
-    print(s_dataset)
-    ba_combs = generate_binary_combinations(n,k)
 
-
-
-
-    exclude_mask = np.ones(ba_combs.shape[0],dtype=bool)
-
-    # for the first 2 there 
-    for i in range(2):
-        best_ba, best_idx, _ = select_most_biased_ba(s_dataset, k, ba_combs)
-        basis.append(best_ba)
-        exclude_mask[best_idx] = False
-
-
-    # update exclude mask with the rows/binary vectors that are in the new combinations of the selected basis elements    
-    exclude_mask = exclude_mask & ~(ba_combs[:, None] == excluded_combinations(basis)).all(-1).any(-1) 
-
-
-    best_ba, best_idx, _ = select_most_biased_ba(s_dataset, k, ba_combs)
-    basis.append(best_ba)
-    # improvement: do not need to check the ones that are already in the exclude mask, would be smarter to just change the exclude mask directly with the all_ba
-    exclude_mask[best_idx] = False
-    exc = excluded_combinations(basis)
-
-
-
-
-# !! Cannot use this because the index does not match the number
-# def arr_to_int(binary_arr):
-#     return binary_arr.dot(1 << np.arange(binary_arr.shape[-1] - 1, -1, -1))
-
+### basis selection ###
 
 def select_most_biased_ba(s_dataset, k, val_combs):
-    # find 
     n = s_dataset.shape[0]
     k = 2
 
@@ -84,7 +70,6 @@ def select_most_biased_ba(s_dataset, k, val_combs):
     return best_ba, best_idx, best_ll
 
 
-
 def excluded_combinations(bas):
     # between every 2 vectors in binary vectors, do element wise xor operation.
     # goal: get all possible interactions that could be build from these and return the exclude list
@@ -94,7 +79,6 @@ def excluded_combinations(bas):
         exclude.append(np.logical_xor(comb[0],comb[1]).astype(int))
     
     return np.array(exclude)
-
 
 
 def generate_binary_combinations(n, k):
@@ -108,32 +92,16 @@ def generate_binary_combinations(n, k):
     return np.array(valid_combinations)
 
 
+# !! Cannot use this because the index does not match the number
+# def arr_to_int(binary_arr):
+#     return binary_arr.dot(1 << np.arange(binary_arr.shape[-1] - 1, -1, -1))
 
 if __name__ == "__main__":
-
-    # ba_combs = np.array([[0, 0, 0, 1],
-    #                     [0, 0, 1, 0],
-    #                     [0, 0, 1, 1],
-    #                     [0, 1, 0, 0],
-    #                     [0, 1, 0, 1],
-    #                     [0, 1, 1, 0],
-    #                     [1, 0, 0, 0],
-    #                     [1, 0, 0, 1],
-    #                     [1, 0, 1, 0],
-    #                     [1, 1, 0, 0]])
-    
-    # exc = np.array([[0, 0, 0, 1],
-    #                 [0, 0, 1, 0]]) 
-
-    # res = ~(ba_combs[:, None] == exc).all(-1).any(-1)
-
-    # exclude = ~np.array([False]*9 + [True]*1)
-    # mask = res & exclude
 
     rng = np.random.default_rng(42)
 
     row_len = 4
-    s_dataset = rng.integers(2,size=(4,4))
+    s_dataset = rng.integers(2,size=(10,4))
     s_dataset = np.where(s_dataset == 0, -1, 1)
 
 
@@ -158,7 +126,8 @@ if __name__ == "__main__":
 
     # result = exclude_combinations(binary_vectors)
     # print(result)
-    find_best_basis(s_dataset,2)
+    best_basis = find_best_basis(s_dataset,2)
+    print(best_basis)
 
 
 
