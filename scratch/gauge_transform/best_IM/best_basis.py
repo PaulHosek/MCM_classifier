@@ -7,22 +7,30 @@ from collections import defaultdict
 ### Build up IM up to order K ###
 def find_best_basis(s_dataset,k):
     basis = list()
-    n = s_dataset.shape[1]
-    ba_combs = generate_binary_combinations(n,k)
+    n = s_dataset.shape[0]
+    size_b = s_dataset.shape[1] # FIXME name sucks im too tired
+    ba_combs = generate_binary_combinations(size_b,k)
     exclude_mask = np.ones(ba_combs.shape[0],dtype=bool)
-
+    ba_combs_idx= np.arange(len(ba_combs))
 
     for r in range(1, n+1):
-        best_ba, best_idx, ll = select_most_biased_ba(s_dataset, k, ba_combs[exclude_mask])
+        valid_combs = ba_combs[exclude_mask] 
+
+        best_ba, best_idx, ll = select_most_biased_ba(s_dataset, valid_combs)
         
         basis.append(best_ba)
-        exclude_mask[best_idx] = False
-
+        valid_idx = ba_combs_idx[exclude_mask] 
+        exclude_mask[valid_idx[best_idx]] = False
+        # print(exclude_mask.astype(int), best_idx)
         # after there are 2 elements in the basis, exclude combinations
         if len(basis)>1:
             exc = excluded_combinations(basis)
             # update exclude mask with the rows/binary vectors that are in the new combinations of the selected basis elements    
+
             exclude_mask = exclude_mask & ~(ba_combs[:, None] == excluded_combinations(basis)).all(-1).any(-1) # improvement: do not need to check the ones that are already in the exclude mask, would be smarter to just change the exclude mask directly with the all_ba
+        
+        # if r > 2:
+        #     raise KeyboardInterrupt
     return basis
 
 ##### IM LL ####
@@ -54,9 +62,8 @@ def h_func(m):
 
 ### basis selection ###
 
-def select_most_biased_ba(s_dataset, k, val_combs):
+def select_most_biased_ba(s_dataset, val_combs):
     n = s_dataset.shape[0]
-    k = 2
 
     best_ba = np.empty(val_combs.shape[1])
     best_ll = np.NINF
@@ -67,6 +74,8 @@ def select_most_biased_ba(s_dataset, k, val_combs):
             best_ll = cur
             best_ba = ba
             best_idx = i
+            print()
+
     return best_ba, best_idx, best_ll
 
 
@@ -98,10 +107,10 @@ def generate_binary_combinations(n, k):
 
 if __name__ == "__main__":
 
-    rng = np.random.default_rng(42)
+    rng = np.random.default_rng(43)
 
     row_len = 4
-    s_dataset = rng.integers(2,size=(10,4))
+    s_dataset = rng.integers(2,size=(10,5))
     s_dataset = np.where(s_dataset == 0, -1, 1)
 
 
@@ -126,7 +135,7 @@ if __name__ == "__main__":
 
     # result = exclude_combinations(binary_vectors)
     # print(result)
-    best_basis = find_best_basis(s_dataset,2)
+    best_basis = find_best_basis(s_dataset,3)
     print(best_basis)
 
 
