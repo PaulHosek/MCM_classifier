@@ -73,7 +73,6 @@ def select_most_biased_ba(s_dataset, val_combs):
             best_ll = cur
             best_ba = ba
             best_idx = i
-            print()
 
     return best_ba, best_idx, best_ll
 
@@ -109,7 +108,7 @@ if __name__ == "__main__":
     rng = np.random.default_rng(43)
 
     row_len = 4
-    s_dataset = rng.integers(2,size=(10,6))
+    s_dataset = rng.integers(2,size=(10,10))
     s_dataset = np.where(s_dataset == 0, -1, 1)
 
 
@@ -134,9 +133,8 @@ if __name__ == "__main__":
 
     # result = exclude_combinations(binary_vectors)
     # print(result)
-    best_basis = find_best_basis(s_dataset,6)
+    best_basis = find_best_basis(s_dataset,3)
     print(best_basis)
-    print(len(best_basis))
 
 
 
