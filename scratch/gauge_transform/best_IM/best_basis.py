@@ -7,9 +7,8 @@ from collections import defaultdict
 ### Build up IM up to order K ###
 def find_best_basis(s_dataset,k):
     basis = list()
-    n = s_dataset.shape[0]
-    size_b = s_dataset.shape[1] # FIXME name sucks im too tired
-    ba_combs = generate_binary_combinations(size_b,k)
+    n = s_dataset.shape[1] # nr of independent operators that should build a basis, equivalent to the size of s_bar.
+    ba_combs = generate_binary_combinations(n,k)
     exclude_mask = np.ones(ba_combs.shape[0],dtype=bool)
     ba_combs_idx= np.arange(len(ba_combs))
 
@@ -110,7 +109,7 @@ if __name__ == "__main__":
     rng = np.random.default_rng(43)
 
     row_len = 4
-    s_dataset = rng.integers(2,size=(10,5))
+    s_dataset = rng.integers(2,size=(10,6))
     s_dataset = np.where(s_dataset == 0, -1, 1)
 
 
@@ -135,8 +134,9 @@ if __name__ == "__main__":
 
     # result = exclude_combinations(binary_vectors)
     # print(result)
-    best_basis = find_best_basis(s_dataset,3)
+    best_basis = find_best_basis(s_dataset,6)
     print(best_basis)
+    print(len(best_basis))
 
 
 
