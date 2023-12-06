@@ -22,6 +22,7 @@ int Matrix::determinant(const std::vector<std::vector<int>>& mat) const {
         return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
     }
 
+    // Cofactor expansion
     int det = 0;
     for (int i = 0; i < size; ++i) {
         // Calculate the cofactor by excluding current row and column
