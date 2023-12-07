@@ -16,5 +16,8 @@
         "string_view": "cpp",
         "unordered_map": "cpp",
         "vector": "cpp"
-    }
+    },
+    "vim.mouseSelectionGoesIntoVisualMode": true,
+    "vim.sneak": true,
+    "vim.sneakReplacesF": true
 }
