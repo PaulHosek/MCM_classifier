@@ -3,53 +3,62 @@ import numpy as np
 from itertools import product, combinations, chain
 
 
+
 ### Build up IM up to order K ###
 def find_best_basis(s_dataset,k):
-    basis = list()
+    """Find the best basis with interactions up to order k for the give data set.
+    1. Build up all possible basis operators ba.
+    2. While rank < n: select next most biased basis operator
+    3. Put ba and aall linear combinations with the operators in the basis
+      and the higher order operators already excluded into the list to exclude.
+    4. Filter the new set of valid ba canidates based on the excluded oeprators
 
-    n = s_dataset.shape[1] # nr of independent operators that should build a basis, equivalent to the size of s_bar.
+    Note: Test the validity of this function with the is valid_basis function
+
+    :param s_dataset: 2d np array with s_bar as rows
+    :type s_dataset: np.ndarray
+    :param k: up to which order of interactions we want to consider
+    :type k: int
+    :return: 2d np array with most biased set of independent basis operators ba
+    :rtype: np.ndarray
+    """
+    basis = list()
+    exclude_combs = list()
+
     ba_combs = generate_binary_combinations(n,k)
     exclude_mask = np.ones(ba_combs.shape[0],dtype=bool)
-    print(ba_combs.shape)
     ba_combs_idx= np.arange(ba_combs.shape[0])
-    exclude_combs = list()
 
     for r in range(1, n+1):
         valid_combs = ba_combs[exclude_mask]
-
         best_ba, best_idx, ll = select_most_biased_ba(s_dataset, valid_combs)
-
-
         valid_idx = ba_combs_idx[exclude_mask]
         exclude_mask[valid_idx[best_idx]] = False
 
         # we only need to compute the combinations to exclude based on the new element
         #  with the basis and with the excluded elements
-        if len(exclude_combs): # TODO: problem is right now that we dont get 3 way interactions or higher possibly.
-            # exclude higher order interactions
-            new_x_exclude = gen_pairwise_interactions(best_ba,exclude_combs) # this works as intended
+
+        # exclude higher order interactions
+        if len(exclude_combs): 
+            new_x_exclude = gen_pairwise_interactions(best_ba,exclude_combs)
             exc_idx1 = np.array(np.where((ba_combs[:, None] ==new_x_exclude).all(-1).any(-1)))
-            # print((ba_combs[:, None] ==new_x_exclude).all(-1).any(-1))
-            # print(exc_idx1)
-            
-
             exclude_combs.extend(new_x_exclude)
-            exclude_mask[exc_idx1] = False # (ba_combs[:, None] ==new_x_exclude).all(-1).any(-1)
+            exclude_mask[exc_idx1] = False 
 
+        # exclude pairwise interactions
         if len(basis):
-            # exclude pairwise interactions
             new_x_basis = gen_pairwise_interactions(best_ba, basis)
             exc_idx2 = np.array(np.where((ba_combs[:, None] ==new_x_basis).all(-1).any(-1)))
             exclude_combs.extend(new_x_basis)
             exclude_mask[exc_idx2] = False
-
-
 
         exclude_combs.append(best_ba)
         basis.append(best_ba)
 
     return basis
 
+
+### BASIS SELECTION TOOLS ###
 def gen_pairwise_interactions(ba,ba_collection):
     """Generate all pairwise combinations between ba and all elements in list_ba
     ba = 1d np array
@@ -58,36 +67,6 @@ def gen_pairwise_interactions(ba,ba_collection):
 
     exclude = [np.logical_xor(ba, i_ba).astype(int) for i_ba in ba_collection]
     return np.unique(exclude, axis=0)
-
-
-##### IM LL ####
-def im_ll(ba, s_dataset):
-    """log P(s_hat|g_hat,M)
-    log likelihood of IM
-    Eq. 18
-    """
-    ll = 0
-    all_m = get_m_bias(ba, s_dataset)
-
-    N = len(all_m)
-
-    for a, m_a in enumerate(all_m):
-        ll += h_func(m_a)
-    ll *= -1*N
-    return ll
-
-def get_m_bias(ba,s_dataset):
-    """Returns m_a the bias of the operator ba applied to s_hat(Eq. 20)."""
-    # ba = binary vector with the spins involved
-    res = ba * s_dataset
-    return np.average(res, axis=1)
-
-def h_func(m):
-    """Eq. 19"""
-    return -1*(1+m/2)*np.log(1+m/2) - (1-m/2)*np.log(1-m/2)
-
-
-### basis selection ###
 
 def select_most_biased_ba(s_dataset, val_combs):
     """Select next most biased basis operator."""
@@ -116,9 +95,33 @@ def generate_binary_combinations(n, k):
 
     return np.array(valid_combinations)
 
+##### IM LL ####
+def im_ll(ba, s_dataset):
+    """log P(s_hat|g_hat,M)
+    log likelihood of IM
+    Eq. 18
+    """
+    ll = 0
+    all_m = get_m_bias(ba, s_dataset)
+
+    N = len(all_m)
+
+    for a, m_a in enumerate(all_m):
+        ll += h_func(m_a)
+    ll *= -1*N
+    return ll
+
+def get_m_bias(ba,s_dataset):
+    """Returns m_a the bias of the operator ba applied to s_hat(Eq. 20)."""
+    # ba = binary vector with the spins involved
+    res = ba * s_dataset
+    return np.average(res, axis=1)
+
+def h_func(m):
+    """Eq. 19"""
+    return -1*(1+m/2)*np.log(1+m/2) - (1-m/2)*np.log(1-m/2)
 
 ### TESTING ### 
-
 def is_valid_basis(basis):
     """Test if generated basis is valid, by testing all ba in the bassis are
        not a linear combination of any of the other ba in that basis. All interactions are considered."""
