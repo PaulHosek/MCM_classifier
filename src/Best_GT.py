@@ -4,7 +4,7 @@ from collections import defaultdict
 from itertools import product
 
 
-class Best_basis():
+class Best_GT():
     def __init__(self, m: np.ndarray) -> None:
         self.m = m
         self.len = len(m)
@@ -26,7 +26,7 @@ class Best_basis():
         self.__score_bases(m)
         self.best_m_score = np.min(list(self.scores.keys()))
         self.all_best = self.scores[self.best_g_score]
-        self.best_m = self.all_best[0]
+        self.best_m = None
 
 
     def __score_bases(self, m: np.ndarray) -> None:
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     size = 3
     # m = np.random.randint(0,2,(3,3),dtype=int)
     m = np.identity(size,dtype=int)
-    B = Best_basis(m)
+    B = Best_GT(m)
     B.find_best()
     print(B.scores)
     
