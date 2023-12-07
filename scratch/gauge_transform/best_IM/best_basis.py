@@ -155,26 +155,25 @@ def powerset_higherorder(iterable):
 
 if __name__ == "__main__":
 
-    i = 0
-    # for i in range(0):
-    rng = np.random.default_rng(0)
 
-    s_dataset = rng.integers(2,size=(10,11))
-    s_dataset = np.where(s_dataset == 0, -1, 1)
+    for i in range(100):
+        rng = np.random.default_rng(0)
 
-    k = 2
-    n = 4
-    try:
+        s_dataset = rng.integers(2,size=(10,11))
+        s_dataset = np.where(s_dataset == 0, -1, 1)
+
+        k = 2
+        n = 4
+
         best_basis = find_best_basis(s_dataset,4)
         print("best_basis",best_basis)
-    except:
-        print(i)
-            # print(len(best_basis))
+
+                # print(len(best_basis))
 
         print(is_valid_basis(np.array(best_basis)))
-    # if not is_valid_basis(np.array(best_basis)):
-    #     print(i)
-    #     break 
+        if not is_valid_basis(np.array(best_basis)):
+            print(i)
+            break 
     
 
 
