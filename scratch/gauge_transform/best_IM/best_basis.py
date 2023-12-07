@@ -10,7 +10,8 @@ def find_best_basis(s_dataset,k):
     n = s_dataset.shape[1] # nr of independent operators that should build a basis, equivalent to the size of s_bar.
     ba_combs = generate_binary_combinations(n,k)
     exclude_mask = np.ones(ba_combs.shape[0],dtype=bool)
-    ba_combs_idx= np.arange(len(ba_combs))
+    print(ba_combs.shape)
+    ba_combs_idx= np.arange(ba_combs.shape[0])
     exclude_combs = list()
 
     for r in range(1, n+1):
@@ -24,33 +25,24 @@ def find_best_basis(s_dataset,k):
 
         # we only need to compute the combinations to exclude based on the new element
         #  with the basis and with the excluded elements
-
         if len(exclude_combs): # TODO: problem is right now that we dont get 3 way interactions or higher possibly.
             # exclude higher order interactions
             new_x_exclude = gen_pairwise_interactions(best_ba,exclude_combs) # this works as intended
-
-            print()
+            exc_idx1 = np.array(np.where((ba_combs[:, None] ==new_x_exclude).all(-1).any(-1)))
+            # print((ba_combs[:, None] ==new_x_exclude).all(-1).any(-1))
+            # print(exc_idx1)
             
-            exc_idx1 = np.array(np.where((ba_combs==new_x_exclude[:,None]).all(-1))) # this does not, we are only adding the 
 
-            print("idx1",exc_idx1)
-
-            # could also do np.logical_or(new_x_exclude, exclude)
-            print()
-            print("---------------------------------")
             exclude_combs.extend(new_x_exclude)
-
-            exclude_mask[exc_idx1] = False
-            print("best_ba", best_ba)
-            print("exclude_combs", exclude_combs)
-            print("new_x_exclude",new_x_exclude)
+            exclude_mask[exc_idx1] = False # (ba_combs[:, None] ==new_x_exclude).all(-1).any(-1)
 
         if len(basis):
             # exclude pairwise interactions
             new_x_basis = gen_pairwise_interactions(best_ba, basis)
-            exc_idx2 = np.array(np.where((ba_combs==new_x_basis[:,None]).all(-1)))
-            exclude_mask[exc_idx2] = False
+            exc_idx2 = np.array(np.where((ba_combs[:, None] ==new_x_basis).all(-1).any(-1)))
             exclude_combs.extend(new_x_basis)
+            exclude_mask[exc_idx2] = False
+
 
 
         exclude_combs.append(best_ba)
@@ -144,10 +136,6 @@ def is_valid_basis(basis):
         print("row mask",row_mask)
         whr = np.where(row_mask == True)
 
-        for i in whr[0]:
-            print(combs[i])
-            # print(combs[i])
-        # print(list(combs)[row_mask])
     return not row_mask.any()
 
 
@@ -167,21 +155,23 @@ def powerset_higherorder(iterable):
 
 if __name__ == "__main__":
 
+    i = 0
+    # for i in range(0):
+    rng = np.random.default_rng(0)
 
-    # for i in range(1000):
-    rng = np.random.default_rng(235)
-
-    s_dataset = rng.integers(2,size=(10,4))
+    s_dataset = rng.integers(2,size=(10,11))
     s_dataset = np.where(s_dataset == 0, -1, 1)
 
     k = 2
     n = 4
+    try:
+        best_basis = find_best_basis(s_dataset,4)
+        print("best_basis",best_basis)
+    except:
+        print(i)
+            # print(len(best_basis))
 
-    best_basis = find_best_basis(s_dataset,3)
-    print("best_basis",best_basis)
-    # print(len(best_basis))
-
-    print(is_valid_basis(np.array(best_basis)))
+        print(is_valid_basis(np.array(best_basis)))
     # if not is_valid_basis(np.array(best_basis)):
     #     print(i)
     #     break 
