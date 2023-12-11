@@ -1,4 +1,3 @@
-from cgitb import reset
 import numpy as np
 from itertools import product, combinations, chain
 import timeit

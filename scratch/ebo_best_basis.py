@@ -1,17 +1,17 @@
-"""
-SPIN TOOLS
+# """
+# SPIN TOOLS
 
-------------------------------
-author: Ebo Peerbooms
-contact: e.peerbooms@uva.nl 
-------------------------------
+# ------------------------------
+# author: Ebo Peerbooms
+# contact: e.peerbooms@uva.nl 
+# ------------------------------
 
-algo_best_basis.py 
+# algo_best_basis.py 
 
-algorithm for finding most biased (basis) set of 
-independent spin operators
+# algorithm for finding most biased (basis) set of 
+# independent spin operators
 
-"""
+# """
 
 import numpy as np 
 import ebo_tools as tools
@@ -49,7 +49,7 @@ def find_best_basis(n, data):
     obs: observables (include identity)
 
     """
-    
+
     obs = tools.observables(n, data) # shape 1d of len 2^n
 
 
@@ -83,6 +83,11 @@ if __name__ == "__main__":
     s_dataset = np.where(s_dataset == 0, -1, 1)
     
     res = find_best_basis(n, data=s_dataset)
-    print(res)
+    # print(res)
+    # rhs = np.zeros(s_dataset.shape)
+    # rhs[-1]
+
+    # kron = tools.nkron(5,-1)
+    # print(kron)
 
 
