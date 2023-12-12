@@ -1,5 +1,5 @@
 import unittest
-from Best_GT import *
+from Best_GT_exhaustive import *
 
 
 class Test 

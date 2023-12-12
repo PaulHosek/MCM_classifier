@@ -2,9 +2,10 @@ from typing import Iterable
 import numpy as np
 from collections import defaultdict
 from itertools import product
+from Best_IM import Best_IM
 
-
-class Best_GT():
+class Best_GT_exhaustive():
+    # exhaustive
     def __init__(self, m: np.ndarray) -> None:
         self.m = m
         self.len = len(m)
@@ -23,10 +24,10 @@ class Best_GT():
         :param m: _description_
         :type m: _type_
         """
-        self.__score_bases(m)
+        self.__score_bases(self.m)
         self.best_m_score = np.min(list(self.scores.keys()))
-        self.all_best = self.scores[self.best_g_score]
-        self.best_m = None
+        self.all_best = self.scores[self.best_m_score]
+        self.best_m = self.all_best[0]
 
 
     def __score_bases(self, m: np.ndarray) -> None:
@@ -106,16 +107,30 @@ class Best_GT():
         invertible_matrices = [matrix for matrix in matrices if np.linalg.det(matrix) != 0]
         return invertible_matrices
 
-
 if __name__ == "__main__":
+    seed = 253
+    rng = np.random.default_rng(seed)
+    n = 3
+    s_dataset = rng.integers(2,size=(10,n))
+    s_dataset = np.where(s_dataset == 0, -1, 1)
     size = 3
-    # m = np.random.randint(0,2,(3,3),dtype=int)
-    m = np.identity(size,dtype=int)
-    B = Best_GT(m)
+
+    k = 2
+    IM = Best_IM(s_dataset, k)
+    IM.find_best_basis()
+    print(IM.to_base10())
+    M = np.array(IM.basis)
+    print(M) 
+
+
+
+    B = Best_GT_exhaustive(M)
     B.find_best()
-    print(B.scores)
+    print(B.all_best)
+    # # print(B.scores)
+    # print(B.scores.keys())
     
-    [print(i,"\n") for i in B.all_best]
+    # [print(i,"\n") for i in B.all_best]
     # FIXME: these are all the same matrix that can be reached with elementary row and column operations,
     #  maybe instead of checking if something is invertible, we can generate matrices that are only different in the nr of elements
     #  and then filter those before constructing all same ones with elementary row operations

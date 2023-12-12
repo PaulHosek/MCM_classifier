@@ -101,6 +101,13 @@ class Best_IM():
         valid_combinations = [comb for comb in combinations if sum(comb) <= k and any(comb)]
 
         return np.array(valid_combinations)
+    
+    def to_base10(self):
+        """Convert 2d binary basis into an integer array"""
+        basis = np.array(self.basis)
+        return basis.dot(1 << np.arange(basis.shape[-1] - 1, -1, -1))
+
+
 
     ##### IM LL ####
     
@@ -176,34 +183,32 @@ if __name__ == "__main__":
     print("best_basis",B.basis)
     print("Is this basis only made up of independent operators?",B.is_valid_basis())
 
-    def run_experiment(n):
-        rng = np.random.default_rng()
-        s_dataset = rng.integers(2, size=(10, n))
-        s_dataset = np.where(s_dataset == 0, -1, 1)
+    # def run_experiment(n):
+    #     rng = np.random.default_rng()
+    #     s_dataset = rng.integers(2, size=(10, n))
+    #     s_dataset = np.where(s_dataset == 0, -1, 1)
 
-        k = 2
-        B = Best_IM(s_dataset, k)
+    #     k = 2
+    #     B = Best_IM(s_dataset, k)
 
-        # Measure the runtime using timeit
-        time_taken = timeit.timeit(lambda: B.find_best_basis(), number=1)
+    #     time_taken = timeit.timeit(lambda: B.find_best_basis(), number=1)
 
-        return time_taken
+    #     return time_taken
 
-    # Experiment with different values of n
-    n_values = np.arange(20)[2:]
-    runtimes = []
+    # n_values = np.arange(20)[2:]
+    # runtimes = []
 
-    for n in n_values:
-        runtime = run_experiment(n)
-        runtimes.append(runtime)
+    # for n in n_values:
+    #     runtime = run_experiment(n)
+    #     runtimes.append(runtime)
 
-    # Plot the results
-    plt.figure
-    plt.plot(n_values, runtimes, marker='o')
-    plt.title('Runtime vs. n')
-    plt.xlabel('n')
-    plt.ylabel('Runtime (seconds)')
-    plt.show()
+    # # Plot the results
+    # plt.figure
+    # plt.plot(n_values, runtimes, marker='o')
+    # plt.title('Runtime vs. n')
+    # plt.xlabel('n')
+    # plt.ylabel('Runtime (seconds)')
+    # plt.show()
 
     
 

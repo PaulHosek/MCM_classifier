@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     seed = 253
     rng = np.random.default_rng(seed)
-    n = 5
+    n = 2
     s_dataset = rng.integers(2,size=(10,n))
     s_dataset = np.where(s_dataset == 0, -1, 1)
     
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # rhs = np.zeros(s_dataset.shape)
     # rhs[-1]
 
-    # kron = tools.nkron(5,-1)
+    # kron = tools.nkron(1,0)
     # print(kron)
 
 

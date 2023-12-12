@@ -23,20 +23,26 @@ def observables(n, data, x = -1, return_pdata = False):
 		print('Type error: Please provide data in integer format')
 		return
 
-	fn = nkron(n,x) # 2^n x 2^n matrix: here 32x32
+	# assume input n=2
+	fn = nkron(n,x) # 2^n x 2^n matrix: here 4x4
 
 	pdata = np.zeros(2**n) # why do we need this big of an array? the next line can only give -1 and 1 as counts. len 2 should be enough.
 
-	unique, counts = np.unique(data, return_counts = True) # [-1  1] [22 28]
-
-	obs = np.dot(fn.T, pdata) # so this is the same as the averaging operation i think
+	unique, counts = np.unique(data, return_counts = True) # [-1  1] [10 10]
+	pdata[unique] = counts/np.sum(counts) # the second and last entry are only ones not 0
+	obs = np.dot(fn.T, pdata) 
 
 	print(unique,counts)
-	pdata[unique] = counts/np.sum(counts) # the second and last entry are only ones not 0
-	print(pdata)
-	raise KeyboardInterrupt
 	print(fn.shape)
+	print("fn.T\n",fn.T)
+	print()
+	print("pdata\n",pdata)
+	print()
+
 	print(obs)
+
+
+	raise KeyboardInterrupt
 	if return_pdata:
 
 		return obs, pdata
