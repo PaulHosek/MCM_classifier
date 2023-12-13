@@ -126,7 +126,8 @@ if __name__ == "__main__":
 
     B = Best_GT_exhaustive(M)
     B.find_best()
-    print(B.all_best)
+    print()
+    print(B.best_m)
     # # print(B.scores)
     # print(B.scores.keys())
     
