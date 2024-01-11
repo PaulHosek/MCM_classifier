@@ -43,11 +43,39 @@ def main():
 
     # Step 3: Evaluate
     predicted_classes, probs = classifier.evaluate(test_data, test_labels)
-
+    print(predicted_classes, probs)
+    # Step 4: Save classification report and other stats
     # Step 4: Save classification report and other stats
     report = classifier.get_classification_report(test_labels)
-    # train_data = None
-    # train_labels = None
+    classifier.save_classification_report(test_labels)
+
+    if (classifier.stats == None):
+        raise Exception("Classifier stats not found. Did you forget to call evaluate()?")
+
+    # Count amount of -1 labels
+    n_no_labels = 0
+    no_labels_labels = []
+    images = []
+    for i in range(len(test_labels)):
+        if predicted_classes[i] == -1:
+            n_no_labels += 1
+            no_labels_labels.append(test_labels[i])
+            images.append(test_data[i])
+    if n_no_labels != 0:
+        # Plot all images with no labels so that they are in the same figure in a square grid
+        dim_1 = int(np.sqrt(n_no_labels))
+        dim_2 = int(np.sqrt(n_no_labels))
+        fig, axs = plt.subplots(dim_1, dim_2, figsize=(10, 10))
+        for i in range(dim_1):
+            for j in range(dim_2):
+                axs[i, j].imshow(images[i*dim_2 + j].reshape(11, 11), cmap="gray")
+                axs[i, j].set_title(no_labels_labels[i*dim_2 + j])
+                axs[i, j].axis("off")
+
+        plt.show()
+            
+    print("Number of datapoints for which the classifier didn't have any probability for any category: {}".format(n_no_labels))
+    print("Labels of these datapoints: {}".format(no_labels_labels))   
 
 # find best MCM
 
@@ -67,8 +95,8 @@ if __name__ == "__main__":
     np.savetxt("INPUT/data/train-images-unlabeled-0.dat", iter_flat(c_binary_data[:60]), delimiter='', fmt='%i',)
     np.savetxt('INPUT/data/train-images-unlabeled-1.dat', iter_flat(t_binary_data[:60]), delimiter='', fmt='%i',)
     
-    test_c_d = iter_flat(c_binary_data[50:])
-    test_t_d = iter_flat(t_binary_data[50:])
+    test_c_d = iter_flat(c_binary_data[:])
+    test_t_d = iter_flat(t_binary_data[:])
     test_data = np.concatenate([test_c_d,test_t_d])
     test_c_labels = np.zeros(len(test_c_d))
     test_labels = np.concatenate((np.ones(len(test_c_d),dtype=int), np.zeros(len(test_t_d),dtype=int)))
