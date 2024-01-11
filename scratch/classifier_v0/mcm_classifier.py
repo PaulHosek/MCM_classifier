@@ -218,7 +218,7 @@ class MCM_Classifier:
             idx = [i for i in range(self.n_variables) if icc[i] == "1"]
             sm = int("".join([str(s) for s in state[idx]]), base=2)
 
-            # Here happens the 0 probabilities, if the state has never been seen before,
+            # Here happen the 0 probabilities, if the state has never been seen before,
             # then since we initialize the p_icc array with 0s we get 0 for p_icc[sm]
             # this leads the probability of the MCM to to be 0 in total
             # log does not help since then we have -inf = P[log(0)]
