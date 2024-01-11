@@ -70,19 +70,19 @@ def find_best_basis(n, data):
 
         bias, dependent_ops = add_dependent_ops(last_op, bias, dependent_ops, dependent_ops)
         bias, dependent_ops = add_dependent_ops(last_op, bias, basis[:-1], dependent_ops)
-
+    
     return np.array(basis)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    seed = 253
-    rng = np.random.default_rng(seed)
-    n = 2
-    s_dataset = rng.integers(2,size=(10,n))
-    s_dataset = np.where(s_dataset == 0, -1, 1)
+    # seed = 253
+    # rng = np.random.default_rng(seed)
+    # n = 2
+    # s_dataset = rng.integers(2,size=(10,n))
+
     
-    res = find_best_basis(n, data=s_dataset)
+    # res = find_best_basis(n, data=s_dataset)
     # print(res)
     # rhs = np.zeros(s_dataset.shape)
     # rhs[-1]

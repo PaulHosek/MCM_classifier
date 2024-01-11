@@ -32,17 +32,17 @@ def observables(n, data, x = -1, return_pdata = False):
 	pdata[unique] = counts/np.sum(counts) # the second and last entry are only ones not 0
 	obs = np.dot(fn.T, pdata) 
 
-	print(unique,counts)
-	print(fn.shape)
-	print("fn.T\n",fn.T)
-	print()
-	print("pdata\n",pdata)
-	print()
+	# print(unique,counts)
+	# print(fn.shape)
+	# print("fn.T\n",fn.T)
+	# print()
+	# print("pdata\n",pdata)
+	# print()
 
-	print(obs)
+	# print(obs)
 
 
-	raise KeyboardInterrupt
+
 	if return_pdata:
 
 		return obs, pdata
