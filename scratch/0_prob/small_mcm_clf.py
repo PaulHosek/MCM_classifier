@@ -1,3 +1,4 @@
+from ast import LShift
 import matplotlib.pyplot as plt
 import array
 from itertools import product
@@ -28,14 +29,23 @@ data_filename_format = "train-images-unlabeled-{}_bootstrap.dat"
 def main():
     print("{:-^50}".format("  MCM-Classifier  ")) 
 
-    test_data = load_data("scratch/0_prob/INPUT/data/test-images-unlabeled-all-uniform.txt").astype(int)
-    test_labels = load_labels("scratch/0_prob/INPUT/data/test-labels-uniform.txt").astype(int)
+    test_data = load_data("INPUT/data/test-images-unlabeled-all-uniform.txt").astype(int)
+    test_labels = load_labels("INPUT/data/test-labels-uniform.txt").astype(int)
     # Step 1: Initialize classifier
     print(test_data)
     classifier = MCM_Classifier(
     n_categories, n_variables, mcm_filename_format, data_filename_format
     )
 
+    # Step 2: Train
+    classifier.fit(greedy=True, max_iter=1000000, max_no_improvement=100000)
+    # classifier.init()
+
+    # Step 3: Evaluate
+    predicted_classes, probs = classifier.evaluate(test_data, test_labels)
+
+    # Step 4: Save classification report and other stats
+    report = classifier.get_classification_report(test_labels)
     # train_data = None
     # train_labels = None
 
@@ -44,24 +54,27 @@ def main():
 # write test scenarios
 
 
+
+def iter_flat(ls): 
+    return np.array([i.flatten() for i in ls]) 
     
 if __name__ == "__main__":
-    m = tools.generate_class_dataset("c")
-
-
+    np.savetxt("INPUT/MCMs/train-images-unlabeled-0_bootstrap_comms.dat",np.identity(n_variables))
+    np.savetxt("INPUT/MCMs/train-images-unlabeled-1_bootstrap_comms.dat",np.identity(n_variables))
     # Generate training and test datasets
     c_binary_data = tools.generate_class_dataset("c")
     t_binary_data = tools.generate_class_dataset("t")
-    np.savetxt("scratch/0_prob/INPUT/data/train-images-unlabeled-0.dat", np.concatenate(c_binary_data[:60]), delimiter='', fmt='%i',)
-    np.savetxt('scratch/0_prob/INPUT/data/train-images-unlabeled-1.dat', np.concatenate(t_binary_data[:60]), delimiter='', fmt='%i',)
+    np.savetxt("INPUT/data/train-images-unlabeled-0.dat", iter_flat(c_binary_data[:60]), delimiter='', fmt='%i',)
+    np.savetxt('INPUT/data/train-images-unlabeled-1.dat', iter_flat(t_binary_data[:60]), delimiter='', fmt='%i',)
     
-    test_c_d = c_binary_data[50:]
-    test_t_d = t_binary_data[50:]
+    test_c_d = iter_flat(c_binary_data[50:])
+    test_t_d = iter_flat(t_binary_data[50:])
+    test_data = np.concatenate([test_c_d,test_t_d])
     test_c_labels = np.zeros(len(test_c_d))
     test_labels = np.concatenate((np.ones(len(test_c_d),dtype=int), np.zeros(len(test_t_d),dtype=int)))
-    test_data = np.concatenate([*test_c_d,*test_t_d])
-    np.savetxt('scratch/0_prob/INPUT/data/test-images-unlabeled-all-uniform.txt', test_data, delimiter='', fmt='%i',)
-    np.savetxt('scratch/0_prob/INPUT/data/test-labels-uniform.txt', test_labels, delimiter='', fmt='%i',)
+
+    np.savetxt('INPUT/data/test-images-unlabeled-all-uniform.txt', test_data, delimiter='', fmt='%i',)
+    np.savetxt('INPUT/data/test-labels-uniform.txt', test_labels, delimiter='', fmt='%i',)
    
     main()
 
