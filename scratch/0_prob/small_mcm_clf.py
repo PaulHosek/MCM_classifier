@@ -105,7 +105,12 @@ if __name__ == "__main__":
     np.savetxt('INPUT/data/test-labels-uniform.txt', test_labels, delimiter='', fmt='%i',)
    
     main()
-
+    # accuracy is very low for this small dataset
+    # maybe add the KLD and smoothing based things to the big classifier and see how accuracy changes
+    # I also do not understand how there are no 0 probabilities in the small one, the MCM cannot have observed 
+    # some of the test states.
+    # also why are all the probabilities so low, are they 0 or are they log and then acc very high 1?
+    #  They are also this low for the real classifier
 
 
 
