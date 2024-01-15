@@ -10,7 +10,7 @@ void merge_partition(Partition &p_struct){
 
 	// calculate log-evidence of merged community
 	__uint128_t merged_community = p_struct.current_partition[p1] + p_struct.current_partition[p2];
-	double merged_evidence = icc_evidence(merged_community, p_struct);
+	double merged_evidence = get_evidence(merged_community, p_struct);
 	double delta_log_evidence = merged_evidence - p_struct.partition_evidence[p1] - p_struct.partition_evidence[p2];
 	
 	// metropolis acceptance probability
@@ -58,8 +58,8 @@ void split_partition(Partition &p_struct){
 		c2 = (community & (~mask));
 	}
 
-	double log_evidence_1 = icc_evidence(c1, p_struct);
-	double log_evidence_2 = icc_evidence(c2, p_struct);
+	double log_evidence_1 = get_evidence(c1, p_struct);
+	double log_evidence_2 = get_evidence(c2, p_struct);
 	double delta_log_evidence = log_evidence_1 + log_evidence_2 - p_struct.partition_evidence[p1];
 	double p = exp(delta_log_evidence/p_struct.T);
 	double u = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
@@ -103,8 +103,8 @@ void switch_partition(Partition &p_struct){
 	__uint128_t new_c1 = c1 - (ONE << node); // remove from community 1
 	__uint128_t new_c2 = c2 + (ONE << node); // add to community 2
 
-	double log_evidence_1 = icc_evidence(new_c1, p_struct);
-	double log_evidence_2 = icc_evidence(new_c2, p_struct);
+	double log_evidence_1 = get_evidence(new_c1, p_struct);
+	double log_evidence_2 = get_evidence(new_c2, p_struct);
 	double delta_log_evidence = log_evidence_1 + log_evidence_2 - p_struct.partition_evidence[p1] - p_struct.partition_evidence[p2];
 	double p = exp(delta_log_evidence/p_struct.T);
 	double u = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);

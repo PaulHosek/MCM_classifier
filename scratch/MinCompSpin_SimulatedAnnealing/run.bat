@@ -1,3 +1,3 @@
 cd bin 
-saa.exe 20 -i my_data_n20_N1000 -g -s
+saa.exe 100 -i my_data_n100_N1000
 pause

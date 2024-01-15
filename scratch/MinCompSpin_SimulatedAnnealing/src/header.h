@@ -37,6 +37,8 @@ struct Partition {
 	vector<__uint128_t> current_partition = vector<__uint128_t>(n);
 	vector<__uint128_t> best_partition = vector<__uint128_t>(n);
 	vector<double> partition_evidence = vector<double>(n); // log-evidence for each community 
+
+	map<__uint128_t, double> evidence_memo;
 };
 
 // function declarations
@@ -52,6 +54,7 @@ __uint128_t random_128_int(unsigned int k);
 // evidence calculation
 map<__uint128_t, unsigned int> build_pdata(vector<pair<__uint128_t, unsigned int>> &data, __uint128_t community);
 double icc_evidence(__uint128_t community, Partition &p_struct);
+double get_evidence(__uint128_t community, Partition &p_struct);
 
 // partitions and data
 void get_data(string fname, Partition &p_struct);

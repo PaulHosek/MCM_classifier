@@ -3,14 +3,14 @@
 
 #include <ctime> // for chrono
 #include <ratio> // for chrono
-#include <chrono> // for chrono]
+#include <chrono> // for chrono
 
 using namespace std::chrono;
 
 int main(int argc, char **argv) {
 
 
-	cout << "SIMULATED ANNEALING [STAND-ALONE VERSION - v20230623]\n" << endl;
+
 
 
 	// ==== initialize RNG ====
@@ -118,6 +118,7 @@ int main(int argc, char **argv) {
     // main algorithm 
     if (anneal) {
         simulated_annealing(p_struct, max_iterations, max_no_improve);
+        greedy_merging(p_struct); // always run an additional greedy merging step
     }
     
 
@@ -126,10 +127,8 @@ int main(int argc, char **argv) {
 
 
 	// print and save best partition
-	// string cpath = "../output/comms/" + fname + "_comms.dat"; 
-	// string spath = "../output/stats/" + fname + "_stats.dat";
-	string cpath = "input/MCMs/" + fname.substr(fname.find_last_of("/\\") + 1) + "_comms.dat"; // pepijn MCM integration
-	string spath = "output/stats/" + fname.substr(fname.find_last_of("/\\") + 1) + "_stats.dat"; // pepijn MCM integration
+	string cpath = "../output/comms/" + fname + "_comms.dat";
+	string spath = "../output/stats/" + fname + "_stats.dat";
 	ofstream comm_file(cpath);
 	ofstream stat_file(spath);
 	stat_file << "best log-evidence: " << p_struct.best_log_evidence << endl;

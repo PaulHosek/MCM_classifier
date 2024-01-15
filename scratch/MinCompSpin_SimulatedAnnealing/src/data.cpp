@@ -7,8 +7,7 @@ void get_data(string fname, Partition &p_struct) {
 	__uint128_t state;
 	map<__uint128_t, unsigned int> data;
 
-	// string fpath = "../input/data/" + fname + ".dat";
-	string fpath = "../" + fname + ".dat"; // Pepijn integration
+	string fpath = "../input/data/" + fname + ".dat";
 	string line, subline;
 	ifstream myfile(fpath);
 

@@ -1,9 +1,9 @@
 ## Community detection using Minimally Complex Models: Simulated annealing algorithm
 
-This program allows to find community structures in binary data of up to 128 variables by using inference based on a class of spin models (maximum entropy models for binary data) called Minimally Complex Models (MCM). It is an alternative to another algorithm that can be found here: https://github.com/clelidm/MinCompSpin_Greedy. Details about MCMs can also be found there. 
-
-The algorithm works by calculating the log-evidence $\log E$ for a given initial partition $C_i$ (community structure). It then proposes slight changes to the partition and calculates the difference in log-evidence $\Delta \log E$. 
-If the new partition $C_{i+1}$ has a larger log-evidence $\Delta \log E > 0$, the new partition is accepted. If not, the partition is still accepted with probability $P(C_{i+1}=C_i)\sim \exp(\Delta \log E/T_A)$ where $T_A$ is the annealing temperature. This parameter controls how likely the new partition is accepted. At large values, this prevents getting stuck in local optima. 
+This program contains two algorithms, greedy merging (GM) and simulated annealing (SA), for finding community structures in binary data of up to 128 variables by using inference based on a class of spin models (maximum entropy models for binary data) called Minimally Complex Models (MCM). 
+### Simulated annealing
+The SA algorithm works by calculating the log-evidence $\log E$ for a given initial partition $C_i$ (community structure). It then proposes slight changes to the partition and calculates the difference in log-evidence $\Delta \log E$. 
+If the new partition $C_{i+1}$ has a larger log-evidence $\Delta \log E > 0$, the new partition is accepted. If not, the partition is still accepted with probability $P(C_{i+1}=C_i)\sim \exp(\Delta \log E/T_A)$ where $T_A$ is the annealing temperature. This parameter controls how likely the new partition is accepted. At large values, this prevents getting stuck in locally optimal solutions. 
 During the search the annealing temperature is gradually lowered allowing the algorithm to converge to an optimal solution. This is done according to a logarithmic cooldown schedule where the annealing temperature at iteration $i$ is given by $T_A(i)=T_0/(1+\log(1+i))$.
 See https://en.wikipedia.org/wiki/Simulated_annealing for more details.
 
@@ -11,7 +11,8 @@ The algorithm can change the partition in three ways:
 - merge: two communities are merged into a single community
 - split: a single community is split into two communities (not necessarily of the same size)
 - switch: a node from one community is placed inside another community
-
+### Greedy merging
+The GM algorithm starts from an independent partition where each node is assigned to a separate community. It then checks all possible mergers of two communities and accept the merger that increases the log-evidence by the largest amount. The algorithm stops when there is no possible increase in log-evidence or when all nodes have been assigned to the same community. This algorithm is much faster than the SA algorithm but may not converge to the optimal solution. A useful approach is therefore to use the best partition found with the GM algorithm as the initial condition for the SA algorithm (see "How to use").
 
 ## Requirements
 The code uses C++ version 11.
@@ -54,6 +55,18 @@ This partition should be located in the `./input/comms` folder and have the name
 
 `saa.exe n -i DATAFILE_NAME --max 4500 --stop 2250`
 
+By default, the program runs only the simulated annealing algorithm and starts from an independent partition. To run a single pass of the greedy merging algorithm before SA, use the `-g` flag. For example, the following would run both the GM and SA algorithms
+
+`saa.exe n -i DATAFILE_NAME -g`
+
+To run greedy merging only, use the `-s` flag together with the `-g` flag. Note that using only the `-s` flag will disable both algorithms and the program will just return the initial partition.
+
+`saa.exe n -i DATAFILE_NAME -g -s`
+
+Finally, to start from a random partition instead of the independent partition, use the `-r` flag. 
+
+`saa.exe n -i DATAFILE_NAME -r`
+
 ## Output 
 
 The best partition found is written to `./output/comms/DATAFILE_NAME_comms.dat`. The associated best log-evidence is written to `./output/stats/DATAFILE_NAME_stats.dat`. 
@@ -79,6 +92,7 @@ If the best partition found divides 20 variables in the following way: `[[0,1,2]
   - `update_schedule`: the number of iterations the algorithms performs at the same annealing temperature.
   - `max_no_improve`: the maximum number of iterations without improvement in log-evidence before stopping the algorithm - increasing this allows for a more exhaustive search at the cost of speed and can be useful when analyzing data of many variables.
   - `max_iterations`: the maximum total number of iterations to perform.
+- The last two parameters can be specified at runtime using the `--max` and `--stop` flags.
 
 ## Coming soon
 - Python wrapper
