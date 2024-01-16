@@ -11,7 +11,6 @@ def load_data(path: str) -> np.ndarray:
     Returns:
         np.ndarray: The data loaded from the given path
     """
-    print(path)
     data = np.loadtxt(path, dtype=str)
     data = np.array([[int(s) for s in state] for state in data])
     return data

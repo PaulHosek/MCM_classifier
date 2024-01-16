@@ -63,11 +63,9 @@ class MCM_Classifier:
         """
         # if not self.__validate_input_data():
         #     raise ValueError("Input data folder file count does not match number of categories")
-
         # Loop over each file in the data folder
         fit_args = (greedy, max_iter, max_no_improvement,n_samples)
         saa_args_list = self.__get_saa_args_and_bootstrap(data_path, fit_args)
-
         # Run the MinCompSpin_SimulatedAnnealing algorithm on different processes for each file
         # TODO maybe not so smart to run a process per category, do not know the nr of categories
         print_box("Running MinCompSpin_SimulatedAnnealing...")
@@ -307,19 +305,14 @@ class MCM_Classifier:
         Returns:
             list: The list with all the arguments, to be used in the subprocess call
         """
-        # datafile = "../../../classifier/INPUT/data/train-images-unlabeled-0"
-        # navigate from the "input/data/" folder in the MinCompSpin_SAA folder to the current input folder
-        repo_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        path_from_saa = os.path.join("..", "..", "..", repo_name, data_path, filename)
-        print(path_from_saa)
 
         g = "-g" if greedy else ""
 
-        sa_file = "../../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if platform.system() == "Windows" else "../../MinCompSpin_SimulatedAnnealing/bin/saa.out" # TODO use os.path.join here instead
+        sa_file = "../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if platform.system() == "Windows" else "../MinCompSpin_SimulatedAnnealing/bin/saa.out" # TODO use os.path.join here instead
         saa_args = [sa_file,
                     str(self.n_variables),
                     '-i',
-                    path_from_saa,
+                    filename,
                     g,
                     '--max',
                     str(max_iter),
@@ -328,8 +321,7 @@ class MCM_Classifier:
                     ]
 
         # Filter out empty strings
-        # return tuple(filter(None, saa_args))
-        return ('../../MinCompSpin_SimulatedAnnealing/bin/saa.out', '121', '-i', '../../../classifier/INPUT/data/train-images-unlabeled-0_bootstrap', '-g', '--max', '1000000', '--stop', '100000')
+        return tuple(filter(None, saa_args))
 
 
     @staticmethod
@@ -344,8 +336,8 @@ class MCM_Classifier:
             """
             try:
                 # p = subprocess.Popen(saa_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                print(saa_args)
                 # ('../bin/saa.exe', str(n), '-i', datafile)
+                print(saa_args)
                 p = subprocess.Popen(saa_args,subprocess.PIPE)
                 # print(p)
                 for line in p.stdout:
@@ -388,11 +380,11 @@ class MCM_Classifier:
                         bootstrap_name = filename
                     generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, len(load_data(data_path + filename + ".dat")))
                     filename = bootstrap_name
+                print(filename,"filename")
 
                 # file = "mcm_classifier/input/data/" + filename
                 saa_args = self.__construct_args(filename,data_path, greedy, max_iter, max_no_improvement)
                 saa_args_list.append(saa_args)
-
             else:
                 continue
         return saa_args_list
