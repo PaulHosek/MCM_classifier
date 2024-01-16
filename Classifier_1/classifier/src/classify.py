@@ -19,7 +19,7 @@ class MCM_Classifier:
         - n_variables (int): The number of variables in the dataset
     """
 
-    def __init__(self, n_categories: int, n_variables: int, mcm_filename_format: str, data_filename_format: str) -> None:
+    def __init__(self, n_categories: int, n_variables: int, mcm_filename_format: str, data_filename_format: str, data_path: str, comms_path: str) -> None:
         """
         The MCM-classifier.
 
@@ -39,6 +39,8 @@ class MCM_Classifier:
         self.predicted_classes = None
         self.probs = None
         self.stats = None
+        self.data_path = os.path.join(data_path, "")
+        self.comms_path = os.path.join(comms_path, "")
         
     # ----- Public methods -----
     def init(self):
@@ -47,25 +49,23 @@ class MCM_Classifier:
         """
         self.__construct_P()
 
-    def fit(self, data_path: str = "../INPUT/data",
+    def fit(self, 
             greedy: bool = False, max_iter: int = 100000, max_no_improvement: int = 10000, n_samples: int = 0) -> None:
         """
         Fit the classifier using the data given in the data_path folder.
         It uses the MinCompSpin_SimulatedAnnealing algorithm to find the MCMs.
 
         Args:
-            - data_path (str): Path to the data folder
             - greedy (bool): Whether to use the greedy algorithm after SA
             - max_iter (int): Maximum number of iterations for the SA algorithm
             - max_no_improvement (int): Maximum number of iterations without improvement for the SA algorithm
             - n_samples (int): The number of samples to be used from the data folder. If 0, all samples are used.
-            - data_directory (str): The directory where the data files are located. If "", from main.py, the path: "INPUT/data/" is used.
         """
         # if not self.__validate_input_data():
         #     raise ValueError("Input data folder file count does not match number of categories")
         # Loop over each file in the data folder
         fit_args = (greedy, max_iter, max_no_improvement,n_samples)
-        saa_args_list = self.__get_saa_args_and_bootstrap(data_path, fit_args)
+        saa_args_list = self.__get_saa_args_and_bootstrap(fit_args)
         # Run the MinCompSpin_SimulatedAnnealing algorithm on different processes for each file
         # TODO maybe not so good to run a process per category, do not know the nr of categories
         print_box("Running MinCompSpin_SimulatedAnnealing...")
@@ -175,7 +175,8 @@ class MCM_Classifier:
         for k in range(self.n_categories):
             # Add MCM to list
             try:
-                mcm = load_mcm(f"INPUT/MCMs/{self.__mcm_filename_format.format(k)}")
+                # mcm = load_mcm(f"../INPUT/MCMs/{self.__mcm_filename_format.format(k)}")
+                mcm = load_mcm(os.path.join(self.comms_path, self.__mcm_filename_format.format(k)))
                 MCM.append(mcm)
             except:
                 # Throw error if MCM file not found
@@ -183,11 +184,11 @@ class MCM_Classifier:
 
             # Load data
             try:
-                data = load_data(f"INPUT/data/{self.__data_filename_format.format(k)}")
+                # data = load_data(f"../INPUT/data/{self.__data_filename_format.format(k)}")
+                data = load_data(os.path.join(self.data_path, self.__data_filename_format.format(k)))
             except:
                 # Throw error if data file not found
                 raise FileNotFoundError(f"Could not find data file for category {k}")
-
             pk = []
 
             for icc in mcm:
@@ -291,13 +292,12 @@ class MCM_Classifier:
 
     #  ---------------------------- SAA methods ----------------------------
 
-    def __construct_args(self, filename: str, data_path:str, greedy: bool, max_iter: int, max_no_improvement: int) -> tuple:
+    def __construct_args(self, filename: str, greedy: bool, max_iter: int, max_no_improvement: int) -> tuple:
         """
         Generates the arguments for the MinCompSpin_SimulatedAnnealing algorithm
 
         Args:
             filename (str): name of the datafile without any path
-            data_path (str): Relative path to data directory from repository directory: e.g., ../INPUT/data
             greedy (bool): if greedy should be done instead of SAA
             max_iter (int): maximal number of iterations before stopping
             max_no_improvement (int): max nr of iterations without improvement found before stopping
@@ -335,13 +335,13 @@ class MCM_Classifier:
                 int: The return code of the algorithm
             """
             try:
-                # p = subprocess.Popen(saa_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                p = subprocess.Popen(saa_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 # ('../bin/saa.exe', str(n), '-i', datafile)
-                print(saa_args)
-                p = subprocess.Popen(saa_args,subprocess.PIPE)
+                # print(saa_args)
+                # p = subprocess.Popen(saa_args,subprocess.PIPE)
                 # print(p)
-                for line in p.stdout:
-                    print(line[:-1].decode('utf-8'))
+                # for line in p.stdout:
+                #     print(line[:-1].decode('utf-8'))
             except KeyboardInterrupt:
                 raise KeyboardInterrupt("MinCompSpin_SimulatedAnnealing interrupted")
             except SystemExit:
@@ -351,14 +351,10 @@ class MCM_Classifier:
 
             return p
 
-    def __get_saa_args_and_bootstrap(self, data_path, fit_args):
-        print(data_path)
-        folder = os.fsencode(data_path)
+    def __get_saa_args_and_bootstrap(self, fit_args):
+        folder = os.fsencode(self.data_path)
         sorted_folder = sorted(os.listdir(folder))
-        data_path += "/"
         saa_args_list = []
-        print(data_path)
-
         greedy, max_iter, max_no_improvement, n_samples = fit_args
         for file in sorted_folder:
             filename = os.fsdecode(file)
@@ -373,20 +369,19 @@ class MCM_Classifier:
                     else:
                         bootstrap_name = filename
                     # os.makedirs("INPUT/data/bootstrap/", exist_ok=True)
-                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, n_samples, data_path)
+                    generate_bootstrap_samples(self.data_path, filename, bootstrap_name, n_samples)
                     filename = bootstrap_name
                 else:
                     if "_bootstrap" not in filename:
                         bootstrap_name = filename + "_bootstrap"
                     else:
                         bootstrap_name = filename
-                    print(data_path + filename + ".dat")
-                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, len(load_data(data_path + filename + ".dat")),data_path)
+                    generate_bootstrap_samples(self.data_path, filename, bootstrap_name, len(load_data(self.data_path + filename + ".dat")))
                     filename = bootstrap_name
                 print(filename,"filename")
 
                 # file = "mcm_classifier/input/data/" + filename
-                saa_args = self.__construct_args(filename,data_path, greedy, max_iter, max_no_improvement)
+                saa_args = self.__construct_args(filename, greedy, max_iter, max_no_improvement)
                 saa_args_list.append(saa_args)
             else:
                 continue
@@ -489,15 +484,15 @@ class MCM_Classifier:
         return classification_report
 
     def save_classification_report(
-            self, labels: np.ndarray, name: str = "classification_report", path: str = "OUTPUT"
+            self, labels: np.ndarray, path, name: str = "classification_report"
     ) -> None:
         """
         Saves the classification report to a file
 
         Args:
             name (str): The name of the file
-            labels (np.ndarray): The labels of the data
             path (str): The path to the folder where the file should be saved
+            labels (np.ndarray): The labels of the data
         """
         if self.predicted_classes is None:
             raise ValueError("Classifier not evaluated yet")
@@ -507,129 +502,129 @@ class MCM_Classifier:
         self.__save_classification_report(name, classification_report, path)
 
 
-def __save_classification_report(self, name: str, classification_report: dict, path: str):
-    """
-    Saves the classification report to a file
+    def __save_classification_report(self, name: str, classification_report: dict, path: str):
+        """
+        Saves the classification report to a file
 
-    Args:
-        name (str): The desired name of the file
-        classification_report (dict): The classification report
-        path (str): The path to the folder where the file should be saved
-    """
-    with open(f"{path}/{name}.txt", "w+") as f:
-        f.write("Classification report:\n")
-        f.write(f"Accuracy: {classification_report['true_accuracy']}\n")
-        f.write(f"Average precision: {classification_report['avg_precision']}\n")
-        f.write(f"Average recall: {classification_report['avg_recall']}\n")
-        f.write(f"Average f1-score: {classification_report['avg_f1_score']}\n")
-        f.write("\n")
-        f.write("Precision:\n")
-        for i in range(self.n_categories):
-            f.write(f"{i}: {classification_report['precision'][i]}\n")
-        f.write("\n")
-        f.write("Recall:\n")
-        for i in range(self.n_categories):
-            f.write(f"{i}: {classification_report['recall'][i]}\n")
-        f.write("\n")
-        f.write("F1-score:\n")
-        for i in range(self.n_categories):
-            f.write(f"{i}: {classification_report['f1_score'][i]}\n")
-
-
-def __str__(self) -> str:
-    """
-    String representation of the classifier
-    """
-    return f"MCM_Classifier(n_categories={self.n_categories}, n_variables={self.n_variables})"
+        Args:
+            name (str): The desired name of the file
+            classification_report (dict): The classification report
+            path (str): The path to the folder where the file should be saved
+        """
+        with open(f"{path}/{name}.txt", "w+") as f:
+            f.write("Classification report:\n")
+            f.write(f"Accuracy: {classification_report['true_accuracy']}\n")
+            f.write(f"Average precision: {classification_report['avg_precision']}\n")
+            f.write(f"Average recall: {classification_report['avg_recall']}\n")
+            f.write(f"Average f1-score: {classification_report['avg_f1_score']}\n")
+            f.write("\n")
+            f.write("Precision:\n")
+            for i in range(self.n_categories):
+                f.write(f"{i}: {classification_report['precision'][i]}\n")
+            f.write("\n")
+            f.write("Recall:\n")
+            for i in range(self.n_categories):
+                f.write(f"{i}: {classification_report['recall'][i]}\n")
+            f.write("\n")
+            f.write("F1-score:\n")
+            for i in range(self.n_categories):
+                f.write(f"{i}: {classification_report['f1_score'][i]}\n")
 
 
-def __validate_input_data(self, data_path: str = "INPUT/data", ) -> bool:
-    """
-        Validates the input community folder. Checks if the number of files in the folder
-        is equal to the number of categories.
-    """
-    folder = os.fsencode(data_path)
-    sorted_folder = sorted(os.listdir(folder))
-
-    n_matching_files = 0
-    for file in sorted_folder:
-        filename = os.fsdecode(file)
-        print(filename)
-        print(self.__data_filename_format.format(n_matching_files))
-        if filename == self.__data_filename_format.format(n_matching_files):
-            n_matching_files += 1
-
-    if n_matching_files == self.n_categories: return True
-    return False
+    def __str__(self) -> str:
+        """
+        String representation of the classifier
+        """
+        return f"MCM_Classifier(n_categories={self.n_categories}, n_variables={self.n_variables})"
 
 
-def __validate_input_comms(self, comms_path: str = "INPUT/MCMs", ) -> bool:
-    """
-        Validates the input community folder. Checks if the number of files in the folder
-        is equal to the number of categories.
-    """
-    folder = os.fsencode(comms_path)
-    sorted_folder = sorted(os.listdir(folder))
+    def __validate_input_data(self) -> bool:
+        """
+            Validates the input community folder. Checks if the number of files in the folder
+            is equal to the number of categories.
+        """
+        folder = os.fsencode(self.data_path)
+        sorted_folder = sorted(os.listdir(folder))
 
-    n_matching_files = 0
-    for i, file in enumerate(sorted_folder):
-        filename = os.fsdecode(file)
-        if filename == self.__mcm_filename_format.format(i):
-            n_matching_files += 1
+        n_matching_files = 0
+        for file in sorted_folder:
+            filename = os.fsdecode(file)
+            print(filename)
+            print(self.__data_filename_format.format(n_matching_files))
+            if filename == self.__data_filename_format.format(n_matching_files):
+                n_matching_files += 1
 
-    if n_matching_files == self.n_categories: return True
-    return False
+        if n_matching_files == self.n_categories: return True
+        return False
 
-def __get_confusion_matrix(self, test_labels: np.ndarray):
-    """
-    Get the confusion matrix for the classifier
 
-    Args:
-        test_labels (np.ndarray): The labels of the test data
+    def __validate_input_comms(self) -> bool:
+        """
+            Validates the input community folder. Checks if the number of files in the folder
+            is equal to the number of categories.
+        """
+        folder = os.fsencode(self.comms_path)
+        sorted_folder = sorted(os.listdir(folder))
 
-    Raises:
-        ValueError: If the classifier has not been evaluated yet
+        n_matching_files = 0
+        for i, file in enumerate(sorted_folder):
+            filename = os.fsdecode(file)
+            if filename == self.__mcm_filename_format.format(i):
+                n_matching_files += 1
 
-    Returns:
-        np.ndarray: The confusion matrix
-    """
-    if self.predicted_classes is None:
-        raise ValueError("Classifier not evaluated yet")
+        if n_matching_files == self.n_categories: return True
+        return False
 
-    confusion_matrix = np.zeros((self.n_categories, self.n_categories))
-    for i, label in enumerate(test_labels):
-        if self.predicted_classes[i] != -1:
-            confusion_matrix[label, self.predicted_classes[i]] += 1
-        else:
-            confusion_matrix[label, label] += 1
+    def __get_confusion_matrix(self, test_labels: np.ndarray):
+        """
+        Get the confusion matrix for the classifier
 
-    return confusion_matrix
+        Args:
+            test_labels (np.ndarray): The labels of the test data
 
-def __sample_MCM(self, cat_index: int) -> np.ndarray:
-    """
-    Sample a state from some MCM.
+        Raises:
+            ValueError: If the classifier has not been evaluated yet
 
-    Args:
-        cat_index (int): The category index from which to sample
-    """
-    # get a sample for each digit
+        Returns:
+            np.ndarray: The confusion matrix
+        """
+        if self.predicted_classes is None:
+            raise ValueError("Classifier not evaluated yet")
 
-    pk = self.__P[cat_index]  # probability distribution for each digit
-    mcm = self.__MCM[cat_index]  # communities for each digit
+        confusion_matrix = np.zeros((self.n_categories, self.n_categories))
+        for i, label in enumerate(test_labels):
+            if self.predicted_classes[i] != -1:
+                confusion_matrix[label, self.predicted_classes[i]] += 1
+            else:
+                confusion_matrix[label, label] += 1
 
-    sampled_state = np.zeros(self.n_variables)
+        return confusion_matrix
 
-    for j, icc in enumerate(mcm):
-        p_icc = pk[j]  # get the probability distribution restricted to specific ICC
-        idx = [
-            i for i in range(self.n_variables) if icc[i] == "1"
-        ]  # count the number of variables in ICC
-        rank = len(idx)
-        sm = np.random.choice(np.arange(2 ** rank), 1, p=p_icc)[
-            0
-        ]  # sample "random" state of ICC
-        ss = format(sm, f"0{rank}b")  # convert integer to binary string
-        ss = np.array([int(s) for s in ss])  # convert binary string to [0,1] array
-        sampled_state[idx] = ss  # fill ICC part of complete state
+    def __sample_MCM(self, cat_index: int) -> np.ndarray:
+        """
+        Sample a state from some MCM.
 
-    return sampled_state
+        Args:
+            cat_index (int): The category index from which to sample
+        """
+        # get a sample for each digit
+
+        pk = self.__P[cat_index]  # probability distribution for each digit
+        mcm = self.__MCM[cat_index]  # communities for each digit
+
+        sampled_state = np.zeros(self.n_variables)
+
+        for j, icc in enumerate(mcm):
+            p_icc = pk[j]  # get the probability distribution restricted to specific ICC
+            idx = [
+                i for i in range(self.n_variables) if icc[i] == "1"
+            ]  # count the number of variables in ICC
+            rank = len(idx)
+            sm = np.random.choice(np.arange(2 ** rank), 1, p=p_icc)[
+                0
+            ]  # sample "random" state of ICC
+            ss = format(sm, f"0{rank}b")  # convert integer to binary string
+            ss = np.array([int(s) for s in ss])  # convert binary string to [0,1] array
+            sampled_state[idx] = ss  # fill ICC part of complete state
+
+        return sampled_state

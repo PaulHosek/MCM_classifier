@@ -15,7 +15,8 @@ n_variables = 121  # Number of variables in the dataset
 mcm_filename_format = "train-images-unlabeled-{}_comms.dat"
 data_filename_format = "train-images-unlabeled-{}.dat"
 data_path = "../INPUT/data/"
-
+communities_path = "../INPUT/MCMs/"
+output_path = "../OUTPUT/"
 def main():
     print("{:-^50}".format("  MCM-Classifier  ")) 
 
@@ -23,12 +24,10 @@ def main():
     test_labels = load_labels("../INPUT/data/test-labels-uniform.txt").astype(int)
 
     # Step 1: Initialize classifier
-    classifier = MCM_Classifier(
-        n_categories, n_variables, mcm_filename_format, data_filename_format
-    )
+    classifier = MCM_Classifier(n_categories, n_variables, mcm_filename_format, data_filename_format, data_path, communities_path)
 
     # Step 2: Train
-    classifier.fit(data_path, greedy=True, max_iter=1000000, max_no_improvement=100000)
+    classifier.fit(greedy=True, max_iter=1000000, max_no_improvement=100000)
 
 
     # Step 3: Evaluate
@@ -37,7 +36,7 @@ def main():
 
     # Step 4: Save classification report and other stats
     # report = classifier.get_classification_report(test_labels)
-    classifier.save_classification_report(test_labels)
+    classifier.save_classification_report(test_labels,path=output_path)
 
     if (classifier.stats == None):
         raise Exception("Classifier stats not found. Did you forget to call evaluate()?")
