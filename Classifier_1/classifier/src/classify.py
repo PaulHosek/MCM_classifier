@@ -47,7 +47,7 @@ class MCM_Classifier:
         """
         self.__construct_P()
 
-    def fit(self, data_path: str = "INPUT/data",
+    def fit(self, data_path: str = "../INPUT/data",
             greedy: bool = False, max_iter: int = 100000, max_no_improvement: int = 10000, n_samples: int = 0) -> None:
         """
         Fit the classifier using the data given in the data_path folder.
@@ -67,7 +67,7 @@ class MCM_Classifier:
         fit_args = (greedy, max_iter, max_no_improvement,n_samples)
         saa_args_list = self.__get_saa_args_and_bootstrap(data_path, fit_args)
         # Run the MinCompSpin_SimulatedAnnealing algorithm on different processes for each file
-        # TODO maybe not so smart to run a process per category, do not know the nr of categories
+        # TODO maybe not so good to run a process per category, do not know the nr of categories
         print_box("Running MinCompSpin_SimulatedAnnealing...")
         processes = []
         for saa_args in saa_args_list:
@@ -297,7 +297,7 @@ class MCM_Classifier:
 
         Args:
             filename (str): name of the datafile without any path
-            data_path (str): Relative path to data directory from repository directory: e.g., /INPUT/data
+            data_path (str): Relative path to data directory from repository directory: e.g., ../INPUT/data
             greedy (bool): if greedy should be done instead of SAA
             max_iter (int): maximal number of iterations before stopping
             max_no_improvement (int): max nr of iterations without improvement found before stopping
@@ -308,7 +308,7 @@ class MCM_Classifier:
 
         g = "-g" if greedy else ""
 
-        sa_file = "../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if platform.system() == "Windows" else "../MinCompSpin_SimulatedAnnealing/bin/saa.out" # TODO use os.path.join here instead
+        sa_file = "../../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if platform.system() == "Windows" else "../../MinCompSpin_SimulatedAnnealing/bin/saa.out" # TODO use os.path.join here instead
         saa_args = [sa_file,
                     str(self.n_variables),
                     '-i',
@@ -352,10 +352,12 @@ class MCM_Classifier:
             return p
 
     def __get_saa_args_and_bootstrap(self, data_path, fit_args):
+        print(data_path)
         folder = os.fsencode(data_path)
         sorted_folder = sorted(os.listdir(folder))
         data_path += "/"
         saa_args_list = []
+        print(data_path)
 
         greedy, max_iter, max_no_improvement, n_samples = fit_args
         for file in sorted_folder:
@@ -371,14 +373,15 @@ class MCM_Classifier:
                     else:
                         bootstrap_name = filename
                     # os.makedirs("INPUT/data/bootstrap/", exist_ok=True)
-                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, n_samples)
+                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, n_samples, data_path)
                     filename = bootstrap_name
                 else:
                     if "_bootstrap" not in filename:
                         bootstrap_name = filename + "_bootstrap"
                     else:
                         bootstrap_name = filename
-                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, len(load_data(data_path + filename + ".dat")))
+                    print(data_path + filename + ".dat")
+                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, len(load_data(data_path + filename + ".dat")),data_path)
                     filename = bootstrap_name
                 print(filename,"filename")
 

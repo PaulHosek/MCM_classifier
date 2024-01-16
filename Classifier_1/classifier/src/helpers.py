@@ -7,7 +7,7 @@ def print_box(message: str) -> None:
     print("{:-^50}".format(""))
     print()
 
-def generate_bootstrap_samples(data: np.ndarray, bootstrap_name: str, n_samples: int):
+def generate_bootstrap_samples(data: np.ndarray, bootstrap_name: str, n_samples: int,data_path: str):
     """Generates bootstrap samples from the provided data in the INPUT/data folder.
     Places them in the INPUT/data/bootstrap_name folder.
     """
@@ -21,7 +21,7 @@ def generate_bootstrap_samples(data: np.ndarray, bootstrap_name: str, n_samples:
     samples.append(all_zeros)
     samples.append(all_ones)
     np.savetxt(
-        "INPUT/data/{}.dat".format(bootstrap_name),
+        "{}/{}.dat".format(data_path, bootstrap_name),
         samples,
         fmt="%d",
         delimiter="",

@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../")
+
 import matplotlib.pyplot as plt
 import numpy as np
 from src.loaders import load_data, load_labels
@@ -11,12 +14,13 @@ n_categories = 10  # Number of categories to be classified
 n_variables = 121  # Number of variables in the dataset
 mcm_filename_format = "train-images-unlabeled-{}_comms.dat"
 data_filename_format = "train-images-unlabeled-{}.dat"
+data_path = "../INPUT/data/"
 
 def main():
     print("{:-^50}".format("  MCM-Classifier  ")) 
 
-    test_data = load_data("INPUT/data/test-images-unlabeled-all-uniform.txt").astype(int)
-    test_labels = load_labels("INPUT/data/test-labels-uniform.txt").astype(int)
+    test_data = load_data("../INPUT/data/test-images-unlabeled-all-uniform.txt").astype(int)
+    test_labels = load_labels("../INPUT/data/test-labels-uniform.txt").astype(int)
 
     # Step 1: Initialize classifier
     classifier = MCM_Classifier(
@@ -24,7 +28,7 @@ def main():
     )
 
     # Step 2: Train
-    classifier.fit(greedy=True, max_iter=1000000, max_no_improvement=100000)
+    classifier.fit(data_path, greedy=True, max_iter=1000000, max_no_improvement=100000)
 
 
     # Step 3: Evaluate

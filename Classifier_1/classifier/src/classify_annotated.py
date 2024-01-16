@@ -92,16 +92,16 @@ class MCM_Classifier:
                     else:
                         bootstrap_name = filename
                     # os.makedirs("INPUT/data/bootstrap/", exist_ok=True)
-                    generate_bootstrap_samples(load_data("INPUT/data/" + filename + ".dat"), bootstrap_name, n_samples)
+                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, n_samples, data_path)
                     filename = bootstrap_name
                 else:
                     if "_bootstrap" not in filename:
                         bootstrap_name = filename + "_bootstrap"
                     else: 
                         bootstrap_name = filename
-                    generate_bootstrap_samples(load_data("INPUT/data/" + filename + ".dat"), bootstrap_name, len(load_data("INPUT/data/" + filename + ".dat")))                        
+                    generate_bootstrap_samples(load_data(data_path + filename + ".dat"), bootstrap_name, len(load_data("INPUT/data/" + filename + ".dat")), data_path)                        
                     filename = bootstrap_name
-                
+            
                 file = "mcm_classifier/input/data/" + filename
                 # saa_args = configuration for the SA function for this MCM 
                 saa_args = self.__construct_args(file, greedy, max_iter, max_no_improvement) 
@@ -335,7 +335,7 @@ class MCM_Classifier:
 
             # Add MCM to list
             try:
-                mcm = load_mcm(f"INPUT/MCMs/{self.__mcm_filename_format.format(k)}")
+                mcm = load_mcm(f"../INPUT/MCMs/{self.__mcm_filename_format.format(k)}") # NOTE FOR FUTURE: this path is wrong, use datapath instead
                 MCM.append(mcm)
             except:
                 # Throw error if MCM file not found
@@ -343,7 +343,7 @@ class MCM_Classifier:
 
             # Load data
             try:
-                data = load_data(f"INPUT/data/{self.__data_filename_format.format(k)}")
+                data = load_data(f"../INPUT/data/{self.__data_filename_format.format(k)}") # NOTE FOR FUTURE: this path is wrong, use datapath instead
             except:
                 # Throw error if data file not found
                 raise FileNotFoundError(f"Could not find data file for category {k}")
