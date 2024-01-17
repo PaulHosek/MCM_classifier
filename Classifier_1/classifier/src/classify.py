@@ -227,6 +227,8 @@ class MCM_Classifier:
             return np.zeros(2**rank)
         elif method == "add_smooth":
             return np.full(2**rank,fill_value=alpha/(2**rank+2*alpha)) # laplacian smoothing for 0 observations: (0+alpha)/(N+2*alpha)
+        else:
+            raise ValueError("Invalid estimator method")
 
     @staticmethod
     def estimator_prob(counts, method="mle", alpha=1):
