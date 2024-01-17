@@ -42,10 +42,9 @@ def main():
         raise Exception("Classifier stats not found. Did you forget to call evaluate()?")
 
     # Count amount of -1 labels
-    plot_results(test_data, test_labels, predicted_classes, probs, classifier)
+    plot_results(test_data, test_labels, predicted_classes, probs, classifier,output_path,n_categories)
 
 
-# test for git
 
 
 

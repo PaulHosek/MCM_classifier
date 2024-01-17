@@ -1,3 +1,4 @@
+import os.path
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import numpy as np
@@ -92,7 +93,7 @@ def plot_label_prob_diff(label1, label2, test_labels, probs, predicted_classes, 
     plt.show()
 
 
-def plot_results(test_data, test_labels, predicted_classes, probs, classifier):
+def plot_results(test_data, test_labels, predicted_classes, probs, classifier, output_path,n_categories):
     # Count amount of -1 labels
     n_no_labels = 0
     no_labels_labels = []
@@ -129,9 +130,9 @@ def plot_results(test_data, test_labels, predicted_classes, probs, classifier):
     print("Number of datapoints with 2 or more categories with probability > 0: {}".format(n_multiple_probs))
 
     plot_label_prob_diff(3, 5, test_labels, probs, predicted_classes)
-    plt.savefig("OUTPUT/probs_and_correctness.png")
+    plt.savefig(os.path.join(output_path, "probs_and_correctness.png"))
 
     # Plot confusion matrix
     plt.figure()
     plot_confusion_matrix(classifier.stats["confusion_matrix"], n_categories)
-    plt.savefig("OUTPUT/confusion_matrix.png")
+    plt.savefig(os.path.join(output_path, "confusion_matrix.png"))
