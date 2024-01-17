@@ -333,7 +333,7 @@ class MCM_Classifier:
 
             Returns:
                 int: The return code of the algorithm
-            """
+                """
             try:
                 p = subprocess.Popen(saa_args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 # ('../bin/saa.exe', str(n), '-i', datafile)
