@@ -228,8 +228,7 @@ class MCM_Classifier:
         elif method == "add_smooth":
             return np.full(2**rank,fill_value=alpha/(2**rank+2*alpha)) # laplacian smoothing for 0 observations: (0+alpha)/(N+2*alpha)
         else:
-            raise ValueError("Invalid estimator method")
-
+            ValueError("Invalid probability estimation method")
     @staticmethod
     def estimator_prob(counts, method="mle", alpha=1):
         """
@@ -249,7 +248,8 @@ class MCM_Classifier:
             return counts / np.sum(counts)
         elif method == "add_smooth":
             return (counts+alpha)/ (np.sum(counts)+2*alpha) # TODO not sure if should not be rank instead of 2
-
+        else:
+            raise ValueError("Invalid probability estimation method")
 
     def __prob_MCM(self, state: np.ndarray, cat_index: int) -> float:
         """
