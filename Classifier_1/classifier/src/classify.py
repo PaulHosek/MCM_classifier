@@ -4,6 +4,7 @@ import subprocess
 import os
 import platform
 import multiprocessing as mp
+from sklearn.metrics import mutual_info_score
 
 # MCM_classifier helper imports
 from .loaders import load_data, load_mcm
@@ -99,7 +100,7 @@ class MCM_Classifier:
          
         return predicted_class, probs
 
-    def evaluate(self, data: np.ndarray, labels: np.ndarray) -> tuple:
+    def evaluate(self, data: np.ndarray, labels: np.ndarray, probs: str) -> tuple:
         """
         Evaluates the performance of the MCM-based classifier.
 
@@ -118,8 +119,10 @@ class MCM_Classifier:
 
         # ----- Calculate probability of sample belonging to each category -----
         print_box("1. Calculating state probabilities...")
-        probs = np.array([self.__get_probs(state) for state in data])
-
+        if method == "probs":
+            probs = np.array([self.__get_probs(state) for state in data])
+        elif method ==  "kl":
+            probs = np.array([self.__get_MI(state) for state in data])
         # ----- Predict classes -----   
         predicted_classes = np.argmax(probs, axis=1)
         
@@ -250,6 +253,19 @@ class MCM_Classifier:
             return (counts+alpha)/ (np.sum(counts)+2*alpha) # TODO not sure if should not be rank instead of 2
         else:
             raise ValueError("Invalid probability estimation method")
+        
+    def __get_probs(self, state: np.ndarray) -> list:
+        """
+        Get the probabilities for a single state for each category, in order
+        
+        Args:
+            state (np.ndarray): The state to calculate the probability of
+        """
+        all_probs = []
+        for i in range(self.n_categories):
+            prob = self.__prob_MCM(state, i)
+            all_probs.append(prob)
+        return all_probs
 
     def __prob_MCM(self, state: np.ndarray, cat_index: int) -> float:
         """
@@ -279,18 +295,37 @@ class MCM_Classifier:
 
         return prob
 
-    def __get_probs(self, state: np.ndarray) -> list:
+    def __get_mi(self, state: np.ndarray) -> list:
         """
-        Get the probabilities for a single state for each category, in order
+        Get the mutual information for a single state for each category, in order
         
         Args:
             state (np.ndarray): The state to calculate the probability of
         """
-        all_probs = []
+        all_mi = []
         for i in range(self.n_categories):
-            prob = self.__prob_MCM(state, i)
-            all_probs.append(prob)
-        return all_probs
+            mi = self.__mi_MCM(state,i)
+            all_mi.append(mi)
+        return all_mi
+
+    def __mi_MCM(self, state,cat_index):
+
+        MCM = self.__MCM[cat_index]
+        P = self.__P[cat_index]
+        info = 0
+        p_x = 1
+        for j, icc in enumerate(MCM):
+            p_icc = P[j]
+            idx = [i for i in range(self.n_variables) if icc[i] == "1"]
+            ss = state[idx]
+            sm = int("".join([str(s) for s in ss]), 2)
+
+            info += p_x * p_icc[sm]*np.log(p_x/p_icc[sm]) # this is not defined if p_icc[sm] = 0
+        pass
+
+
+
+    
 
 
     #  ---------------------------- SAA methods ----------------------------
