@@ -49,6 +49,13 @@ class MCM_Classifier:
         Initializes the classifier if the MCMs have already been selected.
         """
         self.__construct_P()
+    
+    def get_MCMs(self):
+        return self.__MCM
+    
+    def get_P(self):
+        return self.__P
+
 
     def fit(self, 
             greedy: bool = False, max_iter: int = 100000, max_no_improvement: int = 10000, n_samples: int = 0) -> None:
