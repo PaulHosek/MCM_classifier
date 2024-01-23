@@ -114,7 +114,7 @@ def plot_results(test_data, test_labels, predicted_classes, probs, classifier, o
                 axs[i, j].set_title(no_labels_labels[i * dim_2 + j])
                 axs[i, j].axis("off")
 
-        plt.show()
+        plt.savefig(os.path.join(output_path, "test.png"))
 
     print("Number of datapoints for which the classifier didn't have any probability for any category: {}".format(
         n_no_labels))

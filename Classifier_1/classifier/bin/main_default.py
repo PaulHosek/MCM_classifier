@@ -31,15 +31,14 @@ def main():
 
 
     # Step 3: Evaluate
-    predicted_classes, probs = classifier.evaluate(test_data, test_labels)
-    np.savetxt("probs.csv", probs)
+    predicted_classes, probs = classifier.predict(test_data, test_labels)
 
     # Step 4: Save classification report and other stats
     # report = classifier.get_classification_report(test_labels)
     classifier.save_classification_report(test_labels,path=output_path)
 
     if (classifier.stats == None):
-        raise Exception("Classifier stats not found. Did you forget to call evaluate()?")
+        raise Exception("Classifier stats not found. Did you forget to call predict()?")
 
     # Count amount of -1 labels
     plot_results(test_data, test_labels, predicted_classes, probs, classifier,output_path,n_categories)

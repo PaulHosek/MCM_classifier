@@ -100,7 +100,7 @@ class MCM_Classifier:
          
         return predicted_class, probs
 
-    def evaluate(self, data: np.ndarray, labels: np.ndarray, probs: str) -> tuple:
+    def predict(self, data: np.ndarray, labels: np.ndarray) -> tuple:
         """
         Evaluates the performance of the MCM-based classifier.
 
@@ -119,10 +119,10 @@ class MCM_Classifier:
 
         # ----- Calculate probability of sample belonging to each category -----
         print_box("1. Calculating state probabilities...")
-        if method == "probs":
-            probs = np.array([self.__get_probs(state) for state in data])
-        elif method ==  "kl":
-            probs = np.array([self.__get_MI(state) for state in data])
+        # if method == "probs":
+        probs = np.array([self.__get_probs(state) for state in data])
+        # elif method ==  "kl":
+        #     probs = np.array([self.__get_MI(state) for state in data])
         # ----- Predict classes -----   
         predicted_classes = np.argmax(probs, axis=1)
         

@@ -50,7 +50,7 @@ def main():
     classifier.save_classification_report(test_labels)
 
     if (classifier.stats == None):
-        raise Exception("Classifier stats not found. Did you forget to call evaluate()?")
+        raise Exception("Classifier stats not found. Did you forget to call predict()?")
 
     # Count amount of -1 labels
     n_no_labels = 0
