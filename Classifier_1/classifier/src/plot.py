@@ -3,6 +3,147 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import numpy as np
 
+
+
+
+
+
+def draw_border(x, y, side, ax=None, **kwargs):
+    """
+    Draw a border on a specific side of a rectangle (or cell in imshow).
+
+    :param x: The x-coordinate of the rectangle.
+    :type x: float
+    :param y: The y-coordinate of the rectangle.
+    :type y: float
+    :param side: The side of the rectangle to draw the border on. Valid values are 't', 'r', 'b', 'l'.
+    :type side: str
+    :param ax: The matplotlib axes object to draw on, defaults to None.
+    :type ax: matplotlib.axes.Axes, optional
+    :raises ValueError: If an invalid side value is provided.
+    :return: The matplotlib Rectangle object representing the border.
+    :rtype: matplotlib.patches.Rectangle
+    """
+    side_to_offset = {'t': (-.5, -.5, 1, 0), 'r': (.5, -.5, 0, 1), 'b': (-.5, .5, 1, 0), 'l': (-.5, -.5, 0, 1)}
+
+    if side not in side_to_offset:
+        raise ValueError("Invalid side value. Valid values are 't', 'r', 'b', 'l'.")
+    
+    dx, dy, width, height = side_to_offset[side]
+    rect = plt.Rectangle((x+dx, y+dy), width, height, fill=False, **kwargs)
+    
+    ax = ax or plt.gca()
+    ax.add_patch(rect)
+    return rect
+
+
+def find_borders(arr):
+    """
+    Find the borders of different regions in a 2D array.
+
+    :param arr: The input 2D array.
+    :type arr: numpy.ndarray
+    :return: A 2D list representing the borders of different regions.
+             Each element in the list is a list of border directions ('t', 'b', 'l', 'r').
+    :rtype: list[list[str]]
+    """
+    rows, cols = arr.shape
+    borders = [[[] for _ in range(cols)] for _ in range(rows)]
+    
+    for i in range(rows):
+        for j in range(cols):
+            if i > 0 and arr[i, j] != arr[i-1, j]:  # Check top
+                borders[i][j].append('t')
+
+            if i < rows-1 and arr[i, j] != arr[i+1, j]:  # Check bottom
+                borders[i][j].append('b')
+            if j > 0 and arr[i, j] != arr[i, j-1]:  # Check left
+                borders[i][j].append('l')
+            if j < cols-1 and arr[i, j] != arr[i, j+1]:  # Check right
+                borders[i][j].append('r')
+    return borders
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+#                        CLASSIFIER EVAL CODE PEPIJN
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
 def plot_confusion_matrix(confusion_matrix, n_categories: int, title="Confusion matrix", cmap="Blues", logScale: bool = False):
     """
     This function prints and plots the confusion matrix.
