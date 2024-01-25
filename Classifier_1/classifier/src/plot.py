@@ -1,11 +1,90 @@
 import os.path
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
 import numpy as np
+import colorsys
+import numpy as npu
+import matplotlib.colors as mcolors
+
+
+## ----- Partition Map ----- ## 
+def generate_p_icc(data, P_MCM, n_variables,MCM,icc_idx):
+    """Get probability distribution of single icc for some set of input images.
+    E.g., what probabilities do we get for the first ICC in the MCM for the image of a 5 
+    if we show it data of a 3. 
+    ==> How good does this ICC differentiate between classes?
+    P_MCM: is the probability distribution for the selected MCM
+    """
+    
+    icc_Ps = np.zeros(len(data))
+    for k, img in enumerate(data):
+        idx = [i for i in range(n_variables) if MCM[icc_idx][i] == "1"]
+        sm = int("".join([str(s) for s in img[idx]]), 2)
+        icc_Ps[k] = P_MCM[icc_idx][sm] 
+    return icc_Ps
+
+
+def create_white_cmap():
+    """
+    Create a white colormap.
+
+    :return: The white colormap.
+    :rtype: matplotlib.colors.LinearSegmentedColormap
+    """
+    white_cmap = mcolors.LinearSegmentedColormap.from_list("white_cmap", [(1, 1, 1), (1, 1, 1)])
+    return white_cmap
+
+
+def create_pastel_cmap(num_hues, saturation=.4, value=.8):
+    """
+    Create a pastel colormap.
+
+    :param num_hues: The number of hues in the colormap.
+    :type num_hues: int
+    :param saturation: The saturation value in the HSV color space.
+    :type saturation: float
+    :param value: The value (brightness) value in the HSV color space.
+    :type value: float
+    :return: The pastel colormap.
+    :rtype: matplotlib.colors.LinearSegmentedColormap
+    """
+    hues = np.linspace(0, 1, num_hues)
+    colors = [colorsys.hsv_to_rgb(hue, saturation, value) for hue in hues]
+    pastel_cmap = mcolors.LinearSegmentedColormap.from_list("pastel_cmap", colors)
+    return pastel_cmap
 
 
 
+ 
+def draw_all_borders(borders,ax=None, linewidth=2, color="black", **kwargs):
+    """
+    Draw borders for all elements in the border list.
 
+    :param linewidth: The width of the border lines.
+    :type linewidth: int
+    :param color: The color of the border lines.
+    :type color: str
+    :param **kwargs: Additional keyword arguments to be passed to plt.Rectangle.
+    """
+    for i in range(len(borders)):
+        for j in range(len(borders[i])):
+            for side in borders[i][j]:
+                draw_border(j, i, side,ax=ax,linewidth=linewidth,color="black", **kwargs) # TODO Need to do -1/2 linewidth offset the in the direction of the border
+
+def draw_all_values(vals, ax=None, color="white", **kwargs):
+    """
+    Draw all values in a grid.
+
+    :param vals: The values to be drawn.
+    :type vals: numpy.ndarray
+    :param ax: The axes object to draw on, defaults to None.
+    :type ax: matplotlib.axes.Axes, optional
+    :param color: The color of the text, defaults to "white".
+    :type color: str, optional
+    """
+    for i in range(vals.shape[0]):
+        for j in range(vals.shape[1]):
+            ax = ax or plt.gca()
+            txt = plt.text(j, i, vals[i, j], ha='center', va='center', color=color, **kwargs)
 
 
 def draw_border(x, y, side, ax=None, **kwargs):
@@ -155,7 +234,7 @@ def plot_confusion_matrix(confusion_matrix, n_categories: int, title="Confusion 
         cmap (str, optional): Color map. Defaults to "Blues".
     """
     if logScale:
-        plt.matshow(confusion_matrix, interpolation="nearest", cmap=cmap, norm=LogNorm(vmin=1, vmax=confusion_matrix.max()))
+        plt.matshow(confusion_matrix, interpolation="nearest", cmap=cmap, norm=mcolors.LogNorm(vmin=1, vmax=confusion_matrix.max()))
     else:
         plt.matshow(confusion_matrix, interpolation="nearest", cmap=cmap)
     plt.title(title)
