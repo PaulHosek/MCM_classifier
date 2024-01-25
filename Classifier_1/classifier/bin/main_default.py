@@ -17,6 +17,7 @@ data_filename_format = "train-images-unlabeled-{}.dat"
 data_path = "../INPUT/data/"
 communities_path = "../INPUT/MCMs/"
 output_path = "../OUTPUT/"
+
 def main():
     print("{:-^50}".format("  MCM-Classifier  ")) 
 

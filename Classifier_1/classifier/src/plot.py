@@ -4,10 +4,11 @@ import numpy as np
 import colorsys
 import numpy as npu
 import matplotlib.colors as mcolors
+from src.loaders import load_data
 
 
 ## ----- Partition Map ----- ## 
-def generate_p_icc(data, P_MCM, n_variables,MCM,icc_idx):
+def calc_p_icc_single(data, P_MCM, n_variables,MCM,icc_idx):
     """Get probability distribution of single icc for some set of input images.
     E.g., what probabilities do we get for the first ICC in the MCM for the image of a 5 
     if we show it data of a 3. 
@@ -22,7 +23,53 @@ def generate_p_icc(data, P_MCM, n_variables,MCM,icc_idx):
         icc_Ps[k] = P_MCM[icc_idx][sm] 
     return icc_Ps
 
+def calculate_P_icc(P, all_MCM,mcm_index,n_variables, data_path, data_filename_format):
+    """
+    Calculate probability distribution for all ICC of one MCM (mcm_index) for all images in all classes.
+    
 
+
+    :param P: Probability distributions for each category. E.g., __P in the classifier.
+    :type P: np.array
+    :param all_MCM: List of all MCM. E.g., __MCM in the classifier
+    :param mcm_index: which MCM to construct the probability distributions for. Legal values are 0-9.
+    :param data_path: input data path
+    :param data_filename_format: name of the input data files. All files should be named the same except for their category index.
+    :type data_filename_format: str
+    :return: np.array of shape [iccs, samples, category]
+    """
+
+    MCM = all_MCM[mcm_index]
+    P_MCM = P[mcm_index]
+    nr_icc = len(MCM)
+    nr_images = len(load_data(os.path.join(data_path, data_filename_format.format(0))))
+    all_P_icc = np.zeros((nr_icc,nr_images,10))
+
+    for icc_idx in range(nr_icc):
+        icc_Ps = np.zeros((nr_images,10)) # all samples same size
+        for cat_idx in range(10):
+            data = load_data(os.path.join(data_path, data_filename_format.format(cat_idx)))
+            icc_Ps[:,cat_idx] = calc_p_icc_single(data,P_MCM,n_variables,MCM,icc_idx)
+        all_P_icc[icc_idx,:,:] = icc_Ps
+    return all_P_icc
+
+
+def generate_icc_comms_map(single_mcm):
+    """Generate pixelwise integer icc labels.
+      Returns same shape as mcm/image.
+
+    :param single_mcm: single mcm out of __MCM
+    :type single_mcm: np.ndarray
+    """
+    icc_arr = np.array([list(icc) for icc in single_mcm],dtype=int)
+    sorted_data = np.argwhere(icc_arr == 1)
+    grouped_data = np.split(sorted_data[:, 1], np.unique(sorted_data[:, 0], return_index=True)[1][1:])
+    out = np.empty(121)
+    for com_i, comm in enumerate(grouped_data):
+        out[comm] = com_i
+    return out.reshape((11,11))
+
+## -- Partition Map: Drawing --
 def create_white_cmap():
     """
     Create a white colormap.
