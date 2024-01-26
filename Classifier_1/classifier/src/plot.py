@@ -117,7 +117,7 @@ def draw_all_borders(borders,ax=None, linewidth=2, color="black", **kwargs):
             for side in borders[i][j]:
                 draw_border(j, i, side,ax=ax,linewidth=linewidth,color="black", **kwargs) # TODO Need to do -1/2 linewidth offset the in the direction of the border
 
-def draw_all_values(vals, ax=None, color="white", **kwargs):
+def draw_all_values(vals, ax=None, color="white",cond=lambda x: True, **kwargs):
     """
     Draw all values in a grid.
 
@@ -125,13 +125,16 @@ def draw_all_values(vals, ax=None, color="white", **kwargs):
     :type vals: numpy.ndarray
     :param ax: The axes object to draw on, defaults to None.
     :type ax: matplotlib.axes.Axes, optional
+    :param cond: Condition when a number should be printed.
+    :type cond: Function taking in the value of the cell, returning a bool.
     :param color: The color of the text, defaults to "white".
     :type color: str, optional
     """
     for i in range(vals.shape[0]):
         for j in range(vals.shape[1]):
-            ax = ax or plt.gca()
-            txt = plt.text(j, i, vals[i, j], ha='center', va='center', color=color, **kwargs)
+            if cond(vals[i,j]):
+                ax = ax or plt.gca()
+                txt = plt.text(j, i, vals[i, j], ha='center', va='center', color=color, **kwargs)
 
 
 def draw_border(x, y, side, ax=None, **kwargs):
