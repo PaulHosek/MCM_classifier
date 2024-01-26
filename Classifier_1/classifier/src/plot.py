@@ -1,9 +1,11 @@
 import os.path
+from turtle import color
 import matplotlib.pyplot as plt
 import numpy as np
 import colorsys
 import numpy as npu
 import matplotlib.colors as mcolors
+from pytz import NonExistentTimeError
 from src.loaders import load_data
 
 
@@ -70,6 +72,29 @@ def generate_icc_comms_map(single_mcm):
     return out.reshape((11,11))
 
 ## -- Partition Map: Drawing --
+
+def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="coolwarm",drawing_cond=lambda x:True,linewidth=2,cbar=True):
+
+    if colors_vals is None and text_vals is None: 
+        raise ValueError("No color or text values provided. Dimensions of data unknown.")
+    if colors_vals is None: 
+        colors_vals = text_vals
+        cmap = create_white_cmap()
+
+    absmax = np.abs(colors_vals.flat[np.abs(colors_vals).argmax()])
+    draw_all_borders(borders, ax=ax,linewidth=linewidth) if borders is not None else None
+    draw_all_values(text_vals, color="black", cond=drawing_cond, ax=ax) if text_vals is not None else None
+    im = ax.imshow(colors_vals, cmap=cmap, vmin=-absmax, vmax=absmax)
+    colorbar = plt.colorbar(im, ax=ax) if cbar is not None else None
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.spines['top'].set_linewidth(2)
+    ax.spines['bottom'].set_linewidth(2)
+    ax.spines['left'].set_linewidth(2)
+    ax.spines['right'].set_linewidth(2)
+
+
 def create_white_cmap():
     """
     Create a white colormap.
@@ -134,7 +159,7 @@ def draw_all_values(vals, ax=None, color="white",cond=lambda x: True, **kwargs):
         for j in range(vals.shape[1]):
             if cond(vals[i,j]):
                 ax = ax or plt.gca()
-                txt = plt.text(j, i, vals[i, j], ha='center', va='center', color=color, **kwargs)
+                txt = ax.text(j, i, vals[i, j], ha='center', va='center', color=color, **kwargs)
 
 
 def draw_border(x, y, side, ax=None, **kwargs):
