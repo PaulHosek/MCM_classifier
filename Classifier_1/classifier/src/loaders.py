@@ -44,3 +44,16 @@ def load_mcm(path: str) -> np.ndarray:
     mcm = np.loadtxt(path, dtype=str)
 
     return mcm
+
+
+def load_data_toint(path: str) -> np.ndarray:
+    "Read binary strings and convert to integer representation."
+    data = np.loadtxt(path,dtype=str)
+    return np.array(int(binary_string,2) for binary_string in data)
+
+
+
+
+
+
+

@@ -1,5 +1,6 @@
 import numpy as np
 from src.loaders import load_data
+
 def print_box(message: str) -> None:
     print("{:-^50}".format(""))
     print("{:-^50}".format("  " + message + "  "))
@@ -27,5 +28,12 @@ def generate_bootstrap_samples(data_path: str,filename:str, bootstrap_name: str,
         delimiter="",
     )
     print("Done!")
+
+
+
+
+
+
+
 
 

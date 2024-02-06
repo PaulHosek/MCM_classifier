@@ -423,7 +423,6 @@ class MCM_Classifier:
                         bootstrap_name = filename
                     generate_bootstrap_samples(self.data_path, filename, bootstrap_name, len(load_data(self.data_path + filename + ".dat")))
                     filename = bootstrap_name
-                print(filename,"filename")
 
                 # file = "mcm_classifier/input/data/" + filename
                 saa_args = self.__construct_args(filename, greedy, max_iter, max_no_improvement)
