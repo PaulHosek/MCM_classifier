@@ -7,9 +7,58 @@ import numpy as npu
 import matplotlib.colors as mcolors
 from pytz import NonExistentTimeError
 from src.loaders import load_data
+from sklearn.metrics import normalized_mutual_info_score
 
 
 ## ----- Partition Map ----- ## 
+def compare_mcm_mutual_info_avg_vote(selected, all_P_icc, mcm_comms_map,mcm_idx,drawing_cond=lambda x: x!=0 ):
+    """Draw two Parition maps in a row for a single MCM but when seeing different classes.
+    Note: 2 maps are currently supported.
+
+    :param selected: list of class labels e.g., [3,5]
+    :param all_P_icc: return value of src.plot.calculate_P_icc()
+    :param mcm_comms_map: mcm_communities for that mcm
+    :param mcm_idx: Label of the mcm e.g., 3
+    :param drawing_cond: when to draw the values into the cells, defaults to lambdax:x!=0
+    """
+    nr_comms = np.max(mcm_comms_map)+1
+    borders = find_borders(mcm_comms_map)
+    fig, axs = plt.subplots(1, len(selected), figsize=(12, 6))
+    for idx, cls in enumerate(selected):
+        P_mcm_cls = all_P_icc[:,:,cls]
+
+        # Average vs. Individual predicted label
+        out = np.zeros(nr_comms)
+        for i in range(nr_comms):
+            out[i]=normalized_mutual_info_score(np.where(P_mcm_cls.mean(axis=0)>=0.5,1,0),np.where(P_mcm_cls[i,:]>=0.5,1,0))
+        mi_matrix = (out[mcm_comms_map]*100).round(1)
+
+        axs[idx].set_title(f"MutInfo*100 for MCM {mcm_idx} ICC vs. average vote for seeing a {cls}")
+        partition_map(axs[idx],mi_matrix,mi_matrix,borders,drawing_cond=drawing_cond)    
+        axs[idx].text(5,11, f"Average Vote: {P_mcm_cls.mean().round(1)}", ha="center", va="bottom") # note vote not adjusted for number of pixels
+        axs[idx].text(5,11.4, f"High = single icc votes predict average votes well. ", ha="center", va="bottom") # note vote not adjusted for number of pixels
+
+    plt.tight_layout()
+    plt.show()
+
+def plot_communities(ax, comms_map,cmap=None,title="Communities in MCM ?"):
+    """Generate Partitionmap of the docstings
+
+    :param ax: matplotlib.axis to use.
+    :param comms_map: communities. Output of generate_icc_comms_map
+    :param cmap: matplotlib.colormap
+    :param title: _description_, defaults to "Communities in MCM ?"
+    """
+    cmap = create_pastel_cmap(121) if cmap is None else cmap
+    borders = myplot.find_borders(comms_map)
+    ax.set_title(title)
+    myplot.draw_all_borders(borders,ax=ax)
+    myplot.draw_all_values(comms_map,ax=ax)        
+    ax.imshow(comms_map, cmap=camp)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+
 def calc_p_icc_single(data, P_MCM, n_variables,MCM,icc_idx):
     """Get probability distribution of single icc for some set of input images.
     E.g., what probabilities do we get for the first ICC in the MCM for the image of a 5 
