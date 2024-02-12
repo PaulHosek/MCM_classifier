@@ -8,9 +8,55 @@ import matplotlib.colors as mcolors
 from pytz import NonExistentTimeError
 from src.loaders import load_data
 from sklearn.metrics import normalized_mutual_info_score
+import scipy.ndimage as ndi
 
 
 ## ----- Partition Map ----- ## 
+
+def label_communities(comms, ax, labels, fix_to_cellcenter=True, **kwargs):
+    """
+    Label largest connected communities with centered text.
+
+    Parameters:
+    - comms (numpy.ndarray): An array containing the community assignments for each cell.
+    - ax (matplotlib.axes.Axes): The axes object on which the labels will be plotted.
+    - labels (list): A list of labels corresponding to each community.
+    - fix_to_cellcenter (bool, optional): Whether to fix the label position to the center of the cell. Defaults to True.
+    - **kwargs: Additional keyword arguments to be passed to the `ax.text()` function.
+
+    Returns:
+    None
+    """
+    communities = np.unique(comms)
+    average_size = np.mean([np.sum(comms == community) for community in communities])
+
+    for community in communities:
+        mask = comms == community
+        labeled_mask, num_labels = ndi.label(mask)
+
+        sizes = ndi.sum(mask, labeled_mask, range(num_labels + 1)) # size largest connected component
+        max_size = sizes.max()
+
+        # only communities with 70% of the cells adjacent and community size larger than average
+        if max_size / mask.sum() > 0.7 and mask.sum() > average_size:
+            max_mask = labeled_mask == np.argmax(sizes)
+
+            y, x = ndi.center_of_mass(max_mask)
+
+            if fix_to_cellcenter:
+                # map to closest cell
+                y_indices, x_indices = np.where(max_mask)
+                distances = (y_indices - y)**2 + (x_indices - x)**2
+                y, x = y_indices[np.argmin(distances)], x_indices[np.argmin(distances)]
+
+            # circle = patches.Circle((x, y), radius=0.5, facecolor='black',alpha=.4, zorder=2)
+            # circle = patches.Rectangle((x-.5, y-.5),1,1, facecolor='black',alpha=.4, zorder=2)
+            # ax.add_patch(circle)
+                
+            ax.text(x, y, labels[community], ha='center', va='center', **kwargs)
+
+
+
 def compare_mcm_mutual_info_avg_vote(selected, all_P_icc, mcm_comms_map,mcm_idx,drawing_cond=lambda x: x!=0 ):
     """Draw two Parition maps in a row for a single MCM but when seeing different classes.
     Note: 2 maps are currently supported.
