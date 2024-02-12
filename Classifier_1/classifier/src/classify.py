@@ -37,11 +37,13 @@ class MCM_Classifier:
 
         # Construct probability distributions and MCMs for each category
         self.__P, self.__MCM = ([], [])
+        self.__Counts = []
         self.predicted_classes = None
         self.probs = None
         self.stats = None
         self.data_path = os.path.join(data_path, "")
         self.comms_path = os.path.join(comms_path, "")
+
         
     # ----- Public methods -----
     def init(self):
@@ -55,6 +57,9 @@ class MCM_Classifier:
     
     def get_P(self):
         return self.__P
+    
+    def get_Counts(self):
+        return self.__Counts
 
 
     def fit(self, 
@@ -200,6 +205,7 @@ class MCM_Classifier:
                 # Throw error if data file not found
                 raise FileNotFoundError(f"Could not find data file for category {k}")
             pk = []
+            p_count_k = []
 
             for icc in mcm:
                 # TODO maybe we later would like a single call to our estimator function
@@ -211,7 +217,7 @@ class MCM_Classifier:
                 # p_icc = np.full(2**rank,fill_value=np.nan) # initialized with 0, lets try nan
                 # p_icc = np.full(2**rank,fill_value=1/(2**rank+2)) # laplacian smoothing for 0 observations: (0+1)/(N+2*1)
                 p_icc = self.estimator_init(rank,method=estimator,alpha=alp) # TODO this takes a lot of space, maybe we could find a sparse replacement
-
+                p_count = np.zeros(2**rank)
                 icc_data = data[:, idx]
                 icc_strings = [
                     int("".join([str(s) for s in state]), 2) for state in icc_data
@@ -219,11 +225,13 @@ class MCM_Classifier:
 
                 u, c = np.unique(icc_strings, return_counts=True)
                 p_icc[u] = self.estimator_prob(c,method=estimator,alpha=alp)
+                p_count[u] = c
                 # p_icc[u] = c / np.sum(c)
-
+                p_count_k.append(p_count)
                 pk.append(p_icc)
 
             P.append(pk)
+            self.__Counts.append(p_count_k)
 
         self.__P = P
         self.__MCM = MCM
