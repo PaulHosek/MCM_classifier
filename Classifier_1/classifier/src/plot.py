@@ -69,7 +69,7 @@ def generate_icc_comms_map(single_mcm):
     out = np.empty(121)
     for com_i, comm in enumerate(grouped_data):
         out[comm] = com_i
-    return out.reshape((11,11))
+    return out.reshape((11,11)).astype(int)
 
 ## -- Partition Map: Drawing --
 
