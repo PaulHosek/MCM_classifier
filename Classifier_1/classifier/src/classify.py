@@ -365,14 +365,14 @@ class MCM_Classifier:
         sa_file = "../../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if platform.system() == "Windows" else "../../MinCompSpin_SimulatedAnnealing/bin/saa.out" # TODO use os.path.join here instead
         saa_args = [sa_file,
                     str(self.n_variables),
-                    '-i',
+                    '-i', # this flag indicates starting from single spin basis.
                     filename,
                     g,
                     '--max',
                     str(max_iter),
                     '--stop',
                     str(max_no_improvement)
-                    ]
+                    ] 
 
         # Filter out empty strings
         return tuple(filter(None, saa_args))

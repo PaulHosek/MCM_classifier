@@ -15,7 +15,9 @@ n_variables = 121  # Number of variables in the dataset
 mcm_filename_format = "train-images-unlabeled-{}_comms.dat"
 data_filename_format = "train-images-unlabeled-{}.dat"
 data_path = "../INPUT/data/"
-communities_path = "../INPUT/MCMs/"
+communities_path = "../INPUT/MCMs/" # FIXME THIS IS WEIRD. THIS SHOULD BE IN OUTPUT,
+                                    # or wherever the SAA it writes it to.
+                                    # In INPUT should only be those that are used as basis.
 output_path = "../OUTPUT/"
 
 def main():
