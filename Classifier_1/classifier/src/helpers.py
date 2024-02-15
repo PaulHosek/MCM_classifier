@@ -1,7 +1,8 @@
 import numpy as np
+
 from src.loaders import load_data
+from src.classify import MCM_Classifier
 import json
-from classify import MCM_Classifier
 import os
 
 
