@@ -181,6 +181,7 @@ class MCM_Classifier:
         """
         MCM = []
         P = []
+        
 
         print_box("Constructing probability distributions...")
 

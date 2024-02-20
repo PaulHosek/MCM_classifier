@@ -109,8 +109,9 @@ def compare_mcm_mutual_info_avg_vote(selected, all_P_icc, mcm_comms_map,mcm_idx,
     :param selected: list of class labels e.g., [3,5]
     :param all_P_icc: return value of src.plot.calculate_P_icc()
     :param mcm_comms_map: mcm_communities for that mcm
-    :param mcm_idx: Label of the mcm e.g., 3
+    :param mcm_idx: Label of the mcm e.g., 3. Needs to match the data in all_P_icc. Only for title needed.
     :param drawing_cond: when to draw the values into the cells, defaults to lambdax:x!=0
+    :return mutual_information: array of normalized mutual information score.
     """
     nr_comms = np.max(mcm_comms_map)+1
     borders = find_borders(mcm_comms_map)
@@ -131,6 +132,7 @@ def compare_mcm_mutual_info_avg_vote(selected, all_P_icc, mcm_comms_map,mcm_idx,
 
     plt.tight_layout()
     plt.show()
+    return out
 
 def plot_communities(ax, comms_map,title="Communities in MCM ?",cmap=None):
     """Generate Partitionmap of the docstings
