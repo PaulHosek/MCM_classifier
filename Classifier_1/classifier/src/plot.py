@@ -5,10 +5,55 @@ import numpy as np
 import colorsys
 import numpy as npu
 import matplotlib.colors as mcolors
-from pytz import NonExistentTimeError
+import scipy.cluster.hierarchy as sch
 from src.loaders import load_data
 from sklearn.metrics import normalized_mutual_info_score
 import scipy.ndimage as ndi
+
+
+## ---- Co-occurance Matrix ---- ##
+def create_cooccurance_matrix(mcm):
+    """
+    Create a co-occurrence matrix based on the given MCMs.
+
+    :param MCMs: A list or nparray with strings of nr_pixel elements that are either 0 or 1.
+    :type MCMs: list or np.ndarray
+    :return: The ordered co-occurrence matrix.
+    :rtype: np.ndarray
+    """
+    mcm = np.genfromtxt(mcm, delimiter=1, dtype=int)
+    pairs = np.argwhere(mcm == 1).T
+    nr_pixels = len(pairs[0])
+    matrix = np.zeros((nr_pixels, nr_pixels))
+
+    # fill the groupings into the co-occurrence matrix
+    for icc in np.unique(pairs[0]):
+        pixels = pairs[1][pairs[0] == icc]
+        matrix[np.ix_(pixels, pixels)] = 1
+        
+    return matrix
+
+def do_cluster(matrix, via_matrix=None):
+    """
+    Perform hierarchical clustering on a given matrix.
+    Can provide via_matrix to base the clustering of "matrix" on the dendrogram of "via_matrix". 
+
+    :param matrix: The input matrix for clustering.
+    :type matrix: numpy.ndarray
+    :param via_matrix: Optional matrix to base the clustering of "matrix" on. Clustering will be performed on "via_matrix" and applied to "matrix".
+    :type return_dendro: numpy.ndarray
+    :return: The clustered matrix
+    :rtype: numpy.ndarray
+    """
+    
+    if via_matrix is None:
+        via_matrix = matrix
+
+    linkage = sch.linkage(via_matrix, method='average')
+    dendrogram = sch.dendrogram(linkage, no_plot=True)
+    return matrix[:, dendrogram['leaves']][dendrogram['leaves']]
+
+
 
 
 ## ----- Partition Map ----- ## 
@@ -197,6 +242,21 @@ def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="cool
     ax.spines['right'].set_linewidth(2)
     return im
 
+def cmap_to_gray(color, reverse=False):
+    """
+    Create a colormap from the specified color to grey.
+
+    Parameters:
+    - color (str): The color to start the colormap from. This can be any color name recognized by Matplotlib.
+    - reverse (bool, optional): Whether to reverse the colormap. Defaults to False.
+
+    Returns:
+    - A Matplotlib colormap.
+    """
+    cmap = mcolors.LinearSegmentedColormap.from_list("", [color, "whitesmoke"])
+    if reverse:
+        cmap = cmap.reversed()
+    return cmap
 
 def create_white_cmap():
     """
