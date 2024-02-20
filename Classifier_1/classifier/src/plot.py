@@ -290,7 +290,7 @@ def create_pastel_cmap(num_hues, saturation=.4, value=.8):
 
 
  
-def draw_all_borders(borders,ax=None, linewidth=2, color="black", **kwargs):
+def draw_all_borders(borders,ax=None, linewidth=2, color="black",offset=(0,0), **kwargs):
     """
     Draw borders for all elements in the border list.
 
@@ -303,7 +303,7 @@ def draw_all_borders(borders,ax=None, linewidth=2, color="black", **kwargs):
     for i in range(len(borders)):
         for j in range(len(borders[i])):
             for side in borders[i][j]:
-                draw_border(j, i, side,ax=ax,linewidth=linewidth,color="black", **kwargs) # TODO Need to do -1/2 linewidth offset the in the direction of the border
+                draw_border(j, i, side,ax=ax,linewidth=linewidth,color="black",offset=offset, **kwargs) # TODO Need to do -1/2 linewidth offset the in the direction of the border
 
 def draw_all_values(vals, ax=None, color="white",cond=lambda x: True, **kwargs):
     """
@@ -325,7 +325,7 @@ def draw_all_values(vals, ax=None, color="white",cond=lambda x: True, **kwargs):
                 txt = ax.text(j, i, vals[i, j], ha='center', va='center', color=color, **kwargs)
 
 
-def draw_border(x, y, side, ax=None, **kwargs):
+def draw_border(x, y, side, ax=None, offset = (0,0), **kwargs):
     """
     Draw a border on a specific side of a rectangle (or cell in imshow).
 
@@ -347,7 +347,7 @@ def draw_border(x, y, side, ax=None, **kwargs):
         raise ValueError("Invalid side value. Valid values are 't', 'r', 'b', 'l'.")
     
     dx, dy, width, height = side_to_offset[side]
-    rect = plt.Rectangle((x+dx, y+dy), width, height, fill=False, **kwargs)
+    rect = plt.Rectangle((x+dx+offset[0], y+dy+offset[1]), width, height, fill=False, **kwargs)
     
     ax = ax or plt.gca()
     ax.add_patch(rect)
