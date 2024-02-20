@@ -192,6 +192,7 @@ class MCM_Classifier:
             # Add MCM to list
             try:
                 # mcm = load_mcm(f"../INPUT/MCMs/{self.__mcm_filename_format.format(k)}")
+
                 mcm = load_mcm(os.path.join(self.comms_path, self.__mcm_filename_format.format(k)))
                 MCM.append(mcm)
             except:

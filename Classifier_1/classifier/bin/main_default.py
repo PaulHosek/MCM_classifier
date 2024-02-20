@@ -12,10 +12,10 @@ from src.plot import plot_confusion_matrix, plot_label_prob_diff
 # Customizable environment variables
 n_categories = 10  # Number of categories to be classified
 n_variables = 121  # Number of variables in the dataset
-mcm_filename_format = "train-images-unlabeled-{}_comms.dat"
+mcm_filename_format = "train-images-unlabeled-{}_bootstrap_comms.dat"
 data_filename_format = "train-images-unlabeled-{}.dat"
 data_path = "../INPUT/data/"
-communities_path = "../INPUT/MCMs/" # FIXME THIS IS WEIRD. THIS SHOULD BE IN OUTPUT,
+communities_path = "../OUTPUT/comms/" # FIXME THIS IS WEIRD. THIS SHOULD BE IN OUTPUT,
                                     # or wherever the SAA it writes it to.
                                     # In INPUT should only be those that are used as basis.
 output_path = "../OUTPUT/"
