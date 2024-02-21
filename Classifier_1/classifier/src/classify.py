@@ -230,7 +230,7 @@ class MCM_Classifier:
                 p_icc[u] = self.estimator_prob(c,method=estimator,alpha=alp)
                 p_count[u] = c
                 # p_icc[u] = c / np.sum(c)
-                p_count_k.append(p_count)
+                p_count_k.append(list(p_count))
                 pk.append(p_icc)
 
             P.append(pk)

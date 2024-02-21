@@ -43,7 +43,7 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../I
         json.dump([arr.tolist() for arr in classifier.get_MCMs()],f, indent=2) 
 
     with open(os.path.join(nwdir, "Counts.json"), 'w') as f:
-        json.dump([j.tolist() for i in classifier.get_Counts() for j in i],f, indent=2)
+        json.dump(classifier.get_Counts(),f, indent=2)
 
     # # Copy the new communities -> are also in MCM now
     # ncom = os.path.join(nwdir, "comms")
