@@ -134,7 +134,7 @@ def compare_mcm_mutual_info_avg_vote(selected, all_P_icc, mcm_comms_map,mcm_idx,
     plt.show()
     return out
 
-def plot_communities(ax, comms_map,title="Communities in MCM ?",cmap=None):
+def plot_communities(ax, comms_map, comms_labels = None, title="Communities in MCM ?",cmap=None):
     """Generate Partitionmap of the docstings
 
     :param ax: matplotlib.axis to use.
@@ -146,7 +146,9 @@ def plot_communities(ax, comms_map,title="Communities in MCM ?",cmap=None):
     borders = find_borders(comms_map)
     ax.set_title(title)
     draw_all_borders(borders,ax=ax)
-    draw_all_values(comms_map,ax=ax)        
+    if comms_labels is None:
+        comms_labels = comms_map
+    draw_all_values(comms_labels,ax=ax)        
     ax.imshow(comms_map, cmap=cmap)
     ax.set_xticks([])
     ax.set_yticks([])
