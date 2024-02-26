@@ -57,6 +57,37 @@ def do_cluster(matrix, via_matrix=None):
 
 
 ## ----- Partition Map ----- ## 
+@np.vectorize
+def int_to_letters(i):
+    """Converts an integer to a string representation using letters of the alphabet.
+
+    :param i: The integer to be converted.
+    :type i: int
+    :return: The string representation of the integer using letters of the alphabet.
+    :rtype: str
+    """
+    base26 = ''
+    while i >= 0:
+        i, idx = divmod(i, 26)
+        base26 = chr(idx+65) + base26
+        i -= 1
+    return base26
+
+@np.vectorize
+def letters_to_int(s):
+    """Converts a string representation using letters of the alphabet to an integer.
+
+    :param s: The string to be converted.
+    :type s: str
+    :return: The integer representation of the string.
+    :rtype: int
+    """
+    base26 = 0
+    for i, char in enumerate(reversed(s)):
+        base26 += (ord(char) - 65) * (26 ** i)
+    return base26
+
+
 
 def label_communities(comms, ax, labels, fix_to_cellcenter=True, **kwargs):
     """
