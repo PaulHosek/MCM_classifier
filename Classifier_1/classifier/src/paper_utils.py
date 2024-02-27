@@ -46,8 +46,8 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../I
 
 
     # Append the number of files + 1 to the file names
-    mcm_file_name = "MCMs_" + str(len(os.listdir(mcmdir)) + 1) + ".json"
-    counts_file_name = "Counts_" + str(len(os.listdir(countsdir)) + 1) + ".json"
+    mcm_file_name = "MCMs_" + str(len(os.listdir(mcmdir))) + ".json"
+    counts_file_name = "Counts_" + str(len(os.listdir(countsdir))) + ".json"
 
     # Save MCMS and Counts with the updated file names
     with open(os.path.join(mcmdir, mcm_file_name), 'w') as f:
@@ -55,11 +55,7 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../I
 
     with open(os.path.join(countsdir, counts_file_name), 'w') as f:
         json.dump(classifier.get_Counts(), f, indent=2)
-    with open(os.path.join(mcmdir, "MCMs.json"), 'w') as f:
-        json.dump([arr.tolist() for arr in classifier.get_MCMs()],f, indent=2) 
 
-    with open(os.path.join(countsdir, "Counts.json"), 'w') as f:
-        json.dump(classifier.get_Counts(),f, indent=2)
 
     # # Copy the new communities -> are also in MCM now
     # ncom = os.path.join(nwdir, "comms")
