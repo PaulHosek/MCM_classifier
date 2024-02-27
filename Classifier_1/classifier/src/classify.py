@@ -227,7 +227,7 @@ class MCM_Classifier:
                 ]
 
                 u, c = np.unique(icc_strings, return_counts=True)
-                p_icc[u] = self.estimator_prob(c,method=estimator,alpha=alp)
+                p_icc[u] = self.estimator_prob(c,rank,method=estimator,alpha=alp,)
                 p_count[u] = c
                 # p_icc[u] = c / np.sum(c)
                 p_count_k.append(list(p_count))
@@ -244,15 +244,16 @@ class MCM_Classifier:
     @staticmethod
     def estimator_init(rank, method="mle", alpha=1):
         """Iniitalizes array for one icc based on the estimator used."""
+        d = rank
         if method == "mle":
             return np.zeros(2**rank)
         elif method == "add_smooth":
-            return np.full(2**rank,fill_value=alpha/(2**rank+2*alpha)) # laplacian smoothing for 0 observations: (0+alpha)/(N+2*alpha)
+            return np.full(2**rank,fill_value=alpha/(d*alpha)) # laplacian smoothing for 0 observations: (0+alpha)/(N+2*alpha)
         else:
             ValueError("Invalid probability estimation method")
     
     @staticmethod
-    def estimator_prob(counts, method="mle", alpha=1):
+    def estimator_prob(counts,rank, method="mle", alpha=1):
         """
         Used probability estimator function.
         method options are:
@@ -266,10 +267,11 @@ class MCM_Classifier:
         Returns:
             probability estimate
         """
+        d = rank
         if method == "mle":
             return counts / np.sum(counts)
         elif method == "add_smooth":
-            return (counts+alpha)/ (np.sum(counts)+2*alpha) # TODO not sure if should not be rank instead of 2
+            return (counts+alpha)/ (np.sum(counts)+d*alpha) 
         else:
             raise ValueError("Invalid probability estimation method")
         
