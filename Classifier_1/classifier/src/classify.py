@@ -64,7 +64,7 @@ class MCM_Classifier:
 
 
     def fit(self, 
-            greedy: bool = False, max_iter: int = 100000, max_no_improvement: int = 10000, n_samples: int = 0) -> None:
+            greedy: bool = False, max_iter: int = 100000, max_no_improvement: int = 10000, n_samples: int = 0,estimator="add_smooth") -> None:
         """
         Fit the classifier using the data given in the data_path folder.
         It uses the MinCompSpin_SimulatedAnnealing algorithm to find the MCMs.
@@ -97,7 +97,7 @@ class MCM_Classifier:
         print("\N{check mark} Done!")
         
         # Construct probability distributions and MCMs for each category
-        self.__construct_P()
+        self.__construct_P(estimator=estimator)
    
     def classify(self, state: np.ndarray = np.array([])) -> tuple:
         """
