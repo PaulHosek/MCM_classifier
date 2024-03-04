@@ -33,6 +33,7 @@ def create_cooccurance_matrix(mcm):
         
     return matrix
 
+
 def do_cluster(matrix, via_matrix=None):
     """
     Perform hierarchical clustering on a given matrix.
