@@ -11,7 +11,7 @@ from shutil import copytree
 
 ### --- FUNCTIONS FOR DATA SUBSETTING ---
 def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../INPUT_all/data",
-                        result_sample_sizes_dir="../OUTPUT/sample_sizes", comms_dir = "../OUTPUT/comms",estimator="add_smooth"):
+                        result_sample_sizes_dir="../OUTPUT/sample_sizes", comms_dir = "../OUTPUT/comms",estimator="add_smooth", seed=None):
     """
     Generate sample_size number of samples and populate "../INPUT" folder. 
     Then fit the model to that data and save MCM and Counts from that model
@@ -29,7 +29,7 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../I
     """
     # subsample the data
 
-    subsample_data(sample_size, all_data_path=all_data_path)
+    subsample_data(sample_size, all_data_path=all_data_path, seed=seed)
     # Fit new classifier object
     classifier = MCM_Classifier(*MCM_Classifier_init_args)
     classifier.fit(greedy=True, max_iter=1000000, max_no_improvement=100000, estimator=estimator)
