@@ -1,10 +1,10 @@
 import os
 import numpy as np
+import shutil
 
 
 
-
-def subsample_data_ace(sample_size, all_data_path="../INPUT_all/data", input_data_path="../INPUT/data", seed=42,fname_start = "train-"):
+def subsample_data_ace(sample_size, all_data_path="../INPUT_all/data/", input_data_path="../INPUT/data/", seed=42,fname_start = "train-"):
     """Clear the input_data_path folder and fill it with samples from the all_data_path folder.
         Note: Every sample will be getting its own subfolder in this "ace" version.
     
@@ -19,10 +19,10 @@ def subsample_data_ace(sample_size, all_data_path="../INPUT_all/data", input_dat
     for file in os.listdir(all_data_path):
         if file.startswith(fname_start):
             inp = np.loadtxt(os.path.join(all_data_path,file), dtype="str")
-            subfolder_name = file.split(".")[0]  # extract the file name without extension
-            subfolder_path = os.path.join(input_data_path, subfolder_name)  # create subfolder path
+            subfolder_name = file.split(".")[0]  
+            subfolder_path = os.path.join(input_data_path, subfolder_name) 
 
-            os.makedirs(subfolder_path, exist_ok=True)  # create subfolder if it doesn't exist
+            os.makedirs(subfolder_path, exist_ok=True) 
             np.savetxt(os.path.join(subfolder_path, file), rng.choice(inp, sample_size, replace=False), fmt="%s")
 
 
