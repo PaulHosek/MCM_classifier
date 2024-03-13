@@ -19,10 +19,10 @@ def convert_to_spaced(INPUT_dir = "INPUT/data"):
     """Converts all files in the INPUT folder and its subfolders into the spaced format."""
     for root, dirs, files in os.walk(INPUT_dir):
         for filename in files:
-            if filename.endswith(".txt"):
+            if filename.endswith(".dat"):
                 path = os.path.join(root, filename)
                 file = np.genfromtxt(path, dtype=int, delimiter=1)
-                np.savetxt(path + "_sep", file, fmt="%d", delimiter=" ")
+                np.savetxt(path[:-4] + "_sep" + ".dat", file, fmt="%d", delimiter=" ")
 
 
 
@@ -63,11 +63,11 @@ def call_ace(ace_args: tuple):
 # at end should have 10 .p files -> one for each category
 
 if __name__ == "__main__":
-    # helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
+    helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
 
     convert_to_spaced()
 
-    
+
 
     # path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0.dat"
     # res = ACEtools.WriteCMSA("binary",path)
