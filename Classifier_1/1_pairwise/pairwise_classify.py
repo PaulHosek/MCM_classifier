@@ -25,21 +25,6 @@ def convert_to_spaced(INPUT_dir = "INPUT/data"):
                 np.savetxt(path[:-4] + "_sep" + ".dat", file, fmt="%d", delimiter=" ")
 
 
-def no_deletions(INPUT_dir = "INPUT/data"):
-    """Check if after running ACEtools, if there were variables deleted because they were always 0.
-    This should not happen as it messes up the order later. The subsampler should avoid that this happens.
-    This is a function to perform this sanity check."""
-    for root, dirs, files in os.walk(INPUT_dir):
-        for filename in files:
-            if filename.endswith(".rep"):
-                path = os.path.join(root, filename)
-                with open(path, 'r') as file:
-                    lines = file.readlines()
-                    if len(lines) >= 8 and lines[7].strip() != "":
-                        raise ValueError("Variables were deleted: \n" + lines[7].strip())
-
-
-
 
 # call ACEtool code on it to generate .p file
 def call_ace(ace_args: tuple):
@@ -66,23 +51,61 @@ def call_ace(ace_args: tuple):
     return p
 
 
-# test that there were no variables deleted -> check that specific line (should never happen since we always add the all 0s and all 1s but better have safeguard)
+def build_args(path_to_exe:str, p_dir:str ,p_fname:str , sample_size:int, auto_l2=True, *args):
+    """Generate the arguments for the ACE algorithm.
 
+    :param path_to_exe: path to the executable file. e.g., ./bin/ace
+    :type path_to_exe: str
+    :param p_dir: directory of the .p file to do the ace on. e.g., ./INPUT/data/img1
+    :type p_dir: str
+    :param p_fname: filename of the .p file e.g., img1_sep
+    :type p_fname: str
+    :param sample_size: sample size the .p size is based on
+    :type sample_size: int
+    :param auto_l2: if should use automatice 1/sample_size l2 regularisation. Not gauge invariant., defaults to True
+    :type auto_l2: bool, optional
+    :return: argument tuple to pass to subprocess.Popen
+    :rtype: tuple
+    """
+    cm_args = [path_to_exe, "-d",p_dir, "-i",p_fname,"-o", p_fname+"-out", "-b", str(sample_size)]
+    if auto_l2:
+        cm_args.append("-ga")
+    cm_args.append(args)
+
+    return tuple(cm_args)
+
+# test that there were no variables deleted -> check that specific line (should never happen since we always add the all 0s and all 1s but better have safeguard)
+def no_deletions(INPUT_dir = "INPUT/data"):
+    """Check if after running ACEtools, if there were variables deleted because they were always 0.
+    This should not happen as it messes up the order later. The subsampler should avoid that this happens.
+    This is a function to perform this sanity check."""
+    for root, dirs, files in os.walk(INPUT_dir):
+        for filename in files:
+            if filename.endswith(".rep"):
+                path = os.path.join(root, filename)
+                with open(path, 'r') as file:
+                    lines = file.readlines()
+                    if len(lines) >= 8 and lines[7].strip() != "":
+                        raise ValueError("Variables were deleted: \n" + lines[7].strip())
 
 
 # call ACE fitting on it with right flags
 # call MC learning QLS algo on it
 
 # at end should have 10 .p files -> one for each category
+                    
+# make this a class and one main function to do the steps in order
+                    # subsample, convert, ACEtools, nodeletions
 
 if __name__ == "__main__":
-    helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
-    convert_to_spaced()
+    # helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
+    # convert_to_spaced()
+
+    # path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0_sep.dat"
+    # res = ACEtools.WriteCMSA("binary",path)
+    # no_deletions()
 
 
 
-    path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0_sep.dat"
-    res = ACEtools.WriteCMSA("binary",path)
-    no_deletions()
 
 
