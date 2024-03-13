@@ -23,7 +23,9 @@ def subsample_data_ace(sample_size, all_data_path="../INPUT_all/data/", input_da
             subfolder_path = os.path.join(input_data_path, subfolder_name) 
 
             os.makedirs(subfolder_path, exist_ok=True) 
-            np.savetxt(os.path.join(subfolder_path, file), rng.choice(inp, sample_size, replace=False), fmt="%s")
+            arr = rng.choice(inp, sample_size, replace=False)
+            arr = np.append(arr, ["0"*121, "1"*121])
+            np.savetxt(os.path.join(subfolder_path, file), arr, fmt="%s")
 
 
 def clear_directory(path):

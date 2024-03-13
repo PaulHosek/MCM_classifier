@@ -25,6 +25,19 @@ def convert_to_spaced(INPUT_dir = "INPUT/data"):
                 np.savetxt(path[:-4] + "_sep" + ".dat", file, fmt="%d", delimiter=" ")
 
 
+def no_deletions(INPUT_dir = "INPUT/data"):
+    """Check if after running ACEtools, if there were variables deleted because they were always 0.
+    This should not happen as it messes up the order later. The subsampler should avoid that this happens.
+    This is a function to perform this sanity check."""
+    for root, dirs, files in os.walk(INPUT_dir):
+        for filename in files:
+            if filename.endswith(".rep"):
+                path = os.path.join(root, filename)
+                with open(path, 'r') as file:
+                    lines = file.readlines()
+                    if len(lines) >= 8 and lines[7].strip() != "":
+                        raise ValueError("Variables were deleted: \n" + lines[7].strip())
+
 
 
 
@@ -64,11 +77,12 @@ def call_ace(ace_args: tuple):
 
 if __name__ == "__main__":
     helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
-
     convert_to_spaced()
 
 
 
-    # path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0.dat"
-    # res = ACEtools.WriteCMSA("binary",path)
+    path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0_sep.dat"
+    res = ACEtools.WriteCMSA("binary",path)
+    no_deletions()
+
 
