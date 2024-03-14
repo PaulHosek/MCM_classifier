@@ -102,12 +102,6 @@ class Pairwise_model():
                     file = np.genfromtxt(path, dtype=int, delimiter=1)
                     np.savetxt(path[:-4] + "_sep" + ".dat", file, fmt="%d", delimiter=" ")
 
-
-
-
-
-# call ACEtool code on it to generate .p file
-    
     def call_exec(self, args: tuple):
         """Call executable.
         Note, this is a sequential implementation. Only one pairwise model is fitted at the time.
@@ -219,20 +213,10 @@ class Pairwise_model():
 
 
 if __name__ == "__main__":
-    mod = Pairwise_model(10,"./INPUT/data/","train-images-unlabeled-0", "./INPUT_all/data")
+    mod = Pairwise_model(10,"./INPUT/data/","train-images-unlabeled-1", "./INPUT_all/data")
     mod.setup(42)
     mod.fit("ace","./utils/ace")
-
-
-
-
-
-    # helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
-    # convert_to_spaced()
-
-    # path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0_sep.dat"
-    # res = ACEtools.WriteCMSA("binary",path)
-    # no_deletions()
+    # mod.fit("qls", "./utils/")
 
 
 
