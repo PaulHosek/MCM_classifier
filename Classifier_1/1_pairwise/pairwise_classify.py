@@ -20,13 +20,17 @@ class Pairwise_model():
         self.INPUT_dir = INPUT_dir
         self.fname = fname
         self.cat_dir = os.path.join(INPUT_dir,fname)
+        self.fname_sep_path = os.path.join(self.cat_dir, fname+"_sep")
         self.all_data_dir = all_data_path
 
     def fit(self, seed):
     # make this a class and one main function to do the steps in order
                             # subsample, convert, ACEtools, nodeletions
-        self.subsample_cat_ace()
+        self.subsample_cat_ace(seed=seed)
         self.convert_to_spaced()
+        ACEtools.WriteCMSA("binary", self.fname_sep_path+".dat")
+        self.no_deletions()
+
 
     # path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0_sep.dat"
     # res = ACEtools.WriteCMSA("binary",path)
@@ -36,9 +40,15 @@ class Pairwise_model():
 
 # test that there were no variables deleted -> check that specific line (should never happen since we always add the all 0s and all 1s but better have safeguard)
     def no_deletions(self):
-        """Check after running ACEtools, if there were variables deleted because they were always 0.
-        This should not happen as it messes up the order later. The subsampler should avoid that this happens.
-        This is a function to perform this sanity check."""
+        """
+        Verifies that no variables were removed post ACEtools execution.
+
+        This function ensures that no variables, due to never switching to the other state, have been eliminated.
+        Such removals can disrupt the sequence in subsequent parts of the program and should be prevented by the subsampler.
+
+        Raises:
+            ValueError: An error is raised with the names of the removed variables, if any were deleted.
+        """
         for root, dirs, files in os.walk(self.cat_dir):
             for filename in files:
                 if filename.endswith(".rep"):
@@ -138,7 +148,7 @@ class Pairwise_model():
         cm_args.append(args)
         return tuple(cm_args)
 
-    def subsample_cat_ace(self, seed = 42):
+    def subsample_cat_ace(self,seed):
         """Clear input_data_path and fill it, from the all_data_path, with a single folder of the category we are interested in.
         
         :param sample_size: if None then take whole sample, otherwise provide integer of how many samples. Must be <= available samples.
