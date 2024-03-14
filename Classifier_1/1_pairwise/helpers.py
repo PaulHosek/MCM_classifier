@@ -33,8 +33,8 @@ def clear_cat(path, folder_prefix):
             folder_path = os.path.join(path, folder)
             shutil.rmtree(folder_path)
     
-if __name__ == "__main__": 
-    subsample_cat_ace(10,"train-images-unlabeled-0")
+# if __name__ == "__main__": 
+#     subsample_cat_ace(10,"train-images-unlabeled-0")
     
     
 # def clear_directory(path):

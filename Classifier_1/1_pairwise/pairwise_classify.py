@@ -15,23 +15,23 @@ import shutil
 
 class Pairwise_model():
     # fit single pairwise model/ single category
-    def __init__(self, sample_size, INPUT_dir, fname) -> None:
+    def __init__(self, sample_size, INPUT_dir, fname, all_data_path) -> None:
         self.sample_size = sample_size
         self.INPUT_dir = INPUT_dir
         self.fname = fname
         self.cat_dir = os.path.join(INPUT_dir,fname)
+        self.all_data_dir = all_data_path
 
-    def fit():
+    def fit(self, seed):
     # make this a class and one main function to do the steps in order
                             # subsample, convert, ACEtools, nodeletions
-         helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
-        convert_to_spaced()
+        self.subsample_cat_ace()
+        self.convert_to_spaced()
 
     # path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0_sep.dat"
     # res = ACEtools.WriteCMSA("binary",path)
     # no_deletions()
 
-    pass
 
 
 # test that there were no variables deleted -> check that specific line (should never happen since we always add the all 0s and all 1s but better have safeguard)
@@ -54,8 +54,10 @@ class Pairwise_model():
         """Converts all files in the current CATEGORY's folder and its subfolders from binary strings to binary integers with spaces:
         e.g., 000111 -> 0 0 0 1 1 1.
         """
+
         for root, dirs, files in os.walk(self.cat_dir):
             for filename in files:
+                print(filename)
                 if filename.endswith(".dat"):
                     path = os.path.join(root, filename)
                     file = np.genfromtxt(path, dtype=int, delimiter=1)
@@ -88,8 +90,6 @@ class Pairwise_model():
         if stat == 0:
             print(f"\N{check mark} Process done.")
         return p
-
-
 
 
     def build_ace_args(path_to_exe:str, p_dir:str ,p_fname:str , sample_size:int, auto_l2=True, *args):
@@ -138,6 +138,44 @@ class Pairwise_model():
         cm_args.append(args)
         return tuple(cm_args)
 
+    def subsample_cat_ace(self, seed = 42):
+        """Clear input_data_path and fill it, from the all_data_path, with a single folder of the category we are interested in.
+        
+        :param sample_size: if None then take whole sample, otherwise provide integer of how many samples. Must be <= available samples.
+
+        """
+        rng = np.random.default_rng(seed)
+
+        self.clear_cat(self.INPUT_dir, self.fname)
+        # generate new input data 
+        for file in os.listdir(self.all_data_dir):
+            if file.split(".")[0] == self.fname:
+                inp = np.loadtxt(os.path.join(self.all_data_dir,file), dtype="str")
+                subfolder_name = file.split(".")[0]  
+                subfolder_path = os.path.join(self.INPUT_dir, subfolder_name) 
+
+                os.makedirs(subfolder_path, exist_ok=True) 
+                arr = rng.choice(inp, self.sample_size, replace=False)
+                arr = np.append(arr, ["0"*121, "1"*121])
+                np.savetxt(os.path.join(subfolder_path, file), arr, fmt="%s")
+
+    @staticmethod
+    def clear_cat(path, folder_prefix):
+        """In path, delete all folders that begin with folder_prefix."""
+        for folder in os.listdir(path):
+            if folder.startswith(folder_prefix):
+                folder_path = os.path.join(path, folder)
+                shutil.rmtree(folder_path)
+
+
+
+
+
+
+
+
+
+
 # call ACE fitting on it with right flags
 # call MC learning QLS algo on it
 
@@ -163,6 +201,12 @@ class Pairwise_model():
 
 
 if __name__ == "__main__":
+    mod = Pairwise_model(10,"./INPUT/data/","train-images-unlabeled-0", "./INPUT_all/data")
+    mod.fit(42)
+
+
+
+
     # helpers.subsample_data_ace(10, all_data_path="./INPUT_all/data", input_data_path="./INPUT/data")
     # convert_to_spaced()
 
