@@ -203,10 +203,10 @@ class Pairwise_model():
                 np.savetxt(os.path.join(subfolder_path, file), arr, fmt="%s")
 
     @staticmethod
-    def clear_cat(path, folder_prefix):
-        """In path, delete all folders that begin with folder_prefix."""
+    def clear_cat(path, dir_name):
+        """In path, delete all folders that match dir_name."""
         for folder in os.listdir(path):
-            if folder.startswith(folder_prefix):
+            if folder == dir_name:
                 folder_path = os.path.join(path, folder)
                 shutil.rmtree(folder_path)
 
