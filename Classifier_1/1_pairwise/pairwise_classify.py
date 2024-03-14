@@ -39,7 +39,7 @@ class Pairwise_model():
         self.no_deletions()
         self.is_setup = True
     
-    def fit_model(self, method, path_to_exe: str, args: list):
+    def fit(self, method, path_to_exe: str, args: list = []):
         """
         Fit the pairwise model using either ace or qls.
 
@@ -53,11 +53,17 @@ class Pairwise_model():
         assert self.is_setup, "Setup has not been completed. Please call the setup() method before fitting the model."
 
         if method == "ace":
-            cml_args = self.build_ace_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep", args=args)
+            cml_args = self.build_ace_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args)
         elif method == "qls":
-            cml_args = self.build_qls_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep", args=args)
-
+            cml_args = self.build_qls_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args)
+        else:
+            raise ValueError("Invalid method. Please choose either 'ace' or 'qls'.")
         self.call_exec(cml_args)
+
+        f = open(os.devnull, "w")
+        p = self.call_exec(cml_args)
+        status = p.wait()
+        f.close()
     
 
 
@@ -101,7 +107,8 @@ class Pairwise_model():
 
 
 # call ACEtool code on it to generate .p file
-    def call_exec(args: tuple):
+    
+    def call_exec(self, args: tuple):
         """Call executable.
         Note, this is a sequential implementation. Only one pairwise model is fitted at the time.
 
@@ -112,20 +119,23 @@ class Pairwise_model():
         :return: The subprocess.Popen object representing the ACE process
         :rtype: subprocess.Popen
         """
-        with open(os.devnull, "w") as f:
-            try:
-                p = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except KeyboardInterrupt:
-                raise KeyboardInterrupt("Process interrupted")
-            except SystemExit:
-                raise SystemExit("Process process exited unexpectedly")
-            stat = p.wait
+        f = open(os.devnull, "w")
+        print(args)
+        try:
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except KeyboardInterrupt:
+            raise KeyboardInterrupt("Process interrupted")
+        except SystemExit:
+            raise SystemExit("Process process exited unexpectedly")
+        
+        stat = p.wait()
         if stat == 0:
             print(f"\N{check mark} Process done.")
-        return p
+        f.close()
 
 
-    def build_ace_args(path_to_exe:str, p_dir:str ,p_fname:str , args:list, auto_l2=True):
+
+    def build_ace_args(self, path_to_exe:str, p_dir:str ,p_fname:str , args:list, auto_l2=True):
         """Generate the arguments for the ACE algorithm.
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace
@@ -148,7 +158,7 @@ class Pairwise_model():
 
         return tuple(cm_args)
 
-    def build_qls_args(path_to_exe:str, p_dir:str, p_fname:str, sample_size:int, args:list, auto_l2=True):
+    def build_qls_args(self, path_to_exe:str, p_dir:str, p_fname:str, sample_size:int, args:list, auto_l2=True):
         """Generate the arguments for the MC algorithm.
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace
@@ -208,34 +218,11 @@ class Pairwise_model():
 
 
 
-
-# call ACE fitting on it with right flags
-# call MC learning QLS algo on it
-
-# at end should have 10 .p files -> one for each category
-                    
-# make this a class and one main function to do the steps in order
-                    # subsample, convert, ACEtools, nodeletions
-
-
-
-
-
-# def convert_to_spaced(INPUT_dir = "INPUT/data"):
-#     """Converts all files in the INPUT folder and its subfolders from binary strings to binary integers with spaces:
-#     e.g., 000111 -> 0 0 0 1 1 1.
-#     """
-#     for root, dirs, files in os.walk(INPUT_dir):
-#         for filename in files:
-#             if filename.endswith(".dat"):
-#                 path = os.path.join(root, filename)
-#                 file = np.genfromtxt(path, dtype=int, delimiter=1)
-#                 np.savetxt(path[:-4] + "_sep" + ".dat", file, fmt="%d", delimiter=" ")
-
-
 if __name__ == "__main__":
     mod = Pairwise_model(10,"./INPUT/data/","train-images-unlabeled-0", "./INPUT_all/data")
-    mod.fit(42)
+    mod.setup(42)
+    mod.fit("ace","./utils/ace")
+
 
 
 
