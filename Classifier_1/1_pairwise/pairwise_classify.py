@@ -22,23 +22,46 @@ class Pairwise_model():
         self.cat_dir = os.path.join(INPUT_dir,fname)
         self.fname_sep_path = os.path.join(self.cat_dir, fname+"_sep")
         self.all_data_dir = all_data_path
+        self.is_setup = False
 
-    def fit(self, seed):
-    # make this a class and one main function to do the steps in order
-                            # subsample, convert, ACEtools, nodeletions
+    def setup(self, seed):
+        """
+        Set up for model fitting: Subsample, convert to spaced format,
+          generate .p file, check for no deletion of spins.
+
+        :param seed: The seed value for random number generation.
+        :type seed: int
+        """
+
         self.subsample_cat_ace(seed=seed)
         self.convert_to_spaced()
         ACEtools.WriteCMSA("binary", self.fname_sep_path+".dat")
         self.no_deletions()
+        self.is_setup = True
+    
+    def fit_model(self, method, path_to_exe: str, args: list):
+        """
+        Fit the pairwise model using either ace or qls.
+
+        :param method: The method to use for fitting the model. Valid options are "ace" or "qls".
+        :type method: str
+        :param path_to_exe: The path to the executable file.
+        :type path_to_exe: str
+        :param args: Additional arguments to pass to the executable.
+        :type args: list
+        """
+        assert self.is_setup, "Setup has not been completed. Please call the setup() method before fitting the model."
+
+        if method == "ace":
+            cml_args = self.build_ace_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep", args=args)
+        elif method == "qls":
+            cml_args = self.build_qls_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep", args=args)
+
+        self.call_exec(cml_args)
+    
 
 
-    # path = "INPUT/data/train-images-unlabeled-0/train-images-unlabeled-0_sep.dat"
-    # res = ACEtools.WriteCMSA("binary",path)
-    # no_deletions()
 
-
-
-# test that there were no variables deleted -> check that specific line (should never happen since we always add the all 0s and all 1s but better have safeguard)
     def no_deletions(self):
         """
         Verifies that no variables were removed post ACEtools execution.
@@ -102,7 +125,7 @@ class Pairwise_model():
         return p
 
 
-    def build_ace_args(path_to_exe:str, p_dir:str ,p_fname:str , sample_size:int, auto_l2=True, *args):
+    def build_ace_args(path_to_exe:str, p_dir:str ,p_fname:str , args:list, auto_l2=True):
         """Generate the arguments for the ACE algorithm.
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace
@@ -118,14 +141,14 @@ class Pairwise_model():
         :return: argument tuple to pass to subprocess.Popen
         :rtype: tuple
         """
-        cm_args = [path_to_exe, "-d",p_dir, "-i",p_fname,"-o", p_fname+"-out", "-b", str(sample_size)]
+        cm_args = [path_to_exe, "-d",p_dir, "-i",p_fname,"-o", p_fname+"-out", "-b", str(self.sample_size)]
         if auto_l2:
             cm_args.append("-ga")
-        cm_args.append(args)
+        cm_args.extend(args)
 
         return tuple(cm_args)
 
-    def build_qls_args(path_to_exe:str, p_dir:str, p_fname:str, sample_size:int, auto_l2=True, *args):
+    def build_qls_args(path_to_exe:str, p_dir:str, p_fname:str, sample_size:int, args:list, auto_l2=True):
         """Generate the arguments for the MC algorithm.
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace
@@ -145,7 +168,7 @@ class Pairwise_model():
         cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(sample_size)]
         if auto_l2:
             cm_args.append("-ga")
-        cm_args.append(args)
+        cm_args.extend(args)
         return tuple(cm_args)
 
     def subsample_cat_ace(self,seed):
