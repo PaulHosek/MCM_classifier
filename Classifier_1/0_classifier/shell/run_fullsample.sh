@@ -1,20 +1,18 @@
 #!/bin/bash
-# call with srun
 
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --gpus-per-node=1
 #SBATCH --cpus-per-task=8
-#SBATCH --partition=gpu
+#SBATCH --partition=cpu # CHEKC THE TYPE OF PARITION AGAIN
 #SBATCH --time=04:00:00
 
 #Loading modules
 module load 2022
 module load Miniconda3/4.12.0
-module load CUDA/11.7.0
 
 
-source /sw/arch/RHEL8/EB_production/2022/software/Miniconda3/4.12.0/etc/profile.d/conda.sh
+#source /sw/arch/RHEL8/EB_production/2022/software/Miniconda3/4.12.0/etc/profile.d/conda.sh
 conda activate pointcloud
 
 

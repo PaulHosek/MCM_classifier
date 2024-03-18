@@ -11,7 +11,7 @@ from shutil import copytree
 
 ### --- FUNCTIONS FOR DATA SUBSETTING ---
 def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../INPUT_all/data",
-                        result_sample_sizes_dir="../OUTPUT/sample_sizes", comms_dir = "../OUTPUT/comms",estimator="add_smooth", seed=None,fname_start="train-"):
+                        result_sample_sizes_dir="../OUTPUT/sample_sizes", comms_dir = "../OUTPUT/comms",estimator="add_smooth", seed=None,fname_start="train-", input_data_path="../INPUT/data"):
     """
     Generate sample_size number of samples and populate "../INPUT" folder. 
     Then fit the model to that data and save MCM and Counts from that model
@@ -29,7 +29,7 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../I
     """
     # subsample the data
 
-    subsample_data(sample_size, all_data_path=all_data_path, seed=seed, fname_start=fname_start)
+    subsample_data(sample_size, all_data_path=all_data_path, seed=seed, fname_start=fname_start, input_data_path=input_data_path)
     # Fit new classifier object
     classifier = MCM_Classifier(*MCM_Classifier_init_args)
     classifier.fit(greedy=True, max_iter=1000000, max_no_improvement=100000, estimator=estimator)
@@ -84,6 +84,7 @@ def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_pa
     # generate new input data 
     for file in os.listdir(all_data_path):
         if file.startswith(fname_start):
+            print(os.path.join(input_data_path, file))
             inp = np.loadtxt(os.path.join(all_data_path,file), dtype="str")
             np.savetxt(os.path.join(input_data_path, file), rng.choice(inp, sample_size,replace=False), fmt="%s")
 
