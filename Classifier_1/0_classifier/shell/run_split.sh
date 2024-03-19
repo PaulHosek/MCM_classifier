@@ -8,15 +8,19 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=paul@hosek.de
 
-# module load 2022
-# module load Miniconda3/4.12.0
-# source /sw/arch/RHEL8/EB_production/2022/software/Miniconda3/4.12.0/etc/profile.d/conda.sh
-# conda deactivate
-# conda activate mcm
+ module load 2022
+ module load Miniconda3/4.12.0
+ source /sw/arch/RHEL8/EB_production/2022/software/Miniconda3/4.12.0/etc/profile.d/conda.sh
+ conda deactivate
+ conda activate mcm
+
+# recompile for current architecture
+rm /../../MinCompSpin_SimulatedAnnealing/bin/*
+./../../MinCompSpin_SimulatedAnnealing/compile.bat
 
 letters=("A" "B")
 
-size=21
+size=1441
 letter=${letters[0]}
 python3 run_split.py --sample_s  $size --split_letter "$letter"
 
