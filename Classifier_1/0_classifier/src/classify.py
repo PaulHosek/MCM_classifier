@@ -367,7 +367,8 @@ class MCM_Classifier:
 
         g = "-g" if greedy else ""
 
-        sa_file = "../../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if platform.system() == "Windows" else "../../MinCompSpin_SimulatedAnnealing/bin/saa.out" # TODO use os.path.join here instead
+        # sa_file = "../../MinCompSpin_SimulatedAnnealing/bin/saa.exe" if platform.system() == "Windows" else "../../MinCompSpin_SimulatedAnnealing/bin/saa.out" # TODO use os.path.join here instead
+        sa_file = "../../MinCompSpin_SimulatedAnnealing/bin/saa.sh"
         saa_args = [sa_file,
                     str(self.n_variables),
                     '-i', # this flag indicates starting from single spin basis.

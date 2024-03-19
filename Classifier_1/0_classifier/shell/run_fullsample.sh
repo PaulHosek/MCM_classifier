@@ -12,8 +12,8 @@ module load 2022
 module load Miniconda3/4.12.0
 
 
-#source /sw/arch/RHEL8/EB_production/2022/software/Miniconda3/4.12.0/etc/profile.d/conda.sh
-conda activate pointcloud
+source /sw/arch/RHEL8/EB_production/2022/software/Miniconda3/4.12.0/etc/profile.d/conda.sh
+conda activate mcm
 
 
 output_log="$HOME/GeometricDL/output_dir/output.log"
