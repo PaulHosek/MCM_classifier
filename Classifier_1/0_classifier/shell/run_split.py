@@ -20,8 +20,7 @@ def main(sample_s,split_letter):
   clf_args = [n_categories, n_variables, mcm_filename_format, data_filename_format, data_path, communities_path] 
   adp = "../INPUT_all/data/combined_split_{}".format(split_letter)
   rssd = "../OUTPUT/sample_sizes_split_{}".format(split_letter)
-  for i in range(3):
-      utils.evaluate_subsample(sample_s, clf_args,all_data_path=adp, result_sample_sizes_dir=rssd, fname_start="half-", seed=42)
+  utils.evaluate_subsample(sample_s, clf_args,all_data_path=adp, result_sample_sizes_dir=rssd, fname_start="half-", seed=42)
 
 ##########3
   # full sample 6315: train + test
@@ -42,6 +41,5 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
-    # args = parse_arguments()
-    # main(args.sample_s, args.split_letter)
-    main(1342,"A")
+    args = parse_arguments()
+    main(args.sample_s, args.split_letter)

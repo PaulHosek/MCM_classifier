@@ -19,10 +19,10 @@ rm /../../MinCompSpin_SimulatedAnnealing/bin/*
 ./../../MinCompSpin_SimulatedAnnealing/compile.bat
 
 letters=("A" "B")
-
-size=1441
-letter=${letters[0]}
-python3 run_split.py --sample_s  $size --split_letter "$letter"
+python3 run_split.py
+#size=1441
+#letter=${letters[0]}
+#python3 run_split.py --sample_s  $size --split_letter "$letter"
 
 # ## Loop through the sample sizes
 # for size in 100 500 1000 2000 3000; do
