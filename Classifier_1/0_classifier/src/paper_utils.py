@@ -5,6 +5,7 @@ from src.classify import MCM_Classifier
 import json
 import os
 from shutil import copytree
+import src.plot as myplot
 
 
 
@@ -112,3 +113,122 @@ def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_pa
 #     Y = np.concatenate([Y for _ in range(5)], axis=0)
 #     return X, Y
 
+
+
+# TOOLS FOR CONVERGENCE B PLOT -------------------------------
+
+
+# XXX_sample => [sample size, run_index, cat_idx, icc_idx]
+def load_counts_mcm(digit, nr_runs, sample_sizes, letter):
+    """For all sample sizes, load the counts and mcms for a specific digit and a pool of samples specifid by the letter."""
+    samples_path = "../OUTPUT/sample_sizes_split_{}".format(letter)
+
+    fname = "Counts_"
+    counts_sample = []
+    for s, sample_size in enumerate(sample_sizes):
+        counts_runs = []
+        counts_path = os.path.join(samples_path, str(sample_size), "Counts")
+        for i in range(len(os.listdir(counts_path))):
+            with open(os.path.join(counts_path, fname+str(i)+ ".json")) as f:
+                    counts_runs.append(json.load(f))
+        
+        counts_sample.append(counts_runs)
+
+                    
+    fname = "MCMs_"
+    mcm_sample = []
+    for s, sample_size in enumerate(sample_sizes):
+        mcm_runs = []
+        mcms_path = os.path.join(samples_path, str(sample_size), "MCMs")
+        for i in range(len(os.listdir(mcms_path))):
+            with open(os.path.join(mcms_path, fname+str(i)+ ".json")) as f:
+                    # samples[sample_size] = json.load(f)
+                    mcm_runs.append(json.load(f))
+        mcm_sample.append(mcm_runs)
+
+
+    return counts_sample, mcm_sample
+
+# counts_sample, mcm_sample = load_counts_mcm(0,10,[10,100],"B")
+
+
+# get sample seed=42 from dataset B
+def recreate_dataset(sample_from_letter, sample_size:int, seed = 42):
+    """Recreate the dataset A or B was build on."""
+    all_data_path="../INPUT_all/data/combined_split_{}".format(sample_from_letter)
+    file = "half-images-unlabeled-0.dat"
+    sample_size_from_letter = sample_size # needs to be the same as build from sample size. We just show it the exact samples the other one is build on.
+    rng = np.random.default_rng(seed=seed)
+    inp = np.loadtxt(os.path.join(all_data_path,file), dtype="str")
+    return rng.choice(inp, sample_size_from_letter,replace=False)
+
+# sample_B = recreate_dataset("B", 10)
+
+
+# average probability for each icc for observing the data B of the same size was build on
+# do the same for observing A
+def generate_counts_ranks_singlerun_singlesample(counts_sample, mcm_sample, see_data,run_idx, sample_idx, cat_idx = 0):
+    """Generate the observed counts for iccs to observe the "see_data" sample. Also returns the ranks of the iccs.
+    That is it returns a list of count distributions over samples for every icc.
+    """
+    sum_of_count = np.sum(counts_sample[sample_idx][run_idx][cat_idx][0])
+    data = np.array([[int(s) for s in state] for state in see_data])
+    nr_icc = len(counts_sample[sample_idx][run_idx][cat_idx])
+    counts_observe_B = np.empty((nr_icc, see_data.shape[0]))
+    for icc in range(nr_icc):
+        counts_observe_B[icc,:] = (myplot.calc_p_icc_single(data,counts_sample[sample_idx][run_idx][cat_idx],121,mcm_sample[sample_idx][run_idx][cat_idx],icc))
+
+    ranks = np.genfromtxt(mcm_sample[sample_idx][run_idx][cat_idx],dtype=int,delimiter=1).sum(axis=1)
+
+    return counts_observe_B, ranks
+
+
+def counts_to_prob(icc_pdf, rank,sum_of_count, add_smooth=True):
+    alpha = 1
+    if add_smooth:
+        zero_f =  lambda x: (x+alpha)/ (sum_of_count+rank*alpha) 
+    else:
+        zero_f = lambda x: x/sum_of_count
+
+    return np.apply_along_axis(zero_f,0,icc_pdf)
+
+# calculate probabilities P(MCM_A see data_B)
+def probs_mean_std(counts_observe_X, ranks, sum_of_count, data_size,n_icc):
+    """Calculate mean and std probability of mcm to observe some data over samples.
+    That is mean over runs (P(mcm_digitx_samplesizex observes data X). 
+    e.g., mcm digit 0 using 100 samples from pool A to build it sees 100 samples from pool B"""
+
+    probs = np.empty((n_icc,data_size))
+    for i in range(len(ranks)):
+        probs[i,:] = counts_to_prob(counts_observe_X[i],ranks[i], sum_of_count)
+    probs_mcm = np.product(probs,axis=0)
+
+    return np.mean(probs_mcm), np.std(probs_mcm)
+
+
+
+# main function for convergence B
+def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter, data_size="same"):
+    counts_sample, mcm_sample = load_counts_mcm(digit,nr_runs,sample_sizes,letter)
+
+
+    ms_all = np.empty((len(sample_sizes),nr_runs,2))
+    for sample_idx, sample_size in enumerate(sample_sizes):
+        m_s_run = np.empty((nr_runs,2))
+        if data_size =="same":
+            data_size = sample_size
+    
+        for run_idx in range(nr_runs):
+            n_icc = len(counts_sample[sample_idx][run_idx][digit])
+            sample_recreate = recreate_dataset(recreate_letter, int(data_size))
+
+            counts_observe_X, ranks = generate_counts_ranks_singlerun_singlesample(counts_sample, mcm_sample, sample_recreate, run_idx, sample_idx)
+            sum_of_count = np.sum(counts_sample[sample_idx][run_idx][0][0])
+            # mean probabilities over 100 B samples for some mcm
+            m,s = probs_mean_std(counts_observe_X, ranks, sum_of_count,data_size, n_icc) 
+            ms_all[sample_idx, run_idx, :] = [m,s]
+
+    return ms_all
+
+
+            
