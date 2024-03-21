@@ -59,7 +59,7 @@ def do_cluster(matrix, via_matrix=None):
 
 ## ----- Partition Map ----- ## 
 @np.vectorize
-def int_to_letters(i):
+def int_to_letters(i,first_ascii = 65):
     """Converts an integer to a string representation using letters of the alphabet.
 
     :param i: The integer to be converted.
@@ -70,7 +70,7 @@ def int_to_letters(i):
     base26 = ''
     while i >= 0:
         i, idx = divmod(i, 26)
-        base26 = chr(idx+65) + base26
+        base26 = chr(idx+first_ascii) + base26
         i -= 1
     return base26
 
