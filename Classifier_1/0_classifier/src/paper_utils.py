@@ -119,7 +119,7 @@ def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_pa
 
 
 # XXX_sample => [sample size, run_index, cat_idx, icc_idx]
-def load_counts_mcm(digit, nr_runs, sample_sizes, letter):
+def load_counts_mcm(sample_sizes, letter):
     """For all sample sizes, load the counts and mcms for a specific digit and a pool of samples specifid by the letter."""
     samples_path = "../OUTPUT/sample_sizes_split_{}".format(letter)
 
@@ -230,5 +230,75 @@ def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter, data
 
     return ms_all
 
+def load_test_data(digit = 0):
+        all_data_path="../INPUT_all/data/testdata_separated"
+        file = "test-images-unlabeled-{}.dat".format(digit)
+        return np.loadtxt(os.path.join(all_data_path,file), dtype="str")
 
-            
+
+
+#### PIXELWISE EVIDENCE
+import math
+
+def evidence_iccs(Counts, MCMs, mcm_idx):
+    """Calculate the evidence for each icc in an MCM using the count distribution of the g* parameters/ ML estimate.
+      Return an array of evidences. The sum of that array is the MCM evidence.
+
+    :param Counts: Return value of classifier.get_Counts(). Unormalized probability distribution for all MCM for all ICC.  
+    :type Counts: np.ndarray of shape[category,icc,possible_states]
+    :param MCMs: Return value of classifier.get_MCMs(). MCMs for all categories.
+    :type MCMs: np.ndarray of shape[category,icc] of binary strings.
+    :param mcm_idx: which mcm to calculate the evidence for.
+    :type mcm_idx: int < #categories
+    :return: np.ndarray of evidences for each icc. ICC are identified by index
+    :rtype: np.ndarray of shape [icc_evidences]
+    """
+    N = Counts[0][0].sum().astype(int) # sample size == sum of observed states
+    count_mcm = Counts[mcm_idx]
+    evidence = np.zeros(len(count_mcm)) # nr iccs
+    log_sqrt_pi = math.log(math.sqrt(math.pi))
+    for idx, icc in enumerate(count_mcm):
+        rank = MCMs[mcm_idx][idx].count("1")
+        evidence[idx] += math.lgamma(2**(rank-1)) - math.lgamma(N + 2**(rank-1)) # middle part of equation 8 in Mulatier_2020
+        for pattern in Counts[mcm_idx][idx]: # last part of equation 8
+            evidence[idx] += math.lgamma(pattern+.5) - log_sqrt_pi
+    return evidence
+
+# evidence_iccs(Counts,MCMs,2)
+
+def pixelwise_evidence(evidence_iccs,N,single_mcm):
+    icc_pixels = [icc.count("1") for icc in single_mcm]
+    return evidence_iccs / np.log(2) / N / icc_pixels
+
+
+
+##### Evidence Part 2
+def evidence_on_data(single_mcm, data):
+    """Calculate the evidence of a partitioning ("single_mcm") on some (possibly new) data.
+
+    :param single_mcm: Each binary string is an icc state.
+    :type single_mcm: np.array 1D with dtype string
+    :param data: Dataset to calcualte evidence on. result from np.loadtext(dtype=str)
+    :type data: np.array 1D with dtype string
+    :param N: 
+    :type N: _type_
+    """
+    mcm_gen = np.array([[int(s) for s in state] for state in single_mcm])
+    data_gen = np.array([[int(s) for s in state] for state in data])
+    N = len(data)
+    nr_iccs = len(single_mcm)
+
+    evidence = np.zeros(nr_iccs)
+    log_sqrt_pi = math.log(math.sqrt(math.pi))
+    for icc_idx, icc in enumerate(single_mcm):
+        rank = icc.count("1")
+        C_icc = data_gen[:,mcm_gen[icc_idx,:] == 1]
+        counts = np.unique(C_icc, axis=0, return_counts=True)[1]
+
+
+        evidence[icc_idx] += math.lgamma(2**(rank-1)) - math.lgamma(N + 2**(rank-1)) # middle part of equation 8 in Mulatier_2020
+        for k in counts: # last part of equation 8
+            evidence[icc_idx] += math.lgamma(k+.5) - log_sqrt_pi
+
+        mcm_evidence = np.sum(evidence) # - N*(0)*np.log(2)
+    return mcm_evidence

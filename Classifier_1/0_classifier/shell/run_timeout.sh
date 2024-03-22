@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Number of iterations
-iterations=50  # Changed to 50 for alignment with loop condition
+iterations=51  # Changed to 50 for alignment with loop condition
 
 timeout=360
 
 for letter in A B; do
-  for size in 1000 2000 3000; do
+  for size in 100 1000 2000 3000; do
     for (( i=1; i <= iterations; i++ )); do  # Removed $ from iterations for consistency
       
       # Run the Python script with timeout in the background
