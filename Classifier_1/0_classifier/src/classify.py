@@ -244,7 +244,7 @@ class MCM_Classifier:
     @staticmethod
     def estimator_init(rank, method="mle", alpha=1):
         """Iniitalizes array for one icc based on the estimator used."""
-        d = rank
+        d = 2**rank
         if method == "mle":
             return np.zeros(2**rank)
         elif method == "add_smooth":
@@ -267,7 +267,7 @@ class MCM_Classifier:
         Returns:
             probability estimate
         """
-        d = rank
+        d = 2**rank
         if method == "mle":
             return counts / np.sum(counts)
         elif method == "add_smooth":
