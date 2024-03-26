@@ -186,21 +186,21 @@ def generate_counts_ranks_singlerun_singlesample(counts_sample, mcm_sample, see_
 def counts_to_prob(icc_pdf, rank,sum_of_count, add_smooth=True):
     alpha = 1
     if add_smooth:
-        zero_f =  lambda x: (x+alpha)/ (sum_of_count+rank*alpha) 
+        zero_f =  lambda x: (x+(1/(2**rank)))/ (sum_of_count+1) 
     else:
         zero_f = lambda x: x/sum_of_count
 
     return np.apply_along_axis(zero_f,0,icc_pdf)
 
 # calculate probabilities P(MCM_A see data_B)
-def probs_mean_std(counts_observe_X, ranks, sum_of_count, data_size,n_icc):
+def probs_mean_std(counts_observe_X, ranks, sum_of_count, data_size,n_icc,add_smooth):
     """Calculate mean and std probability of mcm to observe some data over samples.
     That is mean over runs (P(mcm_digitx_samplesizex observes data X). 
     e.g., mcm digit 0 using 100 samples from pool A to build it sees 100 samples from pool B"""
 
     probs = np.empty((n_icc,data_size))
     for i in range(len(ranks)):
-        probs[i,:] = counts_to_prob(counts_observe_X[i],ranks[i], sum_of_count)
+        probs[i,:] = counts_to_prob(counts_observe_X[i],ranks[i], sum_of_count, add_smooth)
     probs_mcm = np.product(probs,axis=0)
 
     return np.mean(probs_mcm), np.std(probs_mcm)
@@ -208,8 +208,8 @@ def probs_mean_std(counts_observe_X, ranks, sum_of_count, data_size,n_icc):
 
 
 # main function for convergence B
-def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter, data_size="same"):
-    counts_sample, mcm_sample = load_counts_mcm(digit,nr_runs,sample_sizes,letter)
+def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter,add_smooth, data_size="same",):
+    counts_sample, mcm_sample = load_counts_mcm(sample_sizes,letter)
 
 
     ms_all = np.empty((len(sample_sizes),nr_runs,2))
@@ -225,7 +225,7 @@ def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter, data
             counts_observe_X, ranks = generate_counts_ranks_singlerun_singlesample(counts_sample, mcm_sample, sample_recreate, run_idx, sample_idx)
             sum_of_count = np.sum(counts_sample[sample_idx][run_idx][0][0])
             # mean probabilities over 100 B samples for some mcm
-            m,s = probs_mean_std(counts_observe_X, ranks, sum_of_count,data_size, n_icc) 
+            m,s = probs_mean_std(counts_observe_X, ranks, sum_of_count,data_size, n_icc, add_smooth=add_smooth) 
             ms_all[sample_idx, run_idx, :] = [m,s]
 
     return ms_all
