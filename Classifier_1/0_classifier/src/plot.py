@@ -416,7 +416,33 @@ def find_borders(arr):
                 borders[i][j].append('r')
     return borders
 
+# co-occurance
+def interesting_pix_map(mcms_ss, interesting_pix, nr_runs, digit, ax, map_kwargs={},show_letters=True):
+    # borders around selected pixels
+    b = np.zeros(121)
+    b[interesting_pix] = 1
+    b = b.reshape((11,11))
+    b = find_borders(b)
 
+    icc_loc = np.zeros((11,11))
+    icc_sum = np.zeros((11,11))
+
+    for pixel_idx in interesting_pix:
+        row_i = pixel_idx // 11
+        col_i = pixel_idx % 11
+        for mcms in mcms_ss:
+            comm = generate_icc_comms_map(mcms[digit])
+            icc_sum += np.where(comm==comm[row_i,col_i], 1,0)
+        icc_loc += np.where(icc_sum>0,1,0).astype(int)
+
+        
+
+    letters = int_to_letters(icc_loc.astype(int),first_ascii = 64)
+    letters[letters == "@"] = "."
+    if show_letters:
+        partition_map(ax, icc_sum/nr_runs,letters, b,cmap="viridis", normalise=False, **map_kwargs)
+    else:         
+        partition_map(ax, icc_sum/nr_runs,None, b,cmap="viridis", normalise=False, **map_kwargs)
 
 
 

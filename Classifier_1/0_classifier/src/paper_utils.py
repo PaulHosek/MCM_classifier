@@ -280,8 +280,6 @@ def evidence_on_data(single_mcm, data):
     :type single_mcm: np.array 1D with dtype string
     :param data: Dataset to calcualte evidence on. result from np.loadtext(dtype=str)
     :type data: np.array 1D with dtype string
-    :param N: 
-    :type N: _type_
     """
     mcm_gen = np.array([[int(s) for s in state] for state in single_mcm])
     data_gen = np.array([[int(s) for s in state] for state in data])
