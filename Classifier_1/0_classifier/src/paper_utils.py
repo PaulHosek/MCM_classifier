@@ -119,9 +119,9 @@ def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_pa
 
 
 # XXX_sample => [sample size, run_index, cat_idx, icc_idx]
-def load_counts_mcm(sample_sizes, letter):
+def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_split_{}"):
     """For all sample sizes, load the counts and mcms for a specific digit and a pool of samples specifid by the letter."""
-    samples_path = "../OUTPUT/sample_sizes_split_{}".format(letter)
+    samples_path = path_format.format(letter)
 
     fname = "Counts_"
     counts_sample = []
@@ -244,16 +244,16 @@ def evidence_iccs(Counts, MCMs, mcm_idx):
     """Calculate the evidence for each icc in an MCM using the count distribution of the g* parameters/ ML estimate.
       Return an array of evidences. The sum of that array is the MCM evidence.
 
-    :param Counts: Return value of classifier.get_Counts(). Unormalized probability distribution for all MCM for all ICC.  
+    :param Counts: Return value of classifier.get_Counts(). Unnormalized probability distribution for all MCM for all ICC.  
     :type Counts: np.ndarray of shape[category,icc,possible_states]
     :param MCMs: Return value of classifier.get_MCMs(). MCMs for all categories.
-    :type MCMs: np.ndarray of shape[category,icc] of binary strings.
+    :type MCMs: nested list of shape[category,icc] of binary strings.
     :param mcm_idx: which mcm to calculate the evidence for.
     :type mcm_idx: int < #categories
     :return: np.ndarray of evidences for each icc. ICC are identified by index
     :rtype: np.ndarray of shape [icc_evidences]
     """
-    N = Counts[0][0].sum().astype(int) # sample size == sum of observed states
+    N = np.array(Counts[0][0]).sum().astype(int) # sample size == sum of observed states
     count_mcm = Counts[mcm_idx]
     evidence = np.zeros(len(count_mcm)) # nr iccs
     log_sqrt_pi = math.log(math.sqrt(math.pi))
