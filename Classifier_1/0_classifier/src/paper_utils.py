@@ -153,7 +153,7 @@ def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_
 
 
 # get sample seed=42 from dataset B
-def recreate_dataset(sample_from_letter,digit, sample_size:int, seed = 42,fname_format= "half-images-unlabeled-{}.dat", fname_start="half"):
+def recreate_dataset(sample_from_letter,digit, sample_size:int, seed = 42,fname_format= "half-images-unlabeled-{}.dat", fname_start="half-"):
     """Recreate the dataset A or B was build on."""
     all_data_path="../INPUT_all/data/combined_split_{}".format(sample_from_letter)
 
