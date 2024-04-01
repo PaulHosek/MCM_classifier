@@ -12,7 +12,7 @@ import src.loaders as loaders
 
 ### --- FUNCTIONS FOR DATA SUBSETTING ---
 def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../INPUT_all/data",
-                        result_sample_sizes_dir="../OUTPUT/sample_sizes", comms_dir = "../OUTPUT/comms",estimator="add_smooth", seed=None,fname_start="train-", input_data_path="../INPUT/data"):
+                        result_sample_sizes_dir="../OUTPUT/sample_sizes", comms_dir = "../OUTPUT/comms",estimator="add_smooth", seed=None,fname_start="train-", input_data_path="../INPUT/data", seed_plus=False):
     """
     Generate sample_size number of samples and populate "../INPUT" folder. 
     Then fit the model to that data and save MCM and Counts from that model
@@ -27,23 +27,30 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../I
                             defaults to "../OUTPUT/sample_sizes"
     :type result_sample_sizes_dir: str, optional
     :param comms_dir: directory of the communities after the current fitting
+    :param seed_plus: if true, then do seed += nr runs for that sample done: e.g.,
     """
-    # subsample the data
 
+    # output dirs
+    nwdir = os.path.join(result_sample_sizes_dir, str(sample_size))
+    os.makedirs(nwdir, exist_ok=True)
+    mcmdir = os.path.join(nwdir, "MCMs")
+    countsdir = os.path.join(nwdir, "Counts")
+    os.makedirs(mcmdir, exist_ok=True)
+    os.makedirs(countsdir, exist_ok=True)
+
+    if seed_plus:
+        seed = 0 if seed is None else seed
+        seed += len(os.listdir(mcmdir))
+        print("seed=", seed)
+
+    # subsample the data
     subsample_data(sample_size, all_data_path=all_data_path, seed=seed, fname_start=fname_start, input_data_path=input_data_path)
     # Fit new classifier object
     classifier = MCM_Classifier(*MCM_Classifier_init_args)
     classifier.fit(greedy=True, max_iter=1000000, max_no_improvement=100000, estimator=estimator)
 
 
-    # Save MCMS and Counts
-    nwdir = os.path.join(result_sample_sizes_dir, str(sample_size))
-    os.makedirs(nwdir, exist_ok=True)
 
-    mcmdir = os.path.join(nwdir, "MCMs")
-    countsdir = os.path.join(nwdir, "Counts")
-    os.makedirs(mcmdir, exist_ok=True)
-    os.makedirs(countsdir, exist_ok=True)
 
 
     # Append the number of files + 1 to the file names
