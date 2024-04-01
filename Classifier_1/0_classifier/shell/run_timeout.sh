@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Number of iterations
-iterations=51  # Changed to 50 for alignment with loop condition
+
+iterations=51  
 
 timeout=360
 

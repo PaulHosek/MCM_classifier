@@ -9,7 +9,7 @@ import argparse
 
 def main(sample_s,split_letter):
       
-
+  seed = 1
   n_categories = 10 
   n_variables = 121  
   mcm_filename_format = "half-images-unlabeled-{}_bootstrap_comms.dat"
@@ -23,7 +23,7 @@ def main(sample_s,split_letter):
   # open the dir and count how many we did, add that to the seed so that we have seeds seed,seed+1,seed+2...
 
 
-  utils.evaluate_subsample(sample_s, clf_args,all_data_path=adp, result_sample_sizes_dir=rssd, fname_start="half-", seed=0, seed_plus=True)
+  utils.evaluate_subsample(sample_s, clf_args,all_data_path=adp, result_sample_sizes_dir=rssd, fname_start="half-", seed=seed, seed_plus=True)
 
 ##########3
   # full sample 6315: train + test
