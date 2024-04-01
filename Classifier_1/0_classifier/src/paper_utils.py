@@ -6,7 +6,7 @@ import json
 import os
 from shutil import copytree
 import src.plot as myplot
-
+import src.loaders as loaders
 
 
 
@@ -153,14 +153,19 @@ def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_
 
 
 # get sample seed=42 from dataset B
-def recreate_dataset(sample_from_letter, sample_size:int, seed = 42):
+def recreate_dataset(sample_from_letter,digit, sample_size:int, seed = 42,fname_format= "half-images-unlabeled-{}.dat", fname_start="half"):
     """Recreate the dataset A or B was build on."""
     all_data_path="../INPUT_all/data/combined_split_{}".format(sample_from_letter)
-    file = "half-images-unlabeled-0.dat"
+
+
+    input_data_path = "../INPUT/data/" # FIXME
     sample_size_from_letter = sample_size # needs to be the same as build from sample size. We just show it the exact samples the other one is build on.
-    rng = np.random.default_rng(seed=seed)
-    inp = np.loadtxt(os.path.join(all_data_path,file), dtype="str")
-    return rng.choice(inp, sample_size_from_letter,replace=False)
+    subsample_data(sample_size_from_letter, all_data_path=all_data_path, seed=seed, fname_start=fname_start, input_data_path=input_data_path)
+
+
+    res = loaders.load_data(os.path.join(input_data_path,fname_format.format(digit)))
+    res = ["".join(i) for i in res.astype(str)]
+    return res
 
 # sample_B = recreate_dataset("B", 10)
 
@@ -220,7 +225,7 @@ def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter,add_s
     
         for run_idx in range(nr_runs):
             n_icc = len(counts_sample[sample_idx][run_idx][digit])
-            sample_recreate = recreate_dataset(recreate_letter, int(data_size))
+            sample_recreate = recreate_dataset(recreate_letter,digit, int(data_size))
 
             counts_observe_X, ranks = generate_counts_ranks_singlerun_singlesample(counts_sample, mcm_sample, sample_recreate, run_idx, sample_idx)
             sum_of_count = np.sum(counts_sample[sample_idx][run_idx][0][0])
@@ -292,6 +297,7 @@ def evidence_on_data(single_mcm, data):
         rank = icc.count("1")
         C_icc = data_gen[:,mcm_gen[icc_idx,:] == 1]
         counts = np.unique(C_icc, axis=0, return_counts=True)[1]
+        # counts = counts[np.argsort([int("".join(i)) for i in configs.astype(str)])] # order counts by integer representation of config
 
 
         evidence[icc_idx] += math.lgamma(2**(rank-1)) - math.lgamma(N + 2**(rank-1)) # middle part of equation 8 in Mulatier_2020
