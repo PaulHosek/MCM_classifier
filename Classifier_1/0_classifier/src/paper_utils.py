@@ -92,7 +92,7 @@ def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_pa
     # generate new input data 
     for file in os.listdir(all_data_path):
         if file.startswith(fname_start):
-            print(os.path.join(input_data_path, file))
+            # print(os.path.join(input_data_path, file))
             inp = np.loadtxt(os.path.join(all_data_path,file), dtype="str")
             np.savetxt(os.path.join(input_data_path, file), rng.choice(inp, sample_size,replace=False), fmt="%s")
 
@@ -229,16 +229,30 @@ def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter,add_s
         m_s_run = np.empty((nr_runs,2))
         if data_size =="same":
             data_size = sample_size
-    
+        print("nested")
         for run_idx in range(nr_runs):
             n_icc = len(counts_sample[sample_idx][run_idx][digit])
-            sample_recreate = recreate_dataset(recreate_letter,digit, int(data_size))
+            seed_run = run_idx+1 # for A,B
 
+            sample_recreate = recreate_dataset(recreate_letter,digit, int(data_size), seed=seed_run)
             counts_observe_X, ranks = generate_counts_ranks_singlerun_singlesample(counts_sample, mcm_sample, sample_recreate, run_idx, sample_idx)
+
+            
             sum_of_count = np.sum(counts_sample[sample_idx][run_idx][0][0])
             # mean probabilities over 100 B samples for some mcm
             m,s = probs_mean_std(counts_observe_X, ranks, sum_of_count,data_size, n_icc, add_smooth=add_smooth) 
             ms_all[sample_idx, run_idx, :] = [m,s]
+
+
+            # test if evidence the same: fitted counts = observed counts
+            # my_counts = counts_sample[sample_idx][:nr_runs] # test
+            # mcms = mcm_sample[sample_idx][:nr_runs]
+            # print(len(my_counts[run_idx]),len(mcms))
+            # per_icc = np.sum(evidence_iccs(my_counts[run_idx], mcms[run_idx],digit))#/ my_sample_size
+            # ev = evidence_on_data(mcms[run_idx][digit], sample_recreate)
+            # if not ev == per_icc and recreate_letter == letter:
+            #     raise KeyboardInterrupt
+            # print(ev == per_icc, ev, per_icc) 
 
     return ms_all
 
