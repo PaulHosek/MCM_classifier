@@ -8,8 +8,8 @@ import argparse
 
 
 def main(sample_s):
-      
-
+    
+  seed = 1
   n_categories = 10 
   n_variables = 121  
   mcm_filename_format = "full-images-unlabeled-{}_bootstrap_comms.dat"
@@ -20,7 +20,7 @@ def main(sample_s):
   clf_args = [n_categories, n_variables, mcm_filename_format, data_filename_format, data_path, communities_path] 
   adp = "../INPUT_all/data/combined_data"
   rssd = "../OUTPUT/sample_sizes_fromfull"
-  utils.evaluate_subsample(sample_s, clf_args,all_data_path=adp, result_sample_sizes_dir=rssd, fname_start="half-", seed=None)
+  utils.evaluate_subsample(sample_s, clf_args,all_data_path=adp, result_sample_sizes_dir=rssd, fname_start="full-", seed=seed, seed_plus=True)
 
 ##########3
   # full sample 6315: train + test
@@ -32,14 +32,18 @@ def parse_arguments():
   Returns:
     A dictionary containing parsed arguments with keys matching the flag names.
   """
-    parser = argparse.ArgumentParser(description="run split programme")
+    parser = argparse.ArgumentParser(description="run full sampling regime")
     parser.add_argument("--sample_s", type=int, required=True,
                         help="Sample size.")
-    parser.add_argument("--split_letter", type=str, required=True, help="A or B")
 
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    main(args.sample_s, args.split_letter)
+    main(args.sample_s)
+
+
+
+
+
