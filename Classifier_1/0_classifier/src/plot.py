@@ -656,3 +656,26 @@ def plot_results(test_data, test_labels, predicted_classes, probs, classifier, o
     plt.figure()
     plot_confusion_matrix(classifier.stats["confusion_matrix"], n_categories)
     plt.savefig(os.path.join(output_path, "confusion_matrix.png"))
+
+# ----- INDICATIVE ICC -----
+def mirror_hist(ax, series1, series2, kwargs_up = {}, kwargs_down = {}, n_bins = 20, color="blue", label=None):
+    # update default args
+    kw_up = {"color":color,"alpha":.8}
+    kw_up.update(kwargs_up)
+    kw_down = {"color":color,"alpha":.5, "label":label}
+    kw_down.update(kwargs_down)
+
+    heights, bins = np.histogram(series1*-1, weights=np.ones(len(series1)) / len(series1), bins=n_bins) 
+    bin_width = np.diff(bins)[0]
+    bin_pos =( bins[:-1] + bin_width / 2) * -1
+    ax.bar(bin_pos, heights, width=bin_width, **kw_up)
+    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black')
+
+
+    # upside down plot
+    heights, bins = np.histogram(series2*-1, weights=np.ones(len(series2)) / len(series2), bins=n_bins) 
+    heights *= -1
+    bin_width = np.diff(bins)[0]
+    bin_pos =( bins[:-1] + bin_width / 2) * -1
+    ax.bar(bin_pos, heights, width=bin_width, **kw_down)
+    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black')
