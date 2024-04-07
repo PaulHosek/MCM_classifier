@@ -351,24 +351,20 @@ def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smoot
     for icc_idx, icc in enumerate(single_mcm):
         # calculate probabilities of icc seeing each of the states in data
         rank = icc.count("1")
-
-        counts_icc = np.array(counts_gstar[icc_idx]) # e.g., [200,12,0,0] if rank = 2
+        counts_icc = np.array(counts_gstar[icc_idx]) # e.g., [188,12,0,0] if rank = 2 and 200 samples
         
         observables = data_gen[:,mcm_gen[icc_idx,:] == 1]
-        # unq_states, unq_counts = np.unique(observables, axis=0, return_counts=True)
         obs_states = np.apply_along_axis(lambda i: int("".join(i),base=2), 1, observables.astype(str))
 
 
         kba = counts_icc[obs_states]
         
-
-
         if smooth:
             distr *= (kba+1/(2**rank))/(fitting_sample_size+1)
         else:
             distr *= kba/fitting_sample_size
         
-    print(distr)
+
     return distr
 
 
