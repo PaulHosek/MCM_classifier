@@ -126,7 +126,7 @@ def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_pa
 
 
 # XXX_sample => [sample size, run_index, cat_idx, icc_idx]
-def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_split_{}"):
+def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_split_{}", ):
     """For all sample sizes, load the counts and mcms for a specific digit and a pool of samples specifid by the letter."""
     samples_path = path_format.format(letter)
 
@@ -318,7 +318,7 @@ def evidence_on_data(single_mcm, data):
         rank = icc.count("1")
         C_icc = data_gen[:,mcm_gen[icc_idx,:] == 1]
         counts = np.unique(C_icc, axis=0, return_counts=True)[1]
-        # counts = counts[np.argsort([int("".join(i)) for i in configs.astype(str)])] # order counts by integer representation of config
+        # counts = counts[np.argsort([int("".join(i),base=2) for i in configs.astype(str)])] # order counts by integer representation of config
 
 
         evidence[icc_idx] += math.lgamma(2**(rank-1)) - math.lgamma(N + 2**(rank-1)) # middle part of equation 8 in Mulatier_2020
@@ -327,3 +327,64 @@ def evidence_on_data(single_mcm, data):
 
         mcm_evidence = np.sum(evidence) # - N*(0)*np.log(2)
     return mcm_evidence
+
+
+def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smooth=True):
+    """Calculate the probability distribution at g* of a partitioning ("single_mcm") on some (possibly new) data.
+
+    :param single_mcm: Each binary string is an icc state.
+    :type single_mcm: np.array 1D with dtype string
+    :param data: Dataset to calcualte evidence on. result from np.loadtext(dtype=str)
+    :type data: np.array 1D with dtype string
+    :param fitting_sample_size: nr samples used to build the mcm
+    :returns: 1D np.array of len(data) with the final probability for observing each image
+    """
+    mcm_gen = np.array([[int(s) for s in state] for state in single_mcm])
+    data_gen = np.array([[int(s) for s in state] for state in data])
+
+    
+    N = len(data)
+
+    distr = np.ones(len(data))
+
+    # calcualte probability of MCM
+    for icc_idx, icc in enumerate(single_mcm):
+        # calculate probabilities of icc seeing each of the states in data
+        rank = icc.count("1")
+
+        counts_icc = np.array(counts_gstar[icc_idx]) # e.g., [200,12,0,0] if rank = 2
+        
+        observables = data_gen[:,mcm_gen[icc_idx,:] == 1]
+        # unq_states, unq_counts = np.unique(observables, axis=0, return_counts=True)
+        obs_states = np.apply_along_axis(lambda i: int("".join(i),base=2), 1, observables.astype(str))
+
+
+        kba = counts_icc[obs_states]
+        
+
+
+        if smooth:
+            distr *= (kba+1/(2**rank))/(fitting_sample_size+1)
+        else:
+            distr *= kba/fitting_sample_size
+        
+    print(distr)
+    return distr
+
+
+
+
+
+
+    # for icc_idx, icc in enumerate(single_mcm):
+    #     rank = icc.count("1")
+    #     C_icc = data_gen[:,mcm_gen[icc_idx,:] == 1]
+    #     counts = np.unique(C_icc, axis=0, return_counts=True)[1]
+
+    #     for k in counts: 
+    #         if smooth:
+    #             res[icc_idx] *= (k+1/(2**rank))/(sample_size+1)
+    #         else: 
+    #             res[icc_idx] *= k/sample_size
+
+    # return res
