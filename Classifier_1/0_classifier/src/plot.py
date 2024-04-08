@@ -474,7 +474,7 @@ def mirror_hist(ax, series1, series2, kwargs_up = {}, kwargs_down = {}, n_bins =
     ax.bar(bin_pos, heights, width=bin_width, **kw_down)
     ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black')
 
-def bar_hist(ax, series, n_bins=20, kwargs={}):
+def bar_hist(ax, series, n_bins=20, **kwargs):
     """
     Plot a bar histogram on the given axes.
 
@@ -496,7 +496,36 @@ def bar_hist(ax, series, n_bins=20, kwargs={}):
 def get_default_colorcycle():
     return plt.rcParams['axes.prop_cycle'].by_key()['color']
 
+def get_list_fromcmap(cmap, N=None, use_index="auto"):
+    """
+    Get a list of colors from a colormap.
+
+    :param cmap: The colormap to use for generating the colors.
+    :type cmap: str or matplotlib.colors.Colormap
+    :param N: The number of colors to generate, defaults to None.
+    :type N: int, optional
+    :param use_index: Determines whether to use the colormap index or the actual colors, defaults to "auto".
+                      If "auto", it will automatically determine based on the colormap.
+    :type use_index: str, optional
+    :return: A list of colors extracted from the colormap.
+    :rtype: list
+    """
+    return get_cycle_fromcmap(cmap, N=None, use_index="auto").by_key()["color"]
+
 def get_cycle_fromcmap(cmap, N=None, use_index="auto"):
+    """
+    Get a cycler object for cycling through colors from a colormap.
+
+    :param cmap: The colormap to use for generating the colors.
+    :type cmap: str or matplotlib.colors.Colormap
+    :param N: The number of colors to generate, defaults to None.
+    :type N: int, optional
+    :param use_index: Determines whether to use the colormap index or the actual colors, defaults to "auto".
+                      If "auto", it will automatically determine based on the colormap.
+    :type use_index: str, optional
+    :return: A cycler object that cycles through the colors from the colormap.
+    :rtype: cycler.Cycler
+    """
     if isinstance(cmap, str):
         if use_index == "auto":
             if cmap in ['Pastel1', 'Pastel2', 'Paired', 'Accent',
