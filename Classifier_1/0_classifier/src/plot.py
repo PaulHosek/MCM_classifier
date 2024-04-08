@@ -9,6 +9,9 @@ import scipy.cluster.hierarchy as sch
 from src.loaders import load_data
 from sklearn.metrics import normalized_mutual_info_score
 import scipy.ndimage as ndi
+from matplotlib.pyplot import cycler
+from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+import matplotlib.cm
 
 
 ## ---- Co-occurance Matrix ---- ##
@@ -447,6 +450,79 @@ def interesting_pix_map(mcms_ss, interesting_pix, nr_runs, digit, ax, map_kwargs
 
 
 
+# ----- INDICATIVE ICC -----
+def mirror_hist(ax, series1, series2, kwargs_up = {}, kwargs_down = {}, n_bins = 20, color="blue", label=None):
+    # update default args
+    kw_up = {"color":color,"alpha":.8}
+    kw_up.update(kwargs_up)
+    kw_down = {"color":color,"alpha":.5, "label":label}
+    kw_down.update(kwargs_down)
+
+
+    heights, bins = np.histogram(series1*-1, weights=np.ones(len(series1)) / len(series1), bins=n_bins) 
+    bin_width = np.diff(bins)[0]
+    bin_pos =( bins[:-1] + bin_width / 2) * -1
+    ax.bar(bin_pos, heights, width=bin_width, **kw_up)
+    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black')
+
+
+    # upside down plot
+    heights, bins = np.histogram(series2*-1, weights=np.ones(len(series2)) / len(series2), bins=n_bins) 
+    heights *= -1
+    bin_width = np.diff(bins)[0]
+    bin_pos =( bins[:-1] + bin_width / 2) * -1
+    ax.bar(bin_pos, heights, width=bin_width, **kw_down)
+    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black')
+
+def bar_hist(ax, series, n_bins=20, kwargs={}):
+    """
+    Plot a bar histogram on the given axes.
+
+    :param ax: The axes on which to plot the histogram.
+    :type ax: matplotlib.axes.Axes
+    :param series: The data series to plot.
+    :type series: numpy.ndarray
+    :param n_bins: The number of bins for the histogram.
+    :type n_bins: int
+    :param kwargs: Additional keyword arguments to pass to the `ax.bar` function. Defaults to empty dict.
+    :type kwargs: dict
+    """
+    heights, bins = np.histogram(series*-1, weights=np.ones(len(series)) / len(series), bins=n_bins) 
+    bin_width = np.diff(bins)[0]
+    bin_pos =( bins[:-1] + bin_width / 2) * -1
+    ax.bar(bin_pos, heights, width=bin_width, **kwargs)
+    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black') # edge
+
+def get_default_colorcycle():
+    return plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+def get_cycle_fromcmap(cmap, N=None, use_index="auto"):
+    if isinstance(cmap, str):
+        if use_index == "auto":
+            if cmap in ['Pastel1', 'Pastel2', 'Paired', 'Accent',
+                        'Dark2', 'Set1', 'Set2', 'Set3',
+                        'tab10', 'tab20', 'tab20b', 'tab20c']:
+                use_index=True
+            else:
+                use_index=False
+        cmap = matplotlib.cm.get_cmap(cmap)
+    if not N:
+        N = cmap.N
+    if use_index=="auto":
+        if cmap.N > 100:
+            use_index=False
+        elif isinstance(cmap, LinearSegmentedColormap):
+            use_index=False
+        elif isinstance(cmap, ListedColormap):
+            use_index=True
+    if use_index:
+        ind = np.arange(int(N)) % cmap.N
+        return cycler("color",cmap(ind))
+    else:
+        colors = cmap(np.linspace(0,1,N))
+        return cycler("color",colors)
+
+
 
 
 
@@ -657,48 +733,3 @@ def plot_results(test_data, test_labels, predicted_classes, probs, classifier, o
     plot_confusion_matrix(classifier.stats["confusion_matrix"], n_categories)
     plt.savefig(os.path.join(output_path, "confusion_matrix.png"))
 
-
-
-
-# ----- INDICATIVE ICC -----
-def mirror_hist(ax, series1, series2, kwargs_up = {}, kwargs_down = {}, n_bins = 20, color="blue", label=None):
-    # update default args
-    kw_up = {"color":color,"alpha":.8}
-    kw_up.update(kwargs_up)
-    kw_down = {"color":color,"alpha":.5, "label":label}
-    kw_down.update(kwargs_down)
-
-
-    heights, bins = np.histogram(series1*-1, weights=np.ones(len(series1)) / len(series1), bins=n_bins) 
-    bin_width = np.diff(bins)[0]
-    bin_pos =( bins[:-1] + bin_width / 2) * -1
-    ax.bar(bin_pos, heights, width=bin_width, **kw_up)
-    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black')
-
-
-    # upside down plot
-    heights, bins = np.histogram(series2*-1, weights=np.ones(len(series2)) / len(series2), bins=n_bins) 
-    heights *= -1
-    bin_width = np.diff(bins)[0]
-    bin_pos =( bins[:-1] + bin_width / 2) * -1
-    ax.bar(bin_pos, heights, width=bin_width, **kw_down)
-    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black')
-
-def bar_hist(ax, series, n_bins=20, kwargs={}):
-    """
-    Plot a bar histogram on the given axes.
-
-    :param ax: The axes on which to plot the histogram.
-    :type ax: matplotlib.axes.Axes
-    :param series: The data series to plot.
-    :type series: numpy.ndarray
-    :param n_bins: The number of bins for the histogram.
-    :type n_bins: int
-    :param kwargs: Additional keyword arguments to pass to the `ax.bar` function. Defaults to empty dict.
-    :type kwargs: dict
-    """
-    heights, bins = np.histogram(series*-1, weights=np.ones(len(series)) / len(series), bins=n_bins) 
-    bin_width = np.diff(bins)[0]
-    bin_pos =( bins[:-1] + bin_width / 2) * -1
-    ax.bar(bin_pos, heights, width=bin_width, **kwargs)
-    ax.bar( bin_pos, heights, width=bin_width, color='none', edgecolor='black') # edge
