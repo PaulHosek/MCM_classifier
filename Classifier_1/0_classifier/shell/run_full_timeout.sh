@@ -7,7 +7,7 @@ iterations=52
 timeout=360
 
 
-for size in 10 100 2000 3000 4000 5000 6315; do 
+for size in 3000 4000 5000 6315; do # 10 100 2000 3000 4000 5000 6315;
   for (( i=1; i <= iterations; i++ )); do  # Removed $ from iterations for consistency
     
     # Run the Python script with timeout in the background
