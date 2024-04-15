@@ -9,7 +9,7 @@ import argparse
 
 def main(sample_s):
       
-
+    seed = 1
     n_categories = 10 
     n_variables = 121  
     mcm_filename_format = "train-images-unlabeled-{}_bootstrap_comms.dat"
@@ -22,7 +22,7 @@ def main(sample_s):
     result_sample_sizes_dir = "../OUTPUT/sample_sizes"
     clf_args = [n_categories, n_variables, mcm_filename_format, data_filename_format, data_path, communities_path] # data path here for subsampling
 
-    utils.evaluate_subsample(sample_s, clf_args)
+    utils.evaluate_subsample(sample_s, clf_args, seed=seed, seed_plus=True)
 ##########3
   # full sample 6315: train + test
   

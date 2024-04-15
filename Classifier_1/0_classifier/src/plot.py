@@ -53,7 +53,7 @@ def do_cluster(matrix, via_matrix=None):
     if via_matrix is None:
         via_matrix = matrix
 
-    linkage = sch.linkage(via_matrix, method='average')
+    linkage = sch.linkage(via_matrix)
     dendrogram = sch.dendrogram(linkage, no_plot=True)
     return matrix[:, dendrogram['leaves']][dendrogram['leaves']]
 

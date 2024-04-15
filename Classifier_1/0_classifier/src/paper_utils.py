@@ -160,12 +160,10 @@ def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_
 
 
 # get sample seed=42 from dataset B
-def recreate_dataset(sample_from_letter,digit, sample_size:int, seed = 42,fname_format= "half-images-unlabeled-{}.dat", fname_start="half-"):
+def recreate_dataset(sample_from_letter,digit, sample_size:int, seed = 42,fname_format= "half-images-unlabeled-{}.dat", fname_start="half-", all_data_path="../INPUT_all/data/combined_split_{}", input_data_path = "../INPUT/data/"):
     """Recreate the dataset A or B was build on."""
-    all_data_path="../INPUT_all/data/combined_split_{}".format(sample_from_letter)
-
-
-    input_data_path = "../INPUT/data/" # FIXME
+    all_data_path = all_data_path.format(sample_from_letter)
+     
     sample_size_from_letter = sample_size # needs to be the same as build from sample size. We just show it the exact samples the other one is build on.
     subsample_data(sample_size_from_letter, all_data_path=all_data_path, seed=seed, fname_start=fname_start, input_data_path=input_data_path)
 
