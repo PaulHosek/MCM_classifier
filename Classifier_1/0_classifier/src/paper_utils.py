@@ -365,7 +365,66 @@ def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smoot
 
     return distr
 
+def normalised_signed_distance_decisionbound(probs, own_cat, other_cat):
+    """Generate distances to decision boundary array to quantiy indicative icc.
 
+
+
+    :param probs: _description_
+    :type probs: 2d np array of shape [N, ≥2]
+    :param own_cat: digit that the mcm was fitted on (e.g., 3)
+    :type own_cat: int 
+    :param other_cat: digit to test against (e.g., 5)
+    """
+    assert own_cat <= probs.shape[1] and other_cat <= probs.shape[1], "IndexError: own_cat or other_cat are out of bounds of the probs array."
+
+    x_coords, y_coords = zip(*[(x, y) for x, y in zip(probs[:, own_cat], probs[:, other_cat],)])
+    distances = np.array(x_coords) - np.array(y_coords) / np.sqrt(2) # signed distance
+    x0, y0 = 0, 1
+    max_dist = np.abs(x0 - y0) / np.sqrt(2)
+    return distances/max_dist
+
+
+def norm_distribution_distance(dist_a,dist_b):
+    """
+    Distance between two probability distributions.
+    Implements logic based on to |mu_1 - mu_2| > (sigma_1 + sigma_2).
+    Formula used:
+     [|mu_1 - mu_2| - (sigma_1 + sigma_2)] / (mu_1 + mu_2)
+
+     Positive if mean difference is larger than twice the standard deviation.
+     Negative if smaller.
+     0 if equal.
+    
+
+    :param dist_a: The first probability distribution.
+    :type dist_a: numpy.ndarray
+    :param dist_b: The second probability distribution.
+    :type dist_b: numpy.ndarray
+    :return: The distance between the two probability distributions.
+    :rtype: float
+    """
+
+    return np.divide(np.abs(np.mean(dist_a) - np.mean(dist_b)) - (np.std(dist_a) +  np.std(dist_b)),
+                     np.mean(dist_a) + np.mean(dist_b))
+
+
+def total_variation_distance(dist_a, dist_b):
+    """
+    Calculates the total variation distance (TV)/ normalized L1 distance between two probability distributions.
+    
+    :param dist_a: The first probability distribution.
+    :type dist_a: numpy.ndarray
+    :param dist_b: The second probability distribution.
+    :type dist_b: numpy.ndarray
+    :return: The total variation distance between the two distributions.
+    :rtype: float
+    """
+    return 0.5 * np.sum(np.abs(dist_a - dist_b)) / len(dist_a)
+
+
+
+# norm_distribution_distance(a,b), total_variation_distance(a,b)
 
 
 
