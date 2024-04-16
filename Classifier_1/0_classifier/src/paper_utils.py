@@ -7,7 +7,7 @@ import os
 from shutil import copytree
 import src.plot as myplot
 import src.loaders as loaders
-
+# 
 
 
 ### --- FUNCTIONS FOR DATA SUBSETTING ---
@@ -327,7 +327,7 @@ def evidence_on_data(single_mcm, data):
     return mcm_evidence
 
 
-def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smooth=True):
+def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smooth=True, return_distr_icc=False):
     """Calculate the probability distribution at g* of a partitioning ("single_mcm") on some (possibly new) data.
 
     :param single_mcm: Each binary string is an icc state.
@@ -335,6 +335,8 @@ def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smoot
     :param data: Dataset to calcualte evidence on. result from np.loadtext(dtype=str)
     :type data: np.array 1D with dtype string
     :param fitting_sample_size: nr samples used to build the mcm
+    :param return_distr_icc: instead of multiplying icc, return array of max size icc filled with first k entries with the icc, all other with -1.
+    :type return_distr_icc: 1d np.array of size nr spins (i.e., 121). filled with p_icc if icc exites, else -1.
     :returns: 1D np.array of len(data) with the final probability for observing each image
     """
     mcm_gen = np.array([[int(s) for s in state] for state in single_mcm])
@@ -344,7 +346,8 @@ def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smoot
     N = len(data)
 
     distr = np.ones(len(data))
-
+    if return_distr_icc:
+        distr = np.full((121, len(data)), fill_value = -1.0)    
     # calcualte probability of MCM
     for icc_idx, icc in enumerate(single_mcm):
         # calculate probabilities of icc seeing each of the states in data
@@ -356,12 +359,17 @@ def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smoot
 
 
         kba = counts_icc[obs_states]
-        
-        if smooth:
-            distr *= (kba+1/(2**rank))/(fitting_sample_size+1)
+        if return_distr_icc:
+            if smooth:
+                distr[icc_idx,:] = (kba+1/(2**rank))/(fitting_sample_size+1)
+            else:
+                distr[icc_idx, :] = kba/fitting_sample_size
         else:
-            distr *= kba/fitting_sample_size
-        
+            if smooth:
+                distr *= (kba+1/(2**rank))/(fitting_sample_size+1)
+            else:
+                distr *= kba/fitting_sample_size
+            
 
     return distr
 
