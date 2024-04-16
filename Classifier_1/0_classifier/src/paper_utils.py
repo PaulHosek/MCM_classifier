@@ -361,7 +361,7 @@ def probabilities_gstar(single_mcm,counts_gstar, data,fitting_sample_size, smoot
         kba = counts_icc[obs_states]
         if return_distr_icc:
             if smooth:
-                distr[icc_idx,:] = (kba+1/(2**rank))/(fitting_sample_size+1)
+                distr[icc_idx,:] = (kba+(1/(2**rank)))/(fitting_sample_size+1)
             else:
                 distr[icc_idx, :] = kba/fitting_sample_size
         else:
