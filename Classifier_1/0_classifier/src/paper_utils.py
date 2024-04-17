@@ -479,7 +479,7 @@ def get_complete_testprobs(mcms_samplesizes,counts_samplesizes,sample_sizes,n_ru
                     test_mcms[mcm_digit][sample_size_idx][run_idx][test_digit][:len(mcm[mcm_digit])] = np.array(mcm[mcm_digit],dtype=str)
     return test_mcms, test_probs
 
-def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx, run_idx, return_comms = False):
+def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx, run_idx, return_comms = False, return_iccdata = False, return_avg_icc_prob=False):
 
     icc_data = test_probs[mcm_idx,sample_idx, run_idx]
 
@@ -495,7 +495,13 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
     dist_map = dists[comms] 
     # plt.scatter(avg_prob[:,cat_a], avg_prob[:,cat_b])
     # plt.imshow(dist_map)
+
+    out = [dist_map]
     if return_comms:
-        return dist_map, comms
-    else: 
-        return dist_map
+         out.append(comms)
+    if return_iccdata:
+        out.append(icc_data)
+    if return_avg_icc_prob:
+        out.append(avg_icc_prob)
+
+    return tuple(out)
