@@ -413,8 +413,9 @@ def norm_distribution_distance(dist_a,dist_b):
     :rtype: float
     """
 
-    return np.divide(np.abs(np.mean(dist_a) - np.mean(dist_b)) - (np.std(dist_a) +  np.std(dist_b)),
-                     np.mean(dist_a) + np.mean(dist_b))
+    return np.abs(np.divide(np.abs(np.mean(dist_a) - np.mean(dist_b)) - (np.std(dist_a) +  np.std(dist_b)),
+                     np.mean(dist_a) + np.mean(dist_b)))
+
 
 
 def total_variation_distance(dist_a, dist_b):
@@ -432,20 +433,69 @@ def total_variation_distance(dist_a, dist_b):
 
 
 
-# norm_distribution_distance(a,b), total_variation_distance(a,b)
+def get_complete_testprobs(mcms_samplesizes,counts_samplesizes,sample_sizes,n_runs,nr_digits=10,nr_mcms=10, maxnr_icc=121, smooth=True):
+    """
+    Computes the g* probabilities of every individual icc for each sample, for each run, for each digit, for each mcm.
+    returns test_mcm np array. Shape: (nr_mcms, nr_sample_sizes, n_runs,nr_digits,maxnr_icc, nr_testimg) with , fill_value=-1.0
+    returns test_probs np array. Shape: (nr_mcms, len(sample_sizes), n_runs,nr_digits,maxnr_icc) with  fill_value="", dtype="<U121"
 
+    :param mcms_samplesizes: List of sample sizes used to build the MCMs.
+    :type mcms_samplesizes: list
+    :param counts_samplesizes: List of sample sizes used to calculate the counts.
+    :type counts_samplesizes: list
+    :param sample_sizes: List of sample sizes for which to compute the probabilities.
+    :type sample_sizes: list
+    :param n_runs: Number of runs.
+    :type n_runs: int
+    :param nr_digits: Number of digits.
+    :type nr_digits: int, optional
+    :param nr_mcms: Number of MCMs.
+    :type nr_mcms: int, optional
+    :param maxnr_icc: Maximum number of iccs.
+    :type maxnr_icc: int, optional
+    :param smooth: Whether to apply smoothing to the probabilities, defaults to True.
+    :type smooth: bool, optional
 
+    :return: The test_mcm np array. Shape: (nr_mcms, nr_sample_sizes, n_runs,nr_digits,maxnr_icc, nr_testimg) with , fill_value=-1.0
+    and the test_probs array. Shape: (nr_mcms, len(sample_sizes), n_runs,nr_digits,maxnr_icc) with  fill_value="", dtype="<U121"
 
+    :rtype: tuple
+    """
 
-    # for icc_idx, icc in enumerate(single_mcm):
-    #     rank = icc.count("1")
-    #     C_icc = data_gen[:,mcm_gen[icc_idx,:] == 1]
-    #     counts = np.unique(C_icc, axis=0, return_counts=True)[1]
+    test_probs = np.full((nr_mcms, len(sample_sizes), n_runs,nr_digits,maxnr_icc, len(load_test_data(digit=0))), fill_value=-1.0)
+    test_mcms = np.full((nr_mcms, len(sample_sizes), n_runs,nr_digits,maxnr_icc), fill_value="", dtype="<U121")
+    for mcm_digit in range(nr_digits):
 
-    #     for k in counts: 
-    #         if smooth:
-    #             res[icc_idx] *= (k+1/(2**rank))/(sample_size+1)
-    #         else: 
-    #             res[icc_idx] *= k/sample_size
+        for test_digit in range(nr_digits):
+            test_data = load_test_data(digit=test_digit)
 
-    # return res
+            for sample_size_idx, sample_size in enumerate(sample_sizes):
+
+                mcms = mcms_samplesizes[sample_size_idx][:n_runs]
+                counts_gstar = counts_samplesizes[sample_size_idx][:n_runs]
+                    
+                for run_idx, mcm in enumerate(mcms):
+                    test_probs[mcm_digit][sample_size_idx][run_idx][test_digit] = probabilities_gstar(mcm[mcm_digit], counts_gstar[run_idx][mcm_digit], test_data, sample_size,smooth=smooth,return_distr_icc=True)
+                    test_mcms[mcm_digit][sample_size_idx][run_idx][test_digit][:len(mcm[mcm_digit])] = np.array(mcm[mcm_digit],dtype=str)
+    return test_mcms, test_probs
+
+def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx, run_idx, return_comms = False):
+
+    icc_data = test_probs[mcm_idx,sample_idx, run_idx]
+
+    # get into format for decision boundary distance function
+    nr_icc = np.argmin(icc_data != -1, axis =1)[0,0] # remove icc rows of surplus icc, all the same
+    icc_data = icc_data[:,:nr_icc,:]
+    icc_data = np.transpose(icc_data, (1, 2, 0)) 
+    avg_icc_prob = icc_data.mean(axis=1) # over test samples
+    dists = normalised_signed_distance_decisionbound(avg_icc_prob,digit_pair[0],digit_pair[1])
+    # find mcm and build map
+    intr_mcm = test_mcms[mcm_idx,sample_idx, run_idx][0,:nr_icc] # get rid of unused rows, mcm_identical for every icc
+    comms = myplot.generate_icc_comms_map(intr_mcm)
+    dist_map = dists[comms] 
+    # plt.scatter(avg_prob[:,cat_a], avg_prob[:,cat_b])
+    # plt.imshow(dist_map)
+    if return_comms:
+        return dist_map, comms
+    else: 
+        return dist_map
