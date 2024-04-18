@@ -23,21 +23,54 @@ class Pairwise_model():
         self.fname_sep_path = os.path.join(self.cat_dir, fname+"_sep")
         self.all_data_dir = all_data_path
         self.is_setup = False
-
-    def setup(self, seed):
+        self.dat_shape = ()
+    def setup(self, seed, input_spaced=False):
         """
         Set up for model fitting: Subsample, convert to spaced format,
           generate .p file, check for no deletion of spins.
 
         :param seed: The seed value for random number generation.
         :type seed: int
+        :param input_spaced: If input does already have whitespaces between every spin (example) or not (mnist). Defaults to false.
         """
-
         self.subsample_cat_ace(seed=seed)
-        self.convert_to_spaced()
+        if not input_spaced:
+            self.convert_to_spaced()
+
+        self.dat_shape = np.genfromtxt(self.fname_sep_path+".dat", delimiter=" ").shape
+        self.__test_datdims() 
+
         ACEtools.WriteCMSA("binary", self.fname_sep_path+".dat")
-        self.no_deletions()
+
+
+        # test valid file
+        self.__test_nodeletions()
+        self.__test_freqandcorrels()
+        raise KeyboardInterrupt
+
         self.is_setup = True
+
+    def __test_datdims(self):
+        """Test if the separated .dat file has both rows and columns. 
+        Note, this will also be flag single sample inputs, but fitting on one sample is theoretically unfeasible."""
+
+        if len(self.dat_shape) != 2:
+            raise ValueError("Input data is not two dimensional.")
+
+    def __test_freqandcorrels(self):
+        """
+        Test if .p file the right length:
+        For each variable, the .p file needs to have a frequency. First N lines.
+        For each pairwise combination of variables, the .p file should have a pairwise correlation. Last N(N-1)/2 lines.
+        """
+        data = np.genfromtxt(self.fname_sep_path+"-output.p", delimiter=" ")
+        N = self.dat_shape[1]
+
+        if len(data.shape) != 1:
+            raise ValueError(".p file has != 1 column. Incorrectly generated.")
+        if data.shape[0] != N + N*(N-1)/2:
+            raise ValueError(f"Data shape ({data.shape}) dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
+
     
     def fit(self, method, path_to_exe: str, args: list = []):
         """
@@ -60,19 +93,17 @@ class Pairwise_model():
             raise ValueError("Invalid method. Please choose either 'ace' or 'qls'.")
         self.call_exec(cml_args)
 
-        f = open(os.devnull, "w")
         p = self.call_exec(cml_args)
-        status = p.wait()
-        f.close()
     
 
 
 
-    def no_deletions(self):
+
+    def __test_nodeletions(self):
         """
         Verifies that no variables were removed post ACEtools execution.
 
-        This function ensures that no variables, due to never switching to the other state, have been eliminated.
+        This function ensures that no variables, due to never switching to the other state (0 or 1), have been eliminated.
         Such removals can disrupt the sequence in subsequent parts of the program and should be prevented by the subsampler.
 
         Raises:
@@ -104,7 +135,7 @@ class Pairwise_model():
 
     def call_exec(self, args: tuple):
         """Call executable.
-        Note, this is a sequential implementation. Only one pairwise model is fitted at the time.
+        Note, this is a sequential implementation for fitting a single pairwise model.
 
         :param args: tuple of what string elements that make up the command line argument
         :type args: tuple
@@ -210,10 +241,19 @@ class Pairwise_model():
 
 
 
+# do on small toy system
+# if __name__ == "__main__":
+#     observables_fname = "train-images-unlabeled-1"
+#     mod = Pairwise_model(10,"./INPUT/data/",observables_fname, "./INPUT_all/examples/")
+#     mod.setup(42, input_spaced=True)
+#     mod.fit("ace","./utils/ace")
+    # mod.fit("qls", "./utils/")
 
 
+
+# do on test data for digit 1
 if __name__ == "__main__":
-    mod = Pairwise_model(10,"./INPUT/data/","train-images-unlabeled-1", "./INPUT_all/data")
+    mod = Pairwise_model(10,"./INPUT/data/","train-images-unlabeled-1", "./INPUT_all/data/traindata")
     mod.setup(42)
     mod.fit("ace","./utils/ace")
     # mod.fit("qls", "./utils/")
