@@ -15,8 +15,8 @@ class Pairwise_evaluator():
     def __init__(self, paramter_path:str,nspins:int):
         self.parameter_path = paramter_path
         self.nspins = nspins
-        self.fields = np.zeros(nspins)
-        self.couplings = np.zeros(int(nspins*(nspins-1)/2))
+        self.fields = np.zeros(nspins,dtype=np.double)
+        self.couplings = np.zeros(int(nspins*(nspins-1)/2),dtype=np.double)
 
 
     def load_ising_paramters(self):
@@ -33,7 +33,7 @@ class Pairwise_evaluator():
 
 
 
-    def __validate_jfile(self,all_param):
+    def __validate_jfile(self, res):
         """Validate dimensions of the potts paramter ".j" file."""
         all_param = np.loadtxt(self.parameter_path)
         N = self.nspins
@@ -45,23 +45,36 @@ class Pairwise_evaluator():
 
     # numba this shit
     def calc_energy(self, state): # state assumed to be in convention -1 1
-        h = self.__calc_fields(state)
-    
-        pass
-
+        h = self.__calc_fields(self.fields, state)
+        j = self.__calc_couplings(self.couplings,state)
+        return -1*(h+j)
 
     @staticmethod
-    @jit("(float64[:], float64[:])", nopython=True) # state assumed to be in convention -1 1
-    def __calc_fields(fields, state):
-        return -1*np.sum(fields * state)    # FIXME check if this is correct based on the convention
+    @jit("(float64[:], int64[:])", nopython=True) # state assumed to be in convention -1 1
+    def __calc_fields(fields, state) -> np.double:
+        return np.sum(fields * state)    # FIXME check if this is correct based on the convention
 
+    @staticmethod
+    def __calc_couplings(couplings, state)->np.double:
+        """Compute -1*sum(J_ij*s[i]*s[j]) for all (i,j) with i < j.
+        Outer product and masking triangle.
+        """
+        return np.sum(couplings*((state[:,None]*state)[~np.tri(len(state),dtype=bool)]))
+    
+    @staticmethod
+    def pairwise_multiply_masking(a):
+        """Compute all x[i]*x[j] for all (i,j) with i < j."""
+        return (a[:,None]*a)[~np.tri(len(a),dtype=bool)]
         
 
     # numba here too
     def calc_couplings(state): # state assumed to be in convention -1 1
-        
+        # either calculate the triangle
+        # or precalcuate who gets calcualted with whom in some sort of matrix -> kronecker product?
+            # is this really faster since i only need 
+            # maybe use diagonal as fields
+        # or do some einsum magic
         pass
-
     # numba this as well
     def partiton_function():
         # generate the value for Z
