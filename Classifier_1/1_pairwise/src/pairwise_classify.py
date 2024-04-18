@@ -42,7 +42,7 @@ class Pairwise_model():
         __test_freqandcorrels(): Test if the .p file has the right length.
     """
 
-    def __init__(self, sample_size, OUTPUT_mod_dir, fname, all_data_path) -> None:
+    def __init__(self, sample_size,all_data_path, fname, OUTPUT_mod_dir) -> None:
         """
         Initialize the Pairwise_model class.
 
@@ -70,16 +70,24 @@ class Pairwise_model():
         :type seed: int
         :param input_spaced: If input does already have whitespaces between every spin (example) or not (mnist). Defaults to false.
         """
-        self.subsample_cat_ace(seed=seed)
-        if not input_spaced:
-            self.convert_to_spaced()
-        self.dat_shape = np.genfromtxt(self.fname_sep_path+".dat", delimiter=" ").shape
-        self.__test_datdims() 
-
+        self.subsample_cat_ace(seed, input_spaced)
         ACEtools.WriteCMSA("binary", self.fname_sep_path+".dat")
-        self.__test_nodeletions()
-        self.__test_freqandcorrels()
+
+        self.dat_shape = np.genfromtxt(self.fname_sep_path+".dat", delimiter=" ").shape
+        self.__validate_input()
         self.is_setup = True
+
+    def __validate_input(self):
+        """
+        Test battery to check that the input is valid:
+        1. no spins were deleted
+        2. dimensions of input dat are correct
+        3. .p file has the right length and dimensions.
+        """
+        self.__test_nodeletions()
+        self.__test_datdims() 
+        self.__test_freqandcorrels()
+
 
     def fit(self, method, path_to_exe: str, args: list = []):
         """
@@ -104,18 +112,6 @@ class Pairwise_model():
 
         p = self.call_exec(cml_args)
     
-    def convert_to_spaced(self):
-        """Converts all files in the current CATEGORY's folder and its subfolders from binary strings to binary integers with spaces:
-        e.g., 000111 -> 0 0 0 1 1 1.
-        """
-
-        for root, dirs, files in os.walk(self.cat_dir):
-            for filename in files:
-                print(filename)
-                if filename.endswith(".dat"):
-                    path = os.path.join(root, filename)
-                    file = np.genfromtxt(path, dtype=int, delimiter=1)
-                    np.savetxt(path[:-4] + "_sep" + ".dat", file, fmt="%d", delimiter=" ")
 
     def call_exec(self, args: tuple):
         """Call executable.
@@ -188,26 +184,27 @@ class Pairwise_model():
         cm_args.extend(args)
         return tuple(cm_args)
 
-    def subsample_cat_ace(self,seed):
+    def subsample_cat_ace(self,seed, input_spaced):
         """Clear input_data_path and fill it, from the all_data_path, with a single folder of the category we are interested in.
-        
+        If the data is not spaced (rows are contiguous strings), this will bring it in the right format too.
         :param sample_size: if None then take whole sample, otherwise provide integer of how many samples. Must be <= available samples.
 
         """
         rng = np.random.default_rng(seed)
+        self.clear_cat(self.OUTPUT_mod_dir, self.fname)
 
-        self.clear_cat(self.OUPUT_mod, self.fname)
-        # generate new input data 
-        for file in os.listdir(self.all_data_dir):
-            if file.split(".")[0] == self.fname:
-                inp = np.loadtxt(os.path.join(self.all_data_dir,file), dtype="str")
-                subfolder_name = file.split(".")[0]  
-                subfolder_path = os.path.join(self.OUTPUT_mod_dir, subfolder_name) 
+        # shape (nr samples, nr spins)
+        inp_path = os.path.join(self.all_data_dir,self.fname+".dat")
+        if not input_spaced:
+            data = np.genfromtxt(inp_path, delimiter=1, dtype=int)
+        else:
+            data = np.loadtxt(inp_path, dtype=int) 
 
-                os.makedirs(subfolder_path, exist_ok=True) 
-                arr = rng.choice(inp, self.sample_size, replace=False)
-                arr = np.append(arr, ["0"*121, "1"*121])
-                np.savetxt(os.path.join(subfolder_path, file), arr, fmt="%s")
+        data = rng.permutation(data,axis=0)[:self.sample_size,:]
+        os.makedirs(self.cat_dir, exist_ok=True) 
+        np.savetxt(self.fname_sep_path+".dat",data, fmt="%s", delimiter=" ")
+
+
 
     @staticmethod
     def clear_cat(path, dir_name):
@@ -242,7 +239,7 @@ class Pairwise_model():
         """Test if the separated [...]_sep.dat file has both rows and columns. 
         Note, this will also be flag single sample inputs, but fitting on one sample is theoretically unfeasible."""
         if len(self.dat_shape) != 2:
-            raise ValueError("Input data is not two dimensional.")
+            raise ValueError(f"Input data in is not two dimensional. Input file path: {self.fname_sep_path}")
 
     def __test_freqandcorrels(self):
         """
