@@ -1,10 +1,6 @@
 import numpy as np
 import sys
 sys.path.append("../")
-import ace_utils.ACEtools as ACEtools
-import os
-import subprocess
-import shutil
 
 
 # not sure if should inherent from fitter
@@ -15,8 +11,7 @@ class Pairwise_evaluator():
         self.parameter_path = paramter_path
         self.nspins = nspins
         self.fields = np.zeros(nspins)
-        self.couplings = np.empty(nspins*(nspins-1)/2)
-
+        self.couplings = np.empty(int(nspins*(nspins-1)/2))
 
 
     def load_ising_paramters(self):
@@ -28,8 +23,10 @@ class Pairwise_evaluator():
         # be careful with the indexing on this stuff
         all_param = np.loadtxt(self.parameter_path)
         self.__validate_jfile(all_param)
+        self.fields = all_param[:self.nspins]
+        self.couplings = all_param[self.nspins:]
 
-    def __validate_jfile(self):
+    def __validate_jfile(self,all_param):
         """Validate dimensions of the potts paramter ".j" file."""
         all_param = np.loadtxt(self.parameter_path)
         N = self.nspins
@@ -73,5 +70,5 @@ class Pairwise_evaluator():
 
 if __name__ == "__main__":
     spin4_path = "../output_small/4spin/4spin_sep-output-out.j"
-    mod = Pairwise_evaluator(spin4_path)
+    mod = Pairwise_evaluator(spin4_path,4)
     mod.load_ising_paramters()
