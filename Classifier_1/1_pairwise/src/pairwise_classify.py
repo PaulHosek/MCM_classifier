@@ -2,17 +2,83 @@ import numpy as np
 import sys
 sys.path.append("../")
 import ace_utils.ACEtools as ACEtools
+import legacy.helpers as helddpers
 import os
 import subprocess
 import shutil
 
 class Pairwise_model():
-    # fit single pairwise model/ single category
-    def __init__(self, sample_size, INPUT_dir, fname, all_data_path) -> None:
+    """
+    Class to fit a single pairwise model on a subsample of observables (e.g., to an mnist digit).
+
+    Args:
+        sample_size (int): The sample size for model fitting.
+        OUTPUT_mod_dir (str): The output directory of the model.
+        fname (str): The filename of the model.
+        all_data_path (str): The path to the directory containing all the data.
+
+    Attributes:
+        sample_size (int): The sample size for model fitting.
+        OUTPUT_mod_dir (str): The output directory of the model.
+        fname (str): The filename of the model.
+        cat_dir (str): The directory path for the category.
+        fname_sep_path (str): The path for the separated filename.
+        all_data_dir (str): The directory path for all the data.
+        is_setup (bool): Flag indicating if the model setup has been completed.
+        dat_shape (tuple): The shape of the input data.
+
+    Methods:
+        setup(seed, input_spaced=False): Set up for model fitting.
+        fit(method, path_to_exe, args=[]): Fit the pairwise model using either ace or qls.
+        convert_to_spaced(): Convert files to spaced format.
+        call_exec(args): Call the executable.
+        build_ace_args(path_to_exe, p_dir, p_fname, args, auto_l2=True): Generate arguments for the ACE algorithm.
+        build_qls_args(path_to_exe, p_dir, p_fname, sample_size, args, auto_l2=True): Generate arguments for the MC algorithm.
+        subsample_cat_ace(seed): Clear input_data_path and fill it with a single folder of the category.
+        clear_cat(path, dir_name): Delete all folders that match dir_name.
+        __test_nodeletions(): Verify that no variables were removed post ACEtools execution.
+        __test_datdims(): Test if the separated [...]-sep.dat file has both rows and columns.
+        __test_freqandcorrels(): Test if the .p file has the right length.
+    """
+
+    def __init__(self, sample_size, OUTPUT_mod_dir, fname, all_data_path) -> None:
+        """
+        Initialize the Pairwise_model class.
+
+        Args:
+            sample_size (int): The sample size for model fitting.
+            OUTPUT_mod_dir (str): The output directory of the model. Includes subsampled datafile and other datafiles.
+            fname (str): The filename of the model.
+            all_data_path (str): The path to the directory containing all the data.
+        """
         self.sample_size = sample_size
-        self.INPUT_dir = INPUT_dir
+        self.OUTPUT_mod_dir = OUTPUT_mod_dir
         self.fname = fname
-        self.cat_dir = os.path.join(INPUT_dir,fname)
+        self.cat_dir = os.path.join(OUTPUT_mod_dir, fname)
+        self.fname_sep_path = os.path.join(self.cat_dir, fname+"_sep")
+        self.all_data_dir = all_data_path
+        self.is_setup = False
+        self.dat_shape = ()
+
+    # Rest of the code...
+class Pairwise_model():
+    # fit single pairwise model/ single category
+
+    def __init__(self, sample_size, OUTPUT_mod_dir, fname, all_data_path) -> None:
+        """_summary_
+
+        
+        :param OUTPUT_mod_dir: _description_
+        :type OUTPUT_mod_dir: _type_
+        :param fname: _description_
+        :type fname: _type_
+        :param all_data_path: _description_
+        :type all_data_path: _type_
+        """
+        self.sample_size = sample_size
+        self.OUTPUT_mod_dir =  OUTPUT_mod_dir
+        self.fname = fname
+        self.cat_dir = os.path.join( OUTPUT_mod_dir,fname)
         self.fname_sep_path = os.path.join(self.cat_dir, fname+"_sep")
         self.all_data_dir = all_data_path
         self.is_setup = False
@@ -104,7 +170,7 @@ class Pairwise_model():
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace
         :type path_to_exe: str
-        :param p_dir: directory of the .p file to do the ace on. e.g., ./INPUT/data/img1
+        :param p_dir: directory of the .p file to do the ace on. e.g., ./OUTPUT_mod_dir/data/img1
         :type p_dir: str
         :param p_fname: filename of the .p file e.g., img1_sep
         :type p_fname: str
@@ -127,7 +193,7 @@ class Pairwise_model():
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace
         :type path_to_exe: str
-        :param p_dir: directory of the .p file to do the ace on. e.g., ./INPUT/data/img1
+        :param p_dir: directory of the .p file to do the ace on. e.g., ./OUTPUT_mod_dir/data/img1
         :type p_dir: str
         :param p_fname: filename of the .p file e.g., img1_sep
         :type p_fname: str
@@ -153,13 +219,13 @@ class Pairwise_model():
         """
         rng = np.random.default_rng(seed)
 
-        self.clear_cat(self.INPUT_dir, self.fname)
+        self.clear_cat(self.OUPUT_mod, self.fname)
         # generate new input data 
         for file in os.listdir(self.all_data_dir):
             if file.split(".")[0] == self.fname:
                 inp = np.loadtxt(os.path.join(self.all_data_dir,file), dtype="str")
                 subfolder_name = file.split(".")[0]  
-                subfolder_path = os.path.join(self.INPUT_dir, subfolder_name) 
+                subfolder_path = os.path.join(self.OUTPUT_mod_dir, subfolder_name) 
 
                 os.makedirs(subfolder_path, exist_ok=True) 
                 arr = rng.choice(inp, self.sample_size, replace=False)
@@ -220,7 +286,7 @@ class Pairwise_model():
 
 # do on test data for digit 1
 if __name__ == "__main__":
-    mod = Pairwise_model(10,"../INPUT/data/","train-images-unlabeled-1", "../INPUT_all/data/traindata")
+    mod = Pairwise_model(10, "../INPUT_all/data/traindata","train-images-unlabeled-1","../OUTPUT_mod/data/")
     mod.setup(42)
     mod.fit("ace","../ace_utils/ace")
     # mod.fit("qls", "./utils/")
