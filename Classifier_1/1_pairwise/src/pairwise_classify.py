@@ -2,7 +2,6 @@ import numpy as np
 import sys
 sys.path.append("../")
 import ace_utils.ACEtools as ACEtools
-import helpers
 import os
 import subprocess
 import shutil
@@ -214,10 +213,6 @@ class Pairwise_model():
             raise ValueError(".p file has != 1 column. Incorrectly generated.")
         if data.shape[0] != N + N*(N-1)/2:
             raise ValueError(f"Data shape ({data.shape}) dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
-
-
-
-
 
 
 
