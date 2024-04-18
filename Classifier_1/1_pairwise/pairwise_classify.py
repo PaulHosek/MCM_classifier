@@ -7,12 +7,6 @@ import os
 import subprocess
 import shutil
 
-
-# want class that only has 1 digit 
-
-# need
-# for each class
-
 class Pairwise_model():
     # fit single pairwise model/ single category
     def __init__(self, sample_size, INPUT_dir, fname, all_data_path) -> None:
@@ -24,6 +18,7 @@ class Pairwise_model():
         self.all_data_dir = all_data_path
         self.is_setup = False
         self.dat_shape = ()
+
     def setup(self, seed, input_spaced=False):
         """
         Set up for model fitting: Subsample, convert to spaced format,
@@ -36,42 +31,14 @@ class Pairwise_model():
         self.subsample_cat_ace(seed=seed)
         if not input_spaced:
             self.convert_to_spaced()
-
         self.dat_shape = np.genfromtxt(self.fname_sep_path+".dat", delimiter=" ").shape
         self.__test_datdims() 
 
         ACEtools.WriteCMSA("binary", self.fname_sep_path+".dat")
-
-
-        # test valid file
         self.__test_nodeletions()
         self.__test_freqandcorrels()
-        raise KeyboardInterrupt
-
         self.is_setup = True
 
-    def __test_datdims(self):
-        """Test if the separated .dat file has both rows and columns. 
-        Note, this will also be flag single sample inputs, but fitting on one sample is theoretically unfeasible."""
-
-        if len(self.dat_shape) != 2:
-            raise ValueError("Input data is not two dimensional.")
-
-    def __test_freqandcorrels(self):
-        """
-        Test if .p file the right length:
-        For each variable, the .p file needs to have a frequency. First N lines.
-        For each pairwise combination of variables, the .p file should have a pairwise correlation. Last N(N-1)/2 lines.
-        """
-        data = np.genfromtxt(self.fname_sep_path+"-output.p", delimiter=" ")
-        N = self.dat_shape[1]
-
-        if len(data.shape) != 1:
-            raise ValueError(".p file has != 1 column. Incorrectly generated.")
-        if data.shape[0] != N + N*(N-1)/2:
-            raise ValueError(f"Data shape ({data.shape}) dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
-
-    
     def fit(self, method, path_to_exe: str, args: list = []):
         """
         Fit the pairwise model using either ace or qls.
@@ -95,31 +62,6 @@ class Pairwise_model():
 
         p = self.call_exec(cml_args)
     
-
-
-
-
-    def __test_nodeletions(self):
-        """
-        Verifies that no variables were removed post ACEtools execution.
-
-        This function ensures that no variables, due to never switching to the other state (0 or 1), have been eliminated.
-        Such removals can disrupt the sequence in subsequent parts of the program and should be prevented by the subsampler.
-
-        Raises:
-            ValueError: An error is raised with the names of the removed variables, if any were deleted.
-        """
-        for root, dirs, files in os.walk(self.cat_dir):
-            for filename in files:
-                if filename.endswith(".rep"):
-                    path = os.path.join(root, filename)
-                    with open(path, 'r') as file:
-                        lines = file.readlines()
-                        if len(lines) >= 8 and lines[7].strip() != "":
-                            raise ValueError("Variables were deleted: \n" + lines[7].strip())
-
-
-
     def convert_to_spaced(self):
         """Converts all files in the current CATEGORY's folder and its subfolders from binary strings to binary integers with spaces:
         e.g., 000111 -> 0 0 0 1 1 1.
@@ -157,8 +99,6 @@ class Pairwise_model():
         if stat == 0:
             print(f"\N{check mark} Process done.")
         f.close()
-
-
 
     def build_ace_args(self, path_to_exe:str, p_dir:str ,p_fname:str , args:list, auto_l2=True):
         """Generate the arguments for the ACE algorithm.
@@ -234,6 +174,47 @@ class Pairwise_model():
             if folder == dir_name:
                 folder_path = os.path.join(path, folder)
                 shutil.rmtree(folder_path)
+
+    ### ----- TESTS ----- ###
+    def __test_nodeletions(self):
+        """
+        Verifies that no variables were removed post ACEtools execution.
+
+        This function ensures that no variables, due to never switching to the other state (0 or 1), have been eliminated.
+        Such removals can disrupt the sequence in subsequent parts of the program and should be prevented by the subsampler.
+
+        Raises:
+            ValueError: An error is raised with the names of the removed variables, if any were deleted.
+        """
+        for root, dirs, files in os.walk(self.cat_dir):
+            for filename in files:
+                if filename.endswith(".rep"):
+                    path = os.path.join(root, filename)
+                    with open(path, 'r') as file:
+                        lines = file.readlines()
+                        if len(lines) >= 8 and lines[7].strip() != "":
+                            raise ValueError("Variables were deleted: \n" + lines[7].strip())
+
+    
+    def __test_datdims(self):
+        """Test if the separated [...]_sep.dat file has both rows and columns. 
+        Note, this will also be flag single sample inputs, but fitting on one sample is theoretically unfeasible."""
+        if len(self.dat_shape) != 2:
+            raise ValueError("Input data is not two dimensional.")
+
+    def __test_freqandcorrels(self):
+        """
+        Test if .p file the right length:
+        For each variable, the .p file needs to have a frequency. First N lines.
+        For each pairwise combination of variables, the .p file should have a pairwise correlation. Last N(N-1)/2 lines.
+        """
+        data = np.genfromtxt(self.fname_sep_path+"-output.p", delimiter=" ")
+        N = self.dat_shape[1]
+        if len(data.shape) != 1:
+            raise ValueError(".p file has != 1 column. Incorrectly generated.")
+        if data.shape[0] != N + N*(N-1)/2:
+            raise ValueError(f"Data shape ({data.shape}) dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
+
 
 
 
