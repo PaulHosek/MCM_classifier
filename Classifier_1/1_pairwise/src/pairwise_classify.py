@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 sys.path.append("../")
-import utils.ACEtools as ACEtools
+import ace_utils.ACEtools as ACEtools
 import helpers
 import os
 import subprocess
@@ -222,21 +222,12 @@ class Pairwise_model():
 
 
 
-# do on small toy system
-# if __name__ == "__main__":
-#     observables_fname = "train-images-unlabeled-1"
-#     mod = Pairwise_model(10,"./INPUT/data/",observables_fname, "./INPUT_all/examples/")
-#     mod.setup(42, input_spaced=True)
-#     mod.fit("ace","./utils/ace")
-    # mod.fit("qls", "./utils/")
-
-
 
 # do on test data for digit 1
 if __name__ == "__main__":
-    mod = Pairwise_model(10,"./INPUT/data/","train-images-unlabeled-1", "./INPUT_all/data/traindata")
+    mod = Pairwise_model(10,"../INPUT/data/","train-images-unlabeled-1", "../INPUT_all/data/traindata")
     mod.setup(42)
-    mod.fit("ace","./utils/ace")
+    mod.fit("ace","../ace_utils/ace")
     # mod.fit("qls", "./utils/")
 
 
