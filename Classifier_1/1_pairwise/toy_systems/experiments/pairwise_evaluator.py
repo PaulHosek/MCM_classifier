@@ -11,10 +11,12 @@ import shutil
 
 
 class Pairwise_evaluator():
-    def __init__(self, paramter_path:str):
+    def __init__(self, paramter_path:str,nspins:int):
         self.parameter_path = paramter_path
-        self.fields = np.empty() # size N
-        self.couplings = np.empty() # size N(N-1)/2
+        self.nspins = nspins
+        self.fields = np.zeros(nspins)
+        self.couplings = np.empty(nspins*(nspins-1)/2)
+
 
 
     def load_ising_paramters(self):
@@ -24,9 +26,17 @@ class Pairwise_evaluator():
         """
         # loads the field and coupling paramters
         # be careful with the indexing on this stuff
-        all_param = np.
+        all_param = np.loadtxt(self.parameter_path)
+        self.__validate_jfile(all_param)
 
-
+    def __validate_jfile(self):
+        """Validate dimensions of the potts paramter ".j" file."""
+        all_param = np.loadtxt(self.parameter_path)
+        N = self.nspins
+        if len(all_param.shape) != 1:
+            raise ValueError(f"Input data in is not 1-dimensional. Input file path: {self.parameter_path}")
+        if all_param.shape[0] != N + N*(N-1)/2:
+            raise ValueError(f"Nr of total paramters, shape ({all_param.shape}), dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
 
 
 
