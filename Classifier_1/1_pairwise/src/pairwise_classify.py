@@ -7,6 +7,7 @@ import os
 import subprocess
 import shutil
 
+
 class Pairwise_model():
     """
     Class to fit a single pairwise model on a subsample of observables (e.g., to an mnist digit).
@@ -50,30 +51,6 @@ class Pairwise_model():
             OUTPUT_mod_dir (str): The output directory of the model. Includes subsampled datafile and other datafiles.
             fname (str): The filename of the model.
             all_data_path (str): The path to the directory containing all the data.
-        """
-        self.sample_size = sample_size
-        self.OUTPUT_mod_dir = OUTPUT_mod_dir
-        self.fname = fname
-        self.cat_dir = os.path.join(OUTPUT_mod_dir, fname)
-        self.fname_sep_path = os.path.join(self.cat_dir, fname+"_sep")
-        self.all_data_dir = all_data_path
-        self.is_setup = False
-        self.dat_shape = ()
-
-    # Rest of the code...
-class Pairwise_model():
-    # fit single pairwise model/ single category
-
-    def __init__(self, sample_size, OUTPUT_mod_dir, fname, all_data_path) -> None:
-        """_summary_
-
-        
-        :param OUTPUT_mod_dir: _description_
-        :type OUTPUT_mod_dir: _type_
-        :param fname: _description_
-        :type fname: _type_
-        :param all_data_path: _description_
-        :type all_data_path: _type_
         """
         self.sample_size = sample_size
         self.OUTPUT_mod_dir =  OUTPUT_mod_dir
