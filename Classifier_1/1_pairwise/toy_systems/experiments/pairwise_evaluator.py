@@ -43,11 +43,15 @@ class Pairwise_evaluator():
             raise ValueError(f"Nr of total paramters, shape ({all_param.shape}), dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
 
 
-    # numba this shit
     def calc_energy(self, state): # state assumed to be in convention -1 1
         h = self.__calc_fields(self.fields, state)
         j = self.__calc_couplings(self.couplings,state)
         return -1*(h+j)
+    
+    @staticmethod
+    def __calc_energy(fields, couplings, state):
+            return -1*(__calc_couplings(couplings,state))
+
 
     @staticmethod
     @jit("(float64[:], int64[:])", nopython=True) # state assumed to be in convention -1 1
@@ -61,26 +65,14 @@ class Pairwise_evaluator():
         """
         return np.sum(couplings*((state[:,None]*state)[~np.tri(len(state),dtype=bool)]))
     
-    @staticmethod
-    def pairwise_multiply_masking(a):
-        """Compute all x[i]*x[j] for all (i,j) with i < j."""
-        return (a[:,None]*a)[~np.tri(len(a),dtype=bool)]
-        
-
-    # numba here too
-    def calc_couplings(state): # state assumed to be in convention -1 1
-        # either calculate the triangle
-        # or precalcuate who gets calcualted with whom in some sort of matrix -> kronecker product?
-            # is this really faster since i only need 
-            # maybe use diagonal as fields
-        # or do some einsum magic
-        pass
     # numba this as well
     def partiton_function():
         # generate the value for Z
         # this is the most expensive, only do once -> class
         # calcualte portion we observed and assign mass there, all other ones we do not need to generate since all the same
             # assign their value proportionally to their part of 2^N states
+
+        # 1. Calculate energy for every observed state
         pass
 
 

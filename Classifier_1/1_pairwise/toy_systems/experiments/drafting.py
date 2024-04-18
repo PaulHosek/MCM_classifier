@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit
 
-def calc_energy(fields, state): # state assumed to be in convention -1 1
+def calc_energy(fields,coup, state): # state assumed to be in convention -1 1
     h = __calc_fields(fields, state)
     j = __calc_couplings(coup,state)
     return -1*(h+j)
@@ -17,9 +17,12 @@ def __calc_couplings(coup, state)->np.double:
     """
     return np.sum(coup*((state[:,None]*state)[~np.tri(len(state),dtype=bool)]))
 
-def pairwise_multiply_masking(a):
-    """Compute all x[i]*x[j] for all (i,j) with i < j."""
-    return (a[:,None]*a)[~np.tri(len(a),dtype=bool)]
+
+def partiton_function():
+    # 1. Calculate energy for every observed state
+    
+    pass
+
 
 
 if __name__ == "__main__":
@@ -29,5 +32,5 @@ if __name__ == "__main__":
     fields = rng.random((N),dtype=np.double)
     coup =  rng.random(int(N*(N-1)/2),dtype=np.double)    
     print(fields,coup)
-    res = calc_energy(fields, state)
+    res = calc_energy(fields, coup, state)
     print(res)
