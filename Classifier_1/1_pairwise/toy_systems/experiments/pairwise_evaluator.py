@@ -47,10 +47,6 @@ class Pairwise_evaluator():
         h = self.__calc_fields(self.fields, state)
         j = self.__calc_couplings(self.couplings,state)
         return -1*(h+j)
-    
-    @staticmethod
-    def __calc_energy(fields, couplings, state):
-            return -1*(__calc_couplings(couplings,state))
 
 
     @staticmethod
