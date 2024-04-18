@@ -2,13 +2,12 @@ import numpy as np
 import sys
 sys.path.append("../")
 import ace_utils.ACEtools as ACEtools
-import legacy.helpers as helddpers
 import os
 import subprocess
 import shutil
 
 
-class Pairwise_model():
+class Pairwise_fitter():
     """
     Class to fit a single pairwise model on a subsample of observables (e.g., to an mnist digit).
 
