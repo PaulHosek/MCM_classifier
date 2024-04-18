@@ -54,7 +54,7 @@ class Pairwise_fitter():
         self.sample_size = sample_size
         self.OUTPUT_mod_dir =  OUTPUT_mod_dir
         self.fname = fname
-        self.cat_dir = os.path.join( OUTPUT_mod_dir,fname)
+        self.cat_dir = os.path.join(OUTPUT_mod_dir,fname)
         self.fname_sep_path = os.path.join(self.cat_dir, fname+"_sep")
         self.all_data_dir = all_data_path
         self.is_setup = False

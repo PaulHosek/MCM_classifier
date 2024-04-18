@@ -1,9 +1,14 @@
 import numpy as np
+from numba import jit
 import sys
 sys.path.append("../")
 
 
 # not sure if should inherent from fitter
+
+# FIXME convention transform needed for new states, maybe make separete .dat that is the right convention
+    # probably will need to sample from it later or calculte the evidence or whatever, then need this.
+# FIXME check if formulas are correct using the convention, if use -1 1 state then should just use the ones from clelia
 
 
 class Pairwise_evaluator():
@@ -11,7 +16,7 @@ class Pairwise_evaluator():
         self.parameter_path = paramter_path
         self.nspins = nspins
         self.fields = np.zeros(nspins)
-        self.couplings = np.empty(int(nspins*(nspins-1)/2))
+        self.couplings = np.zeros(int(nspins*(nspins-1)/2))
 
 
     def load_ising_paramters(self):
@@ -23,8 +28,10 @@ class Pairwise_evaluator():
         # be careful with the indexing on this stuff
         all_param = np.loadtxt(self.parameter_path)
         self.__validate_jfile(all_param)
-        self.fields = all_param[:self.nspins]
-        self.couplings = all_param[self.nspins:]
+        self.fields[:] = all_param[:self.nspins]
+        self.couplings[:] = all_param[self.nspins:]
+
+
 
     def __validate_jfile(self,all_param):
         """Validate dimensions of the potts paramter ".j" file."""
@@ -36,23 +43,23 @@ class Pairwise_evaluator():
             raise ValueError(f"Nr of total paramters, shape ({all_param.shape}), dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
 
 
-
     # numba this shit
-    def energy(state):
-        h = fields(state)
+    def calc_energy(self, state): # state assumed to be in convention -1 1
+        h = self.__calc_fields(state)
+    
         pass
 
-    # number here too
-    def fields(state):
-        # make this jittable
-        # calcualte h(xi) and sum over them
-        # 1. find the right xi in the fields datastructure
-        # 2. sum them up    
-        pass
+
+    @staticmethod
+    @jit("(float64[:], float64[:])", nopython=True) # state assumed to be in convention -1 1
+    def __calc_fields(fields, state):
+        return -1*np.sum(fields * state)    # FIXME check if this is correct based on the convention
+
+        
 
     # numba here too
-    def couplings(state):
-
+    def calc_couplings(state): # state assumed to be in convention -1 1
+        
         pass
 
     # numba this as well
