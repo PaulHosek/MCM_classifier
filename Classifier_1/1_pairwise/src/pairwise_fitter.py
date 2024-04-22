@@ -200,6 +200,8 @@ class Pairwise_fitter():
             data = np.loadtxt(inp_path, dtype=int) 
 
         data = rng.permutation(data,axis=0)[:self.sample_size,:]
+        data[-1] = 0 # avoid variable deletion
+        data[-2] = 1
         os.makedirs(self.cat_dir, exist_ok=True) 
         np.savetxt(self.fname_sep_path+".dat",data, fmt="%s", delimiter=" ")
 

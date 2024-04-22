@@ -58,6 +58,7 @@ class Pairwise_evaluator():
     def __calc_couplings(couplings, state)->np.double:
         """Compute -1*sum(J_ij*s[i]*s[j]) for all (i,j) with i < j.
         Outer product and masking triangle.
+        Could maybe make this faster by saving the multiplications where any s is 0.
         """
         return np.sum(couplings*((state[:,None]*state)[~np.tri(len(state),dtype=bool)]))
     

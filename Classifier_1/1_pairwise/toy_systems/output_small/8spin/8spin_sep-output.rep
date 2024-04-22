@@ -1,0 +1,13 @@
+number of samples: 10000	10000
+final length: 8
+most probable sequence:
+00011000
+observed variation:
+2	2	2	2	2	2	2	2	
+deleted sites (singular, p=0 or p=1):
+
+observed concentration:
+5.0180e-01	5.0870e-01	5.0450e-01	4.9310e-01	4.9990e-01	5.0510e-01	5.0290e-01	5.0280e-01	
+average concentration: 5.0235e-01
+median concentration: 5.0285e-01
+insertion/deletion frequency: 0.0000e+00
