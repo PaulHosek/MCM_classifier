@@ -19,6 +19,7 @@ class Pairwise_evaluator():
         self.couplings = np.zeros(int(nspins*(nspins-1)/2),dtype=np.double)
         self.all_E = np.empty(1)
         self.Z = 0.0
+        self.all_state = np.empty(1)
 
 
     def load_ising_paramters(self):
@@ -76,21 +77,32 @@ class Pairwise_evaluator():
 
     def calc_partiton_function(self):
         assert self.nspins <= 15, "> 15 spins. Avoid calculating Z."
-        all_states = self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
-        all_E = np.apply_along_axis(self.calc_energy,1,all_states)
-        self.all_E = all_E
-        self.Z = np.sum(np.exp(all_E))
-        return np.sum(np.exp(all_E))
+        self.all_states =  self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
+        self.all_E = np.apply_along_axis(self.calc_energy,1,self.all_states)
+        self.Z = np.sum(np.exp(self.all_E))
+        return self.Z
 
-
-
-    def predict(state):
+    def predict_with_Z(self,state):
         # assigns probability to a state using formula 1 from ACE Barton et al. paper.
-        pass
+        assert self.all_states.ndim == 2, "self.all_states is not 2d. Didi you call the calc_partition_function?"
+        assert isinstance(state, (np.ndarray, list)), "input state must be a numpy array or a list"
+        # assert state.ndim == 1, f"input state must be 1-dimensional, currently: state.ndim =  {state.ndim}"
+        idx = int("".join(state.astype(str)),base=2)
+        return self.all_E[idx]/self.Z
+        
 
 if __name__ == "__main__":
     spin4_path = "../output_small/4spin/4spin_sep-output-out.j"
     mod = Pairwise_evaluator(spin4_path,4)
     mod.load_ising_paramters()
-    Z = mod.partiton_function()
-    print(Z)
+    mod.calc_partiton_function()
+    P = mod.predict_with_Z(np.array([1,0,0,1]))
+    print(P)
+    # res = np.sum([mod.predict_with_Z(i) for i in mod.all_states])
+    res = 0
+    for i in mod.all_states:
+        x = mod.predict_with_Z(i)
+        res += x
+        print(x)
+    print()
+    print("Sum over all states (should be 1):\n",res)
