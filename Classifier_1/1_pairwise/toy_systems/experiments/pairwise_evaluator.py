@@ -65,6 +65,11 @@ class Pairwise_evaluator():
         return np.sum(couplings*((state[:,None]*state)[~np.tri(len(state),dtype=bool)]))
 
     def calc_partiton_function(self):
+        """Compute the partition function's value. Needs 2**n_spins*nspins*sizof(int) space in memory.
+
+        :return: self.Z The value of the parition function
+        :rtype: float
+        """
         assert self.nspins <= 15, "> 15 spins. Avoid calculating Z."
         self.all_states =  self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
         self.all_E = np.apply_along_axis(self.calc_energy,1,self.all_states)
@@ -72,6 +77,13 @@ class Pairwise_evaluator():
         return self.Z
 
     def predict_with_Z(self,state):
+        """Get the probability of a test state, given the parition function.
+
+        :param state: 1d binary np array of the state with dtype int-like.
+        :type state: np.array 1d
+        :return: P(state|Model)
+        :rtype: float
+        """
         # assigns probability to a state using formula 1 from ACE Barton et al. paper.
         assert self.all_states.ndim == 2, "self.all_states is not 2d. Didi you call the calc_partition_function?"
         assert isinstance(state, (np.ndarray, list)), "input state must be a numpy array or a list"
@@ -81,12 +93,27 @@ class Pairwise_evaluator():
 
     @staticmethod
     def unpackbits2d(x, num_bits):
+        """Unpacks an 1d array of integers into a 2d array of their binary represention.
+
+        :param x: 1d NP array of integers
+        :type x: np.array 1d
+        :param num_bits: number of spins/ binary size of the largest potential integer
+        :type num_bits: int
+        :raises ValueError: If data type of the np array is not int-like.
+        :return: 2d array of size (x,num_bits)
+        :rtype: np.array
+        """
         if np.issubdtype(x.dtype, np.floating):
             raise ValueError("numpy data type needs to be int-like")
         xshape = list(x.shape)
         x = x.reshape([-1, 1])
         mask = 2**np.arange(num_bits, dtype=x.dtype).reshape([1, num_bits])
         return (x & mask).astype(bool).astype(int).reshape(xshape + [num_bits])[:,::-1]
+    
+
+    def _spin_avgs():
+        # for all 
+        pass
 
         
 if __name__ == "__main__":
@@ -102,7 +129,5 @@ if __name__ == "__main__":
         x = mod.predict_with_Z(i)
         res += x
         print(x)
-    print()
-    print("Sum over all states (should be 1):\n",res)
-    print(np.sum(np.exp(-mod.all_E)), mod.Z)
-    print()
+
+    print("\nSum over all states (should be 1): ",res)
