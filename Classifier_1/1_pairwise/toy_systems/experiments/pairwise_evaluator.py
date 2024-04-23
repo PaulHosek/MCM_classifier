@@ -66,19 +66,51 @@ class Pairwise_evaluator():
         """
         return np.sum(couplings*((state[:,None]*state)[~np.tri(len(state),dtype=bool)]))
 
-    def calc_partitionf(self):
+    def partitionf_exhaustive(self,force=False):
         """Compute the partition function's value. Needs 2**n_spins*nspins*sizof(int) space in memory.
         Also sets values for self.all_states, self.all_E, self.Z, self.all_P.
+        :param force: Go through with exhaustive search independent of how many spins are in the system.
+        :type: bool
         :return: self.Z The value of the parition function
         :rtype: float
         """
-        assert self.nspins <= 15, "> 15 spins. Avoid calculating Z."
+        if not force:
+            assert self.nspins <= 15, f"{self.nspins}> 15 spins. Use MCMC instead."
         self.all_states =  self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
         # self.all_states[self.all_states == 0] = -1
         self.all_E = np.apply_along_axis(self.calc_energy,1,self.all_states)
         self.Z = np.sum(np.exp(self.all_E))
         self.all_P = np.exp(self.all_E)/self.Z
         return self.Z
+    
+    def paritionf_MCMC(self):
+        # for large N, use MCMC to approximate Z
+        #something like: #https://cs.stanford.edu/people/karpathy/visml/ising_example.html or the following
+        """  # Initialize random spin configuration
+        spins = np.random.choice([-1, 1], size=n_spins)
+
+
+        magnetization = np.sum(spins)         # Keep track of magnetizaton for efficiency
+
+        for _ in range(n_sweeps):
+            for _ in range(n_spins):
+            i = np.random.randint(0)             # Choose a random spin to update
+
+            # Calculate energy difference for flipping spin
+            delta_e = 2.0 * (h[i] * spins[i] + J[i] * np.sum(spins[np.arange(n_spins) != i] * spins[i]))
+
+            if np.random.rand() < np.exp(-beta * delta_e):            # Metropolis acceptance criterion
+                spins[i] *= -1
+                magnetization += 2 * spins[i]
+
+        # Calculate average quantities
+        average_spin = magnetization / n_spins
+        energy = -h.dot(spins) - 0.5 * J.dot(spins * spins)
+        average_energy_per_spin = beta * energy / n_spins
+
+        return average_spin, average_energy_per_spin""" 
+        
+        pass
 
     def predict_with_Z(self,state):
         """Get the probability of a test state, given the parition function.
