@@ -28,11 +28,13 @@ def gen_config(G,n,include_edge_p,seed):
    
 
 if __name__ == "__main__":
-    """Generate erdos-renyi graph and include each edge with probability given by include_edge_p in a state. Repeat this 10K times."""
+    """Generate erdos-renyi graph and include each edge with probability given by include_edge_p in a state.
+      If edge included, then both bits will be 1.
+      Repeat this 10K times."""
 
     seed = 42
     rng = np.random.default_rng(seed)
-    n = 8
+    n = 15
     p = .3
     G = nx.erdos_renyi_graph(n,p)
     include_edge_p = 0.2
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     states[-1,:] = 0
     states[-2,:] = 1
     print(states.shape)
-    np.savetxt("8_erdos.dat", states,fmt="%d", delimiter=" ")
+    np.savetxt(f"{n}_erdos.dat", states,fmt="%d", delimiter=" ")
 
 
 

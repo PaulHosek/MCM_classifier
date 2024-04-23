@@ -39,11 +39,12 @@ class Pairwise_evaluator():
     def __validate_jfile(self, res):
         """Validate dimensions of the potts paramter ".j" file."""
         all_param = np.loadtxt(self.parameter_path)
+        print(all_param.shape)
         N = self.nspins
         if len(all_param.shape) != 1:
             raise ValueError(f"Input data in is not 1-dimensional. Input file path: {self.parameter_path}")
         if all_param.shape[0] != N + N*(N-1)/2:
-            raise ValueError(f"Nr of total paramters, shape ({all_param.shape}), dim0 does not match expected {N + N(N-1)/2} samples based on {N} spins.")
+            raise ValueError(f"Nr of total paramters have shape ({all_param.shape}). dim0 does not match expected {N + N*(N-1)/2} pairs based on {N} spins.")
 
     def calc_energy(self, state): # state assumed to be in convention -1 1
         h = self.__calc_fields(self.fields, state)
@@ -72,9 +73,10 @@ class Pairwise_evaluator():
         """
         assert self.nspins <= 15, "> 15 spins. Avoid calculating Z."
         self.all_states =  self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
+        # self.all_states[self.all_states == 0] = -1
         self.all_E = np.apply_along_axis(self.calc_energy,1,self.all_states)
-        self.Z = np.sum(np.exp(-self.all_E))
-        self.all_P = np.exp(-self.all_E)/self.Z
+        self.Z = np.sum(np.exp(self.all_E))
+        self.all_P = np.exp(self.all_E)/self.Z
         return self.Z
 
     def predict_with_Z(self,state):
@@ -139,14 +141,16 @@ class Pairwise_evaluator():
 
         
 if __name__ == "__main__":
-    spin4_path = "../output_small/4spin/4spin_sep-output-out.j"
-    mod = Pairwise_evaluator(spin4_path,4)
+    fname = "15_erdos"
+    nspins = 15
+    spin4_path = f"../output_small/{fname}/{fname}_sep-output-out.j"
+    mod = Pairwise_evaluator(spin4_path,nspins)
     mod.load_ising_paramters()
     mod.calc_partitionf()
-    inp = mod.all_states
-    # si = mod.spin_avgs()
-    sij = mod.spin_correls()
-    print(sij)
+    si = mod.spin_avgs()
+    print(si)
+    # sij = mod.spin_correls()
+    # print(sij)
 
 
 
