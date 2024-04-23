@@ -17,6 +17,8 @@ class Pairwise_evaluator():
         self.nspins = nspins
         self.fields = np.zeros(nspins,dtype=np.double)
         self.couplings = np.zeros(int(nspins*(nspins-1)/2),dtype=np.double)
+        self.all_E = np.empty(1)
+        self.Z = 0.0
 
 
     def load_ising_paramters(self):
@@ -72,28 +74,13 @@ class Pairwise_evaluator():
         mask = 2**np.arange(num_bits, dtype=x.dtype).reshape([1, num_bits])
         return (x & mask).astype(bool).astype(int).reshape(xshape + [num_bits])[:,::-1]
 
-    def partiton_function(self):
-        # generate the value for Z
-        # this is the most expensive, only do once -> class
-        # calcualte portion we observed and assign mass there, all other ones we do not need to generate since all the same
-            # assign their value proportionally to their part of 2^N states
-
-        # 1. Calculate energy for every observed state
-
-        # 1. generate every possible state
+    def calc_partiton_function(self):
         assert self.nspins <= 15, "> 15 spins. Avoid calculating Z."
         all_states = self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
-        # 2. calculate energy or each state
         all_E = np.apply_along_axis(self.calc_energy,1,all_states)
-
-
-        return res
-
-
-        # 3. take exp of - energy of every state and sum the results up over all states
-
-        # get Z out
-
+        self.all_E = all_E
+        self.Z = np.sum(np.exp(all_E))
+        return np.sum(np.exp(all_E))
 
 
 
