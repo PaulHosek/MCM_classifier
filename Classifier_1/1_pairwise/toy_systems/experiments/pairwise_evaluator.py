@@ -19,7 +19,7 @@ class Pairwise_evaluator():
         self.couplings = np.zeros(int(nspins*(nspins-1)/2),dtype=np.double)
         self.all_E = np.empty(1)
         self.Z = 0.0
-        self.all_state = np.empty(1)
+        self.all_states = np.empty(1)
 
 
     def load_ising_paramters(self):
@@ -64,9 +64,9 @@ class Pairwise_evaluator():
         """
         return np.sum(couplings*((state[:,None]*state)[~np.tri(len(state),dtype=bool)]))
 
-    def calc_partiton_function(self):
+    def calc_partitionf(self):
         """Compute the partition function's value. Needs 2**n_spins*nspins*sizof(int) space in memory.
-
+        Also sets values for self.all_states, self.all_E, self.Z, self.all_P.
         :return: self.Z The value of the parition function
         :rtype: float
         """
@@ -74,6 +74,7 @@ class Pairwise_evaluator():
         self.all_states =  self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
         self.all_E = np.apply_along_axis(self.calc_energy,1,self.all_states)
         self.Z = np.sum(np.exp(-self.all_E))
+        self.all_P = np.exp(-self.all_E)/self.Z
         return self.Z
 
     def predict_with_Z(self,state):
@@ -89,7 +90,7 @@ class Pairwise_evaluator():
         assert isinstance(state, (np.ndarray, list)), "input state must be a numpy array or a list"
         # assert state.ndim == 1, f"input state must be 1-dimensional, currently: state.ndim =  {state.ndim}"
         idx = int("".join(state.astype(str)),base=2)
-        return np.exp(-self.all_E[idx])/self.Z
+        return self.all_P[idx]
 
     @staticmethod
     def unpackbits2d(x, num_bits):
@@ -111,8 +112,12 @@ class Pairwise_evaluator():
         return (x & mask).astype(bool).astype(int).reshape(xshape + [num_bits])[:,::-1]
     
 
-    def _spin_avgs():
-        # for all 
+    def spin_avgs(self):
+        # for every spin we need to multiply its value with the probability of the state
+        #
+        return np.sum(self.all_P[:,None] *self.all_states, axis=0)
+
+    def correls(self):
         pass
 
         
@@ -120,14 +125,24 @@ if __name__ == "__main__":
     spin4_path = "../output_small/4spin/4spin_sep-output-out.j"
     mod = Pairwise_evaluator(spin4_path,4)
     mod.load_ising_paramters()
-    mod.calc_partiton_function()
-    P = mod.predict_with_Z(np.array([1,0,0,1]))
+    mod.calc_partitionf()
+    si = mod.spin_avgs()
+    print(si)
+
+
+
+
+
+
+
+
+    # P = mod.predict_with_Z(np.array([1,0,0,1]))
     # res = np.sum([mod.predict_with_Z(i) for i in mod.all_states])
 
-    res = 0
-    for i in mod.all_states:
-        x = mod.predict_with_Z(i)
-        res += x
-        print(x)
+    # res = 0
+    # for i in mod.all_states:
+    #     x = mod.predict_with_Z(i)
+    #     res += x
+    #     print(x)
 
-    print("\nSum over all states (should be 1): ",res)
+    # print("\nSum over all states (should be 1): ",res)

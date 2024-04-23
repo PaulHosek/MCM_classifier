@@ -8,7 +8,7 @@ from src.pairwise_fitter import Pairwise_fitter
 
 
 if __name__ == "__main__":
-    fname = "8_erdos"
+    fname = "4spin"
     mod = Pairwise_fitter(10000,"../gen",fname, "../output_small")
     mod.setup(42,input_spaced=True)
     mod.fit("ace","../../ace_utils/ace")
