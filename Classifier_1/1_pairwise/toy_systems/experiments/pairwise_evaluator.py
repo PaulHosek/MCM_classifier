@@ -12,6 +12,7 @@ sys.path.append("../")
 
 
 class Pairwise_evaluator():
+    """Currently assumes convention (0,1)."""
     def __init__(self, paramter_path:str,nspins:int):
         self.parameter_path = paramter_path
         self.nspins = nspins
