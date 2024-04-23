@@ -160,7 +160,7 @@ class Pairwise_fitter():
 
         return tuple(cm_args)
 
-    def build_qls_args(self, path_to_exe:str, p_dir:str, p_fname:str, sample_size:int, args:list, auto_l2=True):
+    def build_qls_args(self, path_to_exe:str, p_dir:str, p_fname:str, args:list, auto_l2=True):
         """Generate the arguments for the MC algorithm.
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace
@@ -169,15 +169,13 @@ class Pairwise_fitter():
         :type p_dir: str
         :param p_fname: filename of the .p file e.g., img1_sep
         :type p_fname: str
-        :param sample_size: sample size the .p size is based on
-        :type sample_size: int
         :param auto_l2: if should use automatice 1/sample_size l2 regularisation. Not gauge invariant., defaults to True
         :type auto_l2: bool, optional
         :return: argument tuple to pass to subprocess.Popen
         :rtype: tuple
         """
      
-        cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(sample_size)]
+        cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(self.sample_size)]
         if auto_l2:
             cm_args.append("-ga")
         cm_args.extend(args)
