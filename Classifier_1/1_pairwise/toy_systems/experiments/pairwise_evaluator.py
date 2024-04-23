@@ -87,7 +87,7 @@ class Pairwise_evaluator():
         """
         # assigns probability to a state using formula 1 from ACE Barton et al. paper.
         assert self.all_states.ndim == 2, "self.all_states is not 2d. Didi you call the calc_partition_function?"
-        assert isinstance(state, (np.ndarray, list)), "input state must be a numpy array or a list"
+        assert isinstance(state, (np.ndarray)), "input state must be a numpy array"
         # assert state.ndim == 1, f"input state must be 1-dimensional, currently: state.ndim =  {state.ndim}"
         idx = int("".join(state.astype(str)),base=2)
         return self.all_P[idx]
@@ -113,12 +113,29 @@ class Pairwise_evaluator():
     
 
     def spin_avgs(self):
-        # for every spin we need to multiply its value with the probability of the state
-        #
-        return np.sum(self.all_P[:,None] *self.all_states, axis=0)
+        """Calculated <si> in the model for all spins. This number should match the empirical frequencies. 
 
-    def correls(self):
-        pass
+        :return: array of <si> for all spins i. Ordered by integer repr. of the states.
+        :rtype: np.array. 1D of size nspins
+        """
+        # equivalent to np.sum(self.all_P[:,None] *self.all_states, axis=0)
+        return np.einsum("i,ij->j",self.all_P,self.all_states)
+
+    def spin_correls(self):
+        """Compute pairwise frequencies/ correlations <sij> under the model. This number should match the empirical correlations/pairwise frequencies.
+
+        :return: Ordered array of <sij> for all spins i. Ordered by integer repr. of the states.
+        :rtype: np.array. 1D of size nspins(nspins-1)/2.
+        """
+        def pairwise1d(x):
+            return (x[:,None]*x)[~np.tri(len(x),dtype=bool)]
+        pairs = np.apply_along_axis(pairwise1d,1,self.all_states)
+        state_probs = self.all_P[:,None]* pairs 
+        return np.sum(state_probs,axis=0) # sum over all possible states
+
+
+        
+
 
         
 if __name__ == "__main__":
@@ -126,8 +143,36 @@ if __name__ == "__main__":
     mod = Pairwise_evaluator(spin4_path,4)
     mod.load_ising_paramters()
     mod.calc_partitionf()
-    si = mod.spin_avgs()
-    print(si)
+    inp = mod.all_states
+    # si = mod.spin_avgs()
+    sij = mod.spin_correls()
+    print(sij)
+
+
+
+
+
+    # print(np.inner(inp,inp))
+
+    # # compute all pairwise products between columns
+    # my_func = lambda x: (x[:,:,None]*x[:,None,:]).reshape(len(x),-1)
+    # res = my_func(inp)
+
+    # self_product_idc = np.array(range(0,int(2**mod.nspins),mod.nspins))
+    # res = np.delete(res,self_product_idc,axis=1)
+
+    # res = mod.all_P[:,None]* res 
+
+    # print(np.sum(res,axis=0))
+    # now multiply each row with its P
+    
+    # then sum over rows
+
+
+    # # Pairwise products using einsum
+    # pairwise_products = np.einsum('jk, kj -> k', arr, arr)
+
+    # print(pairwise_products)
 
 
 
