@@ -40,7 +40,6 @@ class Pairwise_evaluator():
     def __validate_jfile(self, res):
         """Validate dimensions of the potts paramter ".j" file."""
         all_param = np.loadtxt(self.parameter_path)
-        print(all_param.shape)
         N = self.nspins
         if len(all_param.shape) != 1:
             raise ValueError(f"Input data in is not 1-dimensional. Input file path: {self.parameter_path}")
@@ -50,7 +49,7 @@ class Pairwise_evaluator():
     def calc_energy(self, state): # state assumed to be in convention -1 1
         h = self.__calc_fields(self.fields, state)
         j = self.__calc_couplings(self.couplings,state)
-        return h+j
+        return -1*(h+j)
 
 
     @staticmethod
@@ -79,8 +78,8 @@ class Pairwise_evaluator():
         self.all_states =  self.unpackbits2d(np.arange(2**self.nspins), self.nspins)
         # self.all_states[self.all_states == 0] = -1
         self.all_E = np.apply_along_axis(self.calc_energy,1,self.all_states)
-        self.Z = np.sum(np.exp(self.all_E))
-        self.all_P = np.exp(self.all_E)/self.Z
+        self.Z = np.sum(np.exp(-1*self.all_E))
+        self.all_P = np.exp(-1*self.all_E)/self.Z
         return self.Z
     
     def paritionf_MCMC(self):

@@ -259,7 +259,7 @@ class Pairwise_fitter():
 
 # do on test data for digit 1
 if __name__ == "__main__":
-    mod = Pairwise_fitter(100, "../INPUT_all/data/traindata","train-images-unlabeled-1","../OUTPUT_mod/data/")
+    mod = Pairwise_fitter(2000, "../INPUT_all/data/traindata","train-images-unlabeled-1","../OUTPUT_mod/data/")
     mod.setup(42)
     mod.fit("ace","../ace_utils/ace")
     # mod.fit("qls", "./utils/")
