@@ -506,3 +506,17 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
         out.append(dists)
 
     return tuple(out)
+
+
+
+def partition_to_str(mcm):
+    """Take a partition map labeling 11x11 array and return the original string representation"""
+    nr_icc = mcm.max()
+    out = []
+
+    for icc in range(1, nr_icc+1):
+        idx = np.argwhere(mcm.flatten()==icc).flatten()
+        x = np.zeros(121,dtype=int)
+        x[idx] = 1
+        out.append("".join(map(str, x)))
+    return np.array(out, dtype=str)
