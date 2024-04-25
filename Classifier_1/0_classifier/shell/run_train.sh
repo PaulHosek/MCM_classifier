@@ -10,7 +10,7 @@ timeout=360
 for (( i=1; i <= iterations; i++ )); do  # Removed $ from iterations for consistency
 
     # Run the Python script with timeout in the background
-    timeout -s SIGTERM $timeout python3 run_train.py --sample_s 5423 
+    timeout -s SIGTERM $timeout python3 run_train.py --sample_s 500 
     python_pid=$!
 
     # Wait for the Python script to finish or timeout
