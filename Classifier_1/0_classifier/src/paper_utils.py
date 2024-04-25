@@ -398,7 +398,7 @@ def norm_distribution_distance(dist_a,dist_b):
     Distance between two probability distributions.
     Implements logic based on to |mu_1 - mu_2| > (sigma_1 + sigma_2).
     Formula used:
-     [|mu_1 - mu_2| - (sigma_1 + sigma_2)] / (mu_1 + mu_2)
+     [|mu_1 - mu_2| / (sigma_1 + sigma_2)] 
 
      Positive if mean difference is larger than twice the standard deviation.
      Negative if smaller.
@@ -412,9 +412,8 @@ def norm_distribution_distance(dist_a,dist_b):
     :return: The distance between the two probability distributions.
     :rtype: float
     """
-
-    return np.abs(np.divide(np.abs(np.mean(dist_a) - np.mean(dist_b)) - (np.std(dist_a) +  np.std(dist_b)),
-                     np.mean(dist_a) + np.mean(dist_b)))
+    
+    return np.divide(np.abs(np.mean(dist_a) - np.mean(dist_b)), (np.std(dist_a) +  np.std(dist_b)))
 
 
 
@@ -479,7 +478,7 @@ def get_complete_testprobs(mcms_samplesizes,counts_samplesizes,sample_sizes,n_ru
                     test_mcms[mcm_digit][sample_size_idx][run_idx][test_digit][:len(mcm[mcm_digit])] = np.array(mcm[mcm_digit],dtype=str)
     return test_mcms, test_probs
 
-def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx, run_idx, return_comms = False, return_iccdata = False, return_avg_icc_prob=False):
+def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx, run_idx, return_comms = False, return_iccdata = False, return_avg_icc_prob=False,return_dists=False):
 
     icc_data = test_probs[mcm_idx,sample_idx, run_idx]
 
@@ -503,5 +502,7 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
         out.append(icc_data)
     if return_avg_icc_prob:
         out.append(avg_icc_prob)
+    if return_dists:
+        out.append(dists)
 
     return tuple(out)
