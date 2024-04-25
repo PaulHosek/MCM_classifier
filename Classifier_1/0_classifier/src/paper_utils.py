@@ -420,6 +420,7 @@ def norm_distribution_distance(dist_a,dist_b):
 def total_variation_distance(dist_a, dist_b):
     """
     Calculates the total variation distance (TV)/ normalized L1 distance between two probability distributions.
+    Averaged per size of distr.
     
     :param dist_a: The first probability distribution.
     :type dist_a: numpy.ndarray
