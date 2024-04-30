@@ -284,7 +284,7 @@ def evidence_iccs(Counts, MCMs, mcm_idx):
     for idx, icc in enumerate(count_mcm):
         rank = MCMs[mcm_idx][idx].count("1")
         evidence[idx] += math.lgamma(2**(rank-1)) - math.lgamma(N + 2**(rank-1)) # middle part of equation 8 in Mulatier_2020
-        for pattern in count_mcm[idx]: # last part of equation 8
+        for pattern in icc: # last part of equation 8
             evidence[idx] += math.lgamma(pattern+.5) - log_sqrt_pi
     return evidence
 
