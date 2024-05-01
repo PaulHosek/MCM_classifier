@@ -6,6 +6,28 @@ from src.pairwise_evaluator import Pairwise_evaluator
 import os
 
 
+def fit_digit(digit, seed,nsamples,fname = "train-images-unlabeled-{}",\
+                inalldir_rel="../../INPUT_all/data/traindata",outdir_rel="../../OUTPUT_mod/data",exe_rel="../../ace_utils/ace"):
+    """Fit a pairwise model to the digit until convergence.
+
+    :param digit: The mnist digit (0-9) to fit the model on.
+    :type digit: int
+    :param seed: The seed value for random number generation.
+    :type seed: int
+    :param nsamples: The number of samples to use for fitting the model.
+    :type nsamples: int
+    :param fname: The name of the unlabeled image file, defaults to "train-images-unlabeled-{}".
+    :type fname: str, optional
+    :param inalldir_rel: The relative path to the input data directory, defaults to "../../INPUT_all/data/traindata".
+    :type inalldir_rel: str, optional
+    :param outdir_rel: The relative path to the output data directory, defaults to "../../OUTPUT_mod/data".
+    :type outdir_rel: str, optional
+    :param exe_rel: The relative path to the ACE utility, defaults to "../../ace_utils/ace".
+    :type exe_rel: str, optional
+    """
+    mod = Pairwise_fitter(nsamples,inalldir_rel,fname.format(digit), outdir_rel)
+    mod.setup(seed,input_spaced=False)
+    mod.fit("ace",exe_rel)
 
 def get_pw_mod(digit,nspin,fname="train-images-unlabeled-{}",outdir="../OUTPUT_mod/data"):
     """Get the pairwise model that was fitted on a digit.
@@ -30,3 +52,5 @@ def get_pw_mod(digit,nspin,fname="train-images-unlabeled-{}",outdir="../OUTPUT_m
 # nspin = 121
 # digits = [0,1]
 # mods = [get_mod_digit(i,nspin) for i in digits]
+
+

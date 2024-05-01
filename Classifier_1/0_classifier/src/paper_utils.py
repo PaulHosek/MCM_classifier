@@ -509,6 +509,36 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
     return tuple(out)
 
 
+def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx):
+    """Compare two MCM fitted on the digit_pair digits
+      on how many of the top ICC they need to differentiate the digit pair.
+
+    
+    Generate all_byk_pair list of np arrays.
+    Each element of the list is an mcm. Within each list, there is a np array of shape (nicc,ntestimg,digitpair).
+    The first index (nicc) is the cumprod of the top k icc for that binary difference.
+    The index of the last dimension is in the same order as the provided digit pair.
+    
+    :param test_probs: result array from paper_utils.get_complete_testprobs. Probability on test set per icc, MCM, digit, run, sample size.
+    :type test_probs: np.ndarray
+    :param test_mcm: result array from paper_utils.get_complete_testprobs. MCMs for every run, digit, sample size.
+    :param digit_pair: the digits to test
+    :type digit_pair: tuple or list of len 2
+    :param sample_idx: which sample size to use. Provide index, not sample size.
+    :type sample_idx: int
+    :param run_idx: Which run to use. Provide index.
+    :type run_idx: int
+    """
+    all_byk_pair = []
+
+    for mcm_idx in digit_pair:
+        _, icc_data,dists = utils.distmap_from_testprobs(test_probs, test_mcms, digit_pair, mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True)
+        ord_distidcs = np.argsort(dists)[::-1]
+        by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
+        all_byk_pair.append(by_k)
+    return all_byk_pair
+
+
 
 def partition_to_str(mcm):
     """Take a partition map labeling 11x11 array and return the original string representation"""
