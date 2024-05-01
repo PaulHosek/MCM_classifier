@@ -1,8 +1,8 @@
 import numpy as np
 import sys
 sys.path.append("../")
-from src.pairwise_fitter import Pairwise_fitter
-from src.pairwise_evaluator import Pairwise_evaluator
+from pairwise.src.pairwise_fitter import Pairwise_fitter
+from pairwise.src.pairwise_evaluator import Pairwise_evaluator
 import os
 
 
@@ -29,7 +29,7 @@ def fit_digit(digit, seed,nsamples,fname = "train-images-unlabeled-{}",\
     mod.setup(seed,input_spaced=False)
     mod.fit("ace",exe_rel)
 
-def get_pw_mod(digit,nspin,fname="train-images-unlabeled-{}",outdir="../OUTPUT_mod/data"):
+def get_pw_mod(digit,nspin,outdir,fname="train-images-unlabeled-{}",):
     """Get the pairwise model that was fitted on a digit.
 
     :param digit: mnist digit 0-9. only needed to load the right

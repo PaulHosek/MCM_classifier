@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 sys.path.append("../")
-import ace_utils.ACEtools as ACEtools
+import pairwise.src.ACEtools as ACEtools
 import os
 import subprocess
 import shutil
