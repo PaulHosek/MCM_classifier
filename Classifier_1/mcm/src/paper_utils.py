@@ -11,20 +11,20 @@ import src.loaders as loaders
 
 
 ### --- FUNCTIONS FOR DATA SUBSETTING ---
-def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../INPUT_all/data",
-                        result_sample_sizes_dir="../OUTPUT/sample_sizes", comms_dir = "../OUTPUT/comms",estimator="add_smooth", seed=None,fname_start="train-", input_data_path="../INPUT/data", seed_plus=False):
+def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../data/INPUT_all/data",
+                        result_sample_sizes_dir="../data/OUTPUT/mcm/sample_sizes", comms_dir = "../data/OUTPUT/mcm/comms",estimator="add_smooth", seed=None,fname_start="train-", input_data_path="../data/INPUT/data", seed_plus=False):
     """
-    Generate sample_size number of samples and populate "../INPUT" folder. 
+    Generate sample_size number of samples and populate "../data/INPUT" folder. 
     Then fit the model to that data and save MCM and Counts from that model
       in a directory named after the sample size in the "../OUTPUT/sample_sizes" folder.
 
     :param sample_size: The number of images per class that should be used, if None then use all..
     :type sample_size: int
     :param all_data_path: The path to the data directory that will not be changed and where data is read from,
-                            defaults to "../INPUT_all/data"
+                            defaults to "..data/INPUT_all/data"
     :type all_data_path: str, optional
     :param result_sample_sizes_dir: The path to the output directory for saving the results,
-                            defaults to "../OUTPUT/sample_sizes"
+                            defaults to "..data/OUTPUT/mcm/sample_sizes"
     :type result_sample_sizes_dir: str, optional
     :param comms_dir: directory of the communities after the current fitting
     :param seed_plus: if true, then do seed += nr runs for that sample done: e.g.,
@@ -76,7 +76,7 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../I
     
 
 
-def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_path="../INPUT/data", seed=42,fname_start = "train-"):
+def subsample_data(sample_size, all_data_path="../data/INPUT_all/data", input_data_path="../data/INPUT/data", seed=42,fname_start = "train-"):
     """Clear the input_data_path folder and fill it with samples from the all_data_path folder.
     
     :param sample_size: if None then take whole sample, otherwise provide integer of how many samples. Must be <= available samples.
@@ -126,7 +126,7 @@ def subsample_data(sample_size, all_data_path="../INPUT_all/data", input_data_pa
 
 
 # XXX_sample => [sample size, run_index, cat_idx, icc_idx]
-def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_split_{}", ):
+def load_counts_mcm(sample_sizes, letter, path_format = "../data/OUTPUT/mcm/sample_sizes_split_{}", ):
     """For all sample sizes, load the counts and mcms for a specific digit and a pool of samples specifid by the letter."""
     samples_path = path_format.format(letter)
 
@@ -160,7 +160,7 @@ def load_counts_mcm(sample_sizes, letter, path_format = "../OUTPUT/sample_sizes_
 
 
 # get sample seed=42 from dataset B
-def recreate_dataset(sample_from_letter,digit, sample_size:int, seed = 42,fname_format= "half-images-unlabeled-{}.dat", fname_start="half-", all_data_path="../INPUT_all/data/combined_split_{}", input_data_path = "../INPUT/data/"):
+def recreate_dataset(sample_from_letter,digit, sample_size:int, seed = 42,fname_format= "half-images-unlabeled-{}.dat", fname_start="half-", all_data_path="../data/INPUT_all/data/combined_split_{}", input_data_path = "../data/INPUT/data/"):
     """Recreate the dataset A or B was build on."""
     all_data_path = all_data_path.format(sample_from_letter)
      
@@ -255,7 +255,7 @@ def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter,add_s
     return ms_all
 
 def load_test_data(digit = 0):
-        all_data_path="../INPUT_all/data/testdata_separated"
+        all_data_path="../data/INPUT_all/data/testdata_separated"
         file = "test-images-unlabeled-{}.dat".format(digit)
         return np.loadtxt(os.path.join(all_data_path,file), dtype="str")
 
@@ -532,7 +532,7 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx):
     all_byk_pair = []
 
     for mcm_idx in digit_pair:
-        _, icc_data,dists = utils.distmap_from_testprobs(test_probs, test_mcms, digit_pair, mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True)
+        _, icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, digit_pair, mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True)
         ord_distidcs = np.argsort(dists)[::-1]
         by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
         all_byk_pair.append(by_k)
