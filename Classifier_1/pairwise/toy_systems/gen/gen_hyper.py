@@ -3,6 +3,30 @@ import hypernetx as hnx
 import matplotlib.pyplot as plt
 
 
+"""
+General spin model.
+Computes ground truth energy and probability distribution of states.
+Usage:
+    incidence = {
+        1: ('A', 'B'),
+        2: ('C', 'D', 'A', 'B'),
+        3: ("B"),
+        4: ("A"),
+        5: ("B","C","D"),
+    }
+    seed = 0
+    rng = np.random.default_rng(seed)
+    edge_weights_J = rng.random(len(incidence))
+
+    H = Hyperspinmodel(incidence,edge_weights_J)
+    H.compute_spinmodel() # compute probability distribution
+    print(H.energy, H.Z, H.probabilities)
+    x = H.gen_samples(1000,1) # sample states from the model
+
+    plt.subplots(figsize=(5, 5))
+    hnx.draw(H)
+    plt.show()
+"""
 class Hyperspinmodel(hnx.Hypergraph):
     def __init__(self, incidence_dict, edge_weights, convention=0):
         """
@@ -24,6 +48,7 @@ class Hyperspinmodel(hnx.Hypergraph):
         self.Z = np.nan
         self.probabilities = np.empty(0)
         self.convention = convention
+        self.all_states = np.empty(0)
 
 
     def compute_spinmodel(self):
@@ -32,13 +57,29 @@ class Hyperspinmodel(hnx.Hypergraph):
 
         :return: None
         """
-        all_states = self.gen_allbitstrings()
-        all_states[all_states == 0] = self.convention  # FIXME. Test if works with -1 too.
+        self.all_states = self.gen_allbitstrings()
+        self.all_states[self.all_states == 0] = self.convention  # FIXME. Test if works with -1 too.
         incm = self.incidence_matrix().toarray()  # spin (rows) x link (cols)
         weighted_incm = incm * self.edge_weights
-        self.energy = (all_states[:, :, None] * weighted_incm).sum(axis=2).sum(axis=1)  # state spin values * interaction; sum over interactions
+        self.energy = (self.all_states[:, :, None] * weighted_incm).sum(axis=2).sum(axis=1)  # state spin values * interaction; sum over interactions
         self.Z = np.sum(self.energy)
         self.probabilities = self.energy / self.Z
+
+    def gen_samples(self, nsamples, seed):
+        """
+        Generate states from the spin model according to the bolzmann distribution of it.
+
+        :param nsamples: The number of samples to generate.
+        :type nsamples: int
+        :param seed: The seed value to generate the samples with.
+        :type seed: int or None
+        :return: The generated states
+        :rtype: numpy.ndarray
+        """
+        assert self.Z is not np.nan, "Z is np.nan. Call compute_spinmodel before generating samples."
+        rng = np.random.default_rng(seed)
+        return rng.choice(self.all_states, p=self.probabilities, size=nsamples)
+
 
 
     def gen_allbitstrings(self):
@@ -59,7 +100,7 @@ class Hyperspinmodel(hnx.Hypergraph):
 
 
 if __name__ == "__main__":
-    scenes = {
+    incidence = {
         1: ('A', 'B'),
         2: ('C', 'D', 'A', 'B'),
         3: ("B"),
@@ -68,11 +109,13 @@ if __name__ == "__main__":
     }
     seed = 0
     rng = np.random.default_rng(seed)
-    edge_weights_Jij = rng.random(5)
+    edge_weights_J = rng.random(len(incidence))
 
-    H = Hyperspinmodel(scenes,edge_weights_Jij)
-    H.compute_spinmodel()
-    print(H.probabilities)
-    # plt.subplots(figsize=(5, 5))
-    # hnx.draw(H)
-    # plt.show()
+    H = Hyperspinmodel(incidence,edge_weights_J)
+    H.compute_spinmodel() # compute probability distribution
+    print(H.energy, H.Z, H.probabilities)
+    x = H.gen_samples(1000,1) # sample states from the model
+
+    plt.subplots(figsize=(5, 5))
+    hnx.draw(H)
+    plt.show()
