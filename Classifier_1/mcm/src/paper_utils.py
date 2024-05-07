@@ -1,6 +1,5 @@
-
 import numpy as np
-
+import copy
 from src.classify import MCM_Classifier
 import json
 import os
@@ -537,6 +536,34 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx):
         by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
         all_byk_pair.append(by_k)
     return all_byk_pair
+
+
+
+def adjust_smaller_icc(all_byk,all_byk_modspin):
+    """For a comparision of two MCM over K icc, at each k adjust the size of
+      the smaller sub-MCM to the size of the larger one by adding unmodelled spins.
+
+    :param all_byk: Probabilities for ICC in two models over data.
+    :type all_byk: list of two np arrays of shape (nicc, nimages, seedigit(of 2))
+    :param all_byk_modspin: number spins in each sub-mcm
+    :type all_byk_modspin: 1d np.array
+    """
+    c_all_byk = copy.deepcopy(all_byk)  # create a copy of all_byk
+
+    nicc_mods = [len(i) for i in all_byk_modspin]
+    nspin_diff = all_byk_modspin[0][:np.min(nicc_mods)] - all_byk_modspin[1][:np.min(nicc_mods)]
+    long_mod = np.argmax(nicc_mods)
+    nspin_diff = np.append(nspin_diff,( 121 - all_byk_modspin[long_mod][np.min(nicc_mods):]))
+    
+    assert len(nspin_diff) == np.max(nicc_mods)
+    nspin_diff
+    for i,r_diff in enumerate(nspin_diff):
+        # if model 0 more icc than model 1 for that k, adjust model 1 probability
+        if r_diff > 0:
+            c_all_byk[1][i,...] = c_all_byk[1][i,...] * 1/(2**np.abs(r_diff))
+        elif r_diff < 0:
+            c_all_byk[0][i,...] = c_all_byk[0][i,...] * 1/(2**np.abs(r_diff))
+    return c_all_byk
 
 
 
