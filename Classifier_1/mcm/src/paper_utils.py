@@ -253,8 +253,7 @@ def letter_means_stds(letter, sample_sizes, nr_runs, digit,recreate_letter,add_s
 
     return ms_all
 
-def load_test_data(digit = 0):
-        all_data_path="../data/INPUT_all/data/testdata_separated"
+def load_test_data(digit = 0, all_data_path="../data/INPUT_all/data/testdata_separated"):
         file = "test-images-unlabeled-{}.dat".format(digit)
         return np.loadtxt(os.path.join(all_data_path,file), dtype="str")
 
