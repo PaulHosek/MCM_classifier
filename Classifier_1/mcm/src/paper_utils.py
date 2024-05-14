@@ -507,7 +507,7 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
     return tuple(out)
 
 
-def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx):
+def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return_comms=False, return_dists=False):
     """Compare two MCM fitted on the digit_pair digits
       on how many of the top ICC they need to differentiate the digit pair.
 
@@ -528,22 +528,35 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx):
     :type digit_pair: tuple or list of len 2
     :param sample_idx: which sample size to use. Provide index, not sample size.
     :type sample_idx: int
+    :param return_comms: bool if should return communities of the mcms used
+    :param return_dists: bool if should return the distances for each icc
     :param run_idx: Which run to use. Provide index.
     :type run_idx: int
     """
     all_byk_pair = []
     all_byk_modspin = []
+    all_comms = []
+    all_dists = []
     for mcm_idx in digit_pair:
         _, comms,icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, digit_pair, mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True, return_comms=True)
         ord_distidcs = np.argsort(dists)[::-1]
         by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
         all_byk_pair.append(by_k)
 
-            # compute the number of spins in each model
+        # compute the number of spins in each model
         icc_sizes = np.unique(comms,return_counts=True)[1]
         modelled_spins = np.cumsum(icc_sizes[ord_distidcs])
         all_byk_modspin.append(modelled_spins)
-    return all_byk_pair, all_byk_modspin
+
+        #optional returns
+        all_comms.append(comms)
+        all_dists.append(dists)
+    out = [all_byk_pair, all_byk_modspin]
+    if return_comms:
+        out.append(all_comms)
+    if return_dists:
+        out.append(all_dists)
+    return out
 
 
 
