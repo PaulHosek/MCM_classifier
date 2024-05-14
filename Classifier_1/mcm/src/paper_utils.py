@@ -549,19 +549,21 @@ def adjust_smaller_icc(all_byk,all_byk_modspin):
     """
     c_all_byk = copy.deepcopy(all_byk)  # create a copy of all_byk
 
-    nicc_mods = [len(i) for i in all_byk_modspin]
-    nspin_diff = all_byk_modspin[0][:np.min(nicc_mods)] - all_byk_modspin[1][:np.min(nicc_mods)]
-    long_mod = np.argmax(nicc_mods)
-    nspin_diff = np.append(nspin_diff,( 121 - all_byk_modspin[long_mod][np.min(nicc_mods):]))
-    
+    nicc_mods = [len(i) for i in all_byk_modspin] # 33, 30
+    mods_long_short = np.argsort(nicc_mods)[::-1]
+    nspin_diff = all_byk_modspin[mods_long_short[0]][:np.min(nicc_mods)] - all_byk_modspin[mods_long_short[1]][:np.min(nicc_mods)]
+
+    nspin_diff = np.append(nspin_diff,(  all_byk_modspin[mods_long_short[0]][np.min(nicc_mods):] - all_byk_modspin[mods_long_short[1]][-1]))
+
+    # print(( 121 - all_byk_modspin[long_mod][np.min(nicc_mods):]))
     assert len(nspin_diff) == np.max(nicc_mods)
-    nspin_diff
     for i,r_diff in enumerate(nspin_diff):
-        # if model 0 more icc than model 1 for that k, adjust model 1 probability
+        # if model 0 more spins than model 1 for that k, adjust model 1 probability
         if r_diff > 0:
-            c_all_byk[1][i,...] = c_all_byk[1][i,...] * 1/(2**np.abs(r_diff))
+            c_all_byk[mods_long_short[1]][i,...] *= 1/(2**np.abs(r_diff))
         elif r_diff < 0:
-            c_all_byk[0][i,...] = c_all_byk[0][i,...] * 1/(2**np.abs(r_diff))
+            c_all_byk[mods_long_short[0]][i,...] *= 1/(2**np.abs(r_diff))
+
     return c_all_byk
 
 
