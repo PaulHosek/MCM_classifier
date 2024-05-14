@@ -512,11 +512,15 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx):
       on how many of the top ICC they need to differentiate the digit pair.
 
     
-    Generate all_byk_pair list of np arrays.
+    Generates all_byk_pair list of np arrays.
     Each element of the list is an mcm. Within each list, there is a np array of shape (nicc,ntestimg,digitpair).
     The first index (nicc) is the cumprod of the top k icc for that binary difference.
     The index of the last dimension is in the same order as the provided digit pair.
     
+    Generates all_byk_modspin list of 1d np arrays.
+    Each eleent of the list is an mcm. Each np array is the commulative sum of SPINS in the k iccs modelled.
+    This list can be used to adjust the probabilities between k.
+
     :param test_probs: result array from paper_utils.get_complete_testprobs. Probability on test set per icc, MCM, digit, run, sample size.
     :type test_probs: np.ndarray
     :param test_mcm: result array from paper_utils.get_complete_testprobs. MCMs for every run, digit, sample size.
@@ -528,13 +532,18 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx):
     :type run_idx: int
     """
     all_byk_pair = []
-
+    all_byk_modspin = []
     for mcm_idx in digit_pair:
-        _, icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, digit_pair, mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True)
+        _, comms,icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, digit_pair, mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True, return_comms=True)
         ord_distidcs = np.argsort(dists)[::-1]
         by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
         all_byk_pair.append(by_k)
-    return all_byk_pair
+
+            # compute the number of spins in each model
+        icc_sizes = np.unique(comms,return_counts=True)[1]
+        modelled_spins = np.cumsum(icc_sizes[ord_distidcs])
+        all_byk_modspin.append(modelled_spins)
+    return all_byk_pair, all_byk_modspin
 
 
 
