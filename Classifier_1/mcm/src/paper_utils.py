@@ -288,9 +288,27 @@ def evidence_iccs(Counts, MCMs, mcm_idx):
 
 # evidence_iccs(Counts,MCMs,2)
 
-def pixelwise_evidence(evidence_iccs,N,single_mcm):
+def pixelwise_evidence(evidence_iccs,N,single_mcm, image_wise = False):
+    """Normalises raw log evidence for a model to logE per bits per pixel per image for each icc.
+
+    If image_wise = True, get the number of pixels of information that were compressed. Number between 0-121.
+
+
+    :param evidence_iccs: log evidence for each ICC. Result of paper_utils.evidence_iccs
+    :type evidence_iccs: array-like
+    :param N: number of images used to fit the model
+    :type N: int
+    :param single_mcm: the mcm to calculate the evidence for.
+    :type single_mcm: np array of str
+    :param image_wise: flag to avoid dividing by the number of pixels in the icc, defaults to False
+    :type image_wise: bool, optional
+    :return: np array of evidences per icc
+    :rtype: np array
+    """
     icc_pixels = [icc.count("1") for icc in single_mcm]
-    return evidence_iccs / np.log(2) / N / icc_pixels
+    if image_wise:
+        return evidence_iccs / np.log(2) / N
+    return  evidence_iccs / np.log(2) / N / icc_pixels
 
 
 
