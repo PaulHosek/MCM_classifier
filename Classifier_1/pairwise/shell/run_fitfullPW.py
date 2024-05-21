@@ -48,11 +48,6 @@ def main(nsamples, digit):
             if not os.path.exists(os.path.join(test_dir, fname.format(digit))):
                 seed = ex_seed
                 break
-                
-
-
-            
-
 
         print("seed=",seed)
         

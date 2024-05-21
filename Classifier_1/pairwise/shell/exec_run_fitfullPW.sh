@@ -2,7 +2,17 @@
 
 
 
-for digit in `seq 0 2` # inclusive on both ends
-do
-    python3 run_fitfullPW.py --sample_s 10 --digit $digit
+# for run in {0..9}
+# do
+
+#for size in 10 100 500 $(seq 1000 1000 6000) 6315 ; do 
+for size in $(seq 11 1 20);do 
+  echo $size
+   # for digit in {0..9} 
+   # do
+    python3 run_fitfullPW.py --sample_s $size --digit 0
+   # done
 done
+
+# done
+

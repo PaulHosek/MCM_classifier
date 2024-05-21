@@ -126,14 +126,13 @@ class Pairwise_fitter():
         f = open(os.devnull, "w")
         print(args)
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except KeyboardInterrupt:
             raise KeyboardInterrupt("Process interrupted")
         except SystemExit:
             raise SystemExit("Process process exited unexpectedly")
         
-        stat = p.wait()
-        if stat == 0:
+        if p.returncode==0:
             print(f"\N{check mark} Process done.")
         f.close()
 
