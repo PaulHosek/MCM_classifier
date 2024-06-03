@@ -6,7 +6,7 @@
 # do
 
 #for size in 10 100 500 $(seq 1000 1000 6000) 6315 ; do 
-for size in $(seq 17 1 20);do 
+for size in 10 13 15 6000 60001;do 
   echo $size
    # for digit in {0..9} 
    # do

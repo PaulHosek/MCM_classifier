@@ -126,7 +126,7 @@ class Pairwise_fitter():
         f = open(os.devnull, "w")
         print(args)
         try:
-            p = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.run(args)#, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         except KeyboardInterrupt:
             raise KeyboardInterrupt("Process interrupted")
         except SystemExit:
@@ -139,7 +139,7 @@ class Pairwise_fitter():
     def build_ace_args(self, path_to_exe:str, p_dir:str ,p_fname:str , args:list, auto_l2=True):
         """Generate the arguments for the ACE algorithm.
 
-        :param path_to_exe: path to the executable file. e.g., ./bin/ace
+        :param path_to_exe: path to the executable file. e.g., ./bin/ace or ./bin/qls
         :type path_to_exe: str
         :param p_dir: directory of the .p file to do the ace on. e.g., ./OUTPUT_mod_dir/data/img1
         :type p_dir: str
@@ -154,7 +154,9 @@ class Pairwise_fitter():
         """
         cm_args = [path_to_exe, "-d",p_dir, "-i",p_fname,"-o", p_fname+"-out", "-b", str(self.sample_size)]
         if auto_l2:
-            cm_args.append("-ga")
+            cm_args.append("-ag")
+        cm_args.append("-v") # debug verbose output
+
         cm_args.extend(args)
 
         return tuple(cm_args)
@@ -176,7 +178,7 @@ class Pairwise_fitter():
      
         cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(self.sample_size)]
         if auto_l2:
-            cm_args.append("-ga")
+            cm_args.append("-ag")
         cm_args.extend(args)
         return tuple(cm_args)
 

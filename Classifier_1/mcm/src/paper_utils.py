@@ -6,6 +6,8 @@ import os
 from shutil import copytree
 import src.plot as myplot
 import src.loaders as loaders
+import math
+
 # 
 
 
@@ -260,7 +262,6 @@ def load_test_data(digit = 0, all_data_path="../data/INPUT_all/data/testdata_sep
 
 
 #### PIXELWISE EVIDENCE
-import math
 
 def evidence_iccs(Counts, MCMs, mcm_idx):
     """Calculate the evidence for each icc in an MCM using the count distribution of the g* parameters/ ML estimate.
