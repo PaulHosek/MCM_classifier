@@ -22,7 +22,6 @@ class Pairwise_evaluator():
         self.Z = 0.0
         self.all_states = np.empty(1)
 
-
     def load_ising_paramters(self):
         """
         Read the .j file of the inferred ising/potts paramters.
