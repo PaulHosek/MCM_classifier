@@ -35,8 +35,6 @@ class Pairwise_evaluator():
         self.fields[:] = all_param[:self.nspins]
         self.couplings[:] = all_param[self.nspins:]
 
-
-
     def __validate_jfile(self, res):
         """Validate dimensions of the potts paramter ".j" file."""
         all_param = np.loadtxt(self.parameter_path)
@@ -50,7 +48,6 @@ class Pairwise_evaluator():
         h = self.__calc_fields(self.fields, state)
         j = self.__calc_couplings(self.couplings,state)
         return -1*(h+j)
-
 
     @staticmethod
     @jit("(float64[:], int64[:])", nopython=True) # state assumed to be in convention -1 1
