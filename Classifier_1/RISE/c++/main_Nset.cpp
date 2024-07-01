@@ -18,38 +18,51 @@ const __uint128_t ONE = 1;
 
 
 // function declarations
-map<__uint128_t, unsigned int> read_data(string fname, unsigned int &N, unsigned int n);
+map<__uint128_t, unsigned int> read_data(string fname, unsigned int &N, unsigned int n, string directory);
 map<__uint128_t, double> get_pdata(map<__uint128_t, unsigned int> &Nset, unsigned int N);
 map<__uint128_t, double> optimize(unsigned int n, map<__uint128_t, double> &pdata);
-void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n);
+void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n, string directory);
 
 
 // MAIN FUNCTION
 int main(int argc, char **argv) {
 
-	unsigned int n;
+	unsigned int n = 1;
 	unsigned int N = 0;
+	string directory;
 	string fname;
-    sscanf(argv[1], "%d", &n);
-
-    for (int i = 2; i < argc; i++) {
-
-        string arg = argv[i];
-
-        // input data
-        if (arg == "-i") {
-            fname = argv[i+1];
-            i++;
-            cout << "- input file: " << fname << "\n";
-        }
+	
+	for (int i = 1; i < argc; ++i) {
+	if (std::string(argv[i]) == "-n" && i + 1 < argc) { // Check for -n flag and ensure there's a value following it
+		n = std::stoi(argv[++i]); // Convert the next argument to integer and assign to N
+		std::cout << "-n set to: " << n << "\n";
+	} else if (std::string(argv[i]) == "-i" && i + 1 < argc) { // Check for -i flag and ensure there's a value following it
+		fname = argv[++i]; // Assign the next argument to fname
+		std::cout << "- Input file: " << fname << "\n";
+	} else if (std::string(argv[i]) == "-p" && i + 1 < argc) { // Check for -d flag and ensure there's a value following it
+		directory = std::string("./") + argv[++i] + "/"; // Assign the next argument to directory
+		std::cout << "- Path: " << directory << "\n";
+	}
     }
+    // sscanf(argv[1], "%d", &n);
+    // for (int i = 2; i < argc; i++) {
+
+    //     string arg = argv[i];
+
+    //     // input data
+    //     if (arg == "-i") {
+    //         fname = argv[i+1];
+    //         i++;
+    //         cout << "- input file: " << fname << "\n";
+    //     }
+    // }
 
 
 
-	map<__uint128_t, unsigned int> Nset = read_data(fname, N, n);
+	map<__uint128_t, unsigned int> Nset = read_data(fname, N, n, directory);
 	map<__uint128_t, double> pdata = get_pdata(Nset, N);
 	map<__uint128_t, double> jij = optimize(n, pdata);
-	write_jij(jij, fname, n);
+	write_jij(jij, fname, n, directory);
 	return 0;
 }
 
@@ -101,7 +114,7 @@ __uint128_t string_to_int(string nstring, unsigned int n) {
 }
 
 // PROCESSING FUNCTIONS ============================================
-map<__uint128_t, unsigned int> read_data(string fname, unsigned int &N, unsigned int n) {
+map<__uint128_t, unsigned int> read_data(string fname, unsigned int &N, unsigned int n, string directory) {
 
 	cout << "reading data..." << endl;
 
@@ -110,7 +123,7 @@ map<__uint128_t, unsigned int> read_data(string fname, unsigned int &N, unsigned
 
 	map<__uint128_t, unsigned int> Nset;
 
-	string fname_full = "../data/" + fname + ".dat";
+	string fname_full = directory + fname + ".dat";
 
 	cout << fname << endl;
 	ifstream myfile(fname_full);
@@ -144,19 +157,19 @@ map<__uint128_t, double> get_pdata(map<__uint128_t, unsigned int> &Nset, unsigne
 
 }
 // modifided function to fit my convention: 0s for the fields before and only the couplings not the bitstrings
-void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n) {
+void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n, string directory) {
 
 	map<__uint128_t, double>::iterator it;
 
 	ofstream myfile;
 
-	string fname_full = "../data/" + fname + "_jij_fit.dat";
+	string fname_full = directory + fname + "_jij_fit.dat";
 
 	myfile.open(fname_full);
 
 	// write 
 	for (int i=0; i<n; i++){
-		myfile << 0 << "\n";
+		myfile << 0.0 << "\n";
 	}
 
 	for (it = jij.begin(); it != jij.end(); it++) {

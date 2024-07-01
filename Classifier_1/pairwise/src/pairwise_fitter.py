@@ -105,11 +105,18 @@ class Pairwise_fitter():
             cml_args = self.build_ace_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args)
         elif method == "qls":
             cml_args = self.build_qls_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args)
+        elif method == "rise":
+            cml_args = self.build_rise_args()
         else:
             raise ValueError("Invalid method. Please choose either 'ace' or 'qls'.")
         self.call_exec(cml_args)
 
         p = self.call_exec(cml_args)
+
+    def build_rise_args(path_to_exe):
+
+        cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(self.sample_size)]
+
     
 
     def call_exec(self, args: tuple):
