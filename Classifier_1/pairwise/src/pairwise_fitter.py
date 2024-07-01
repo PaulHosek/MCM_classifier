@@ -106,16 +106,26 @@ class Pairwise_fitter():
         elif method == "qls":
             cml_args = self.build_qls_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args)
         elif method == "rise":
-            cml_args = self.build_rise_args()
+            cml_args = self.build_rise_args(path_to_exe)
         else:
             raise ValueError("Invalid method. Please choose either 'ace' or 'qls'.")
         self.call_exec(cml_args)
 
         p = self.call_exec(cml_args)
 
-    def build_rise_args(path_to_exe):
+    def build_rise_args(self, path_to_exe):
+        """
 
-        cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(self.sample_size)]
+        - needs unserperated .dat file -> check if the subsampling works still #FIXME
+
+        :param path_to_exe: _description_
+        :type path_to_exe: _type_
+        """
+        
+        cml_args = [path_to_exe, "-n", self.dat_shape[1], "-i", self.fname+".dat", "-p", self.cat_dir]
+        pass
+
+        # cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(self.sample_size)]
 
     
 
