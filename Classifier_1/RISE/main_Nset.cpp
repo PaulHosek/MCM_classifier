@@ -16,7 +16,7 @@ using namespace LBFGSpp;
 const int n = 60;
 const unsigned int N = 1000000;
 
-const string fname = "../data/test_data_n60_N1000000";
+const string fname = "./example_data/test_data_n60_N1000";
 //stringstream fname_base;
 
 // function declarations
