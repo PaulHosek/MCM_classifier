@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-sys.path.append("../../../")
+sys.path.append("../../")
 import pairwise.src.ACEtools as ACEtools
 import os
 import subprocess

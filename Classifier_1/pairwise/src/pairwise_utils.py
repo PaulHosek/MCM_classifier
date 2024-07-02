@@ -29,7 +29,7 @@ def fit_digit(digit, seed,nsamples,fname = "train-images-unlabeled-{}",\
     mod.setup(seed,input_spaced=False)
     mod.fit("ace",exe_rel)
 
-def get_pw_mod(digit,nspin,outdir,fname="train-images-unlabeled-{}",):
+def get_pw_mod(digit,nspin,outdir,fname="train-images-unlabeled-{}",fileend="_sep-output-out.j"):
     """Get the pairwise model that was fitted on a digit.
 
     :param digit: mnist digit 0-9. only needed to load the right
@@ -44,7 +44,7 @@ def get_pw_mod(digit,nspin,outdir,fname="train-images-unlabeled-{}",):
     :rtype: instance of class Pairwise_evaluator
     """
     fname = fname.format(digit)
-    jpath = os.path.join(outdir,fname,fname+"_sep-output-out.j")
+    jpath = os.path.join(outdir,fname,fname+fileend)
     mod = Pairwise_evaluator(jpath, nspin)
     mod.load_ising_paramters()
     return mod

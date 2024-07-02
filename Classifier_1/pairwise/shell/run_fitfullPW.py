@@ -24,7 +24,7 @@ def fit_digit(digit, seed, nsamples,\
     mod.fit(method,exe_rel)
 
 
-def main(nsamples, digit, method):
+def main(nsamples, digit, method, train_full = "full"):
     seed = 1
     seed_plus = True
     if method == "ace":
@@ -32,9 +32,14 @@ def main(nsamples, digit, method):
     elif method == "rise":
         exe_rel="../ace_utils/rise"
         
-    fname = "full-images-unlabeled-{}"
-    inalldir_rel="../data/INPUT_all/data/combined_data/"
-    sample_size_dir = os.path.join(f"../data/OUTPUT_mod/data/full_sample_sizes/{method}/",str(nsamples))
+    fname = train_full + "-images-unlabeled-{}"
+    if train_full=="full":
+        inalldir_rel="../data/INPUT_all/data/combined_data/"
+    elif train_full=="train":
+        inalldir_rel="../data/INPUT_all/data/traindata/"
+
+
+    sample_size_dir = os.path.join(f"../data/OUTPUT_mod/data/{train_full}_sample_sizes/{method}/",str(nsamples))
 
     os.makedirs(sample_size_dir, exist_ok=True)
     if seed_plus:
@@ -73,11 +78,13 @@ def parse_arguments():
     parser.add_argument('--sample_s', type=int, help='Number of samples')
     parser.add_argument('--digit', type=int, help='Digit to fit')
     parser.add_argument('--method',type=str, help="ace or rise")
+    parser.add_argument('--trainfull',type=str, help="full or train")
+
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = parse_arguments()
-    main(args.sample_s, args.digit, args.method)
+    main(args.sample_s, args.digit, args.method, args.trainfull)
 
 
 
