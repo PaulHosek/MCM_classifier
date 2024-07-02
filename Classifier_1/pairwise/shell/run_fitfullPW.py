@@ -17,21 +17,24 @@ def listdir_nohidden(path):
 # fit the ising model to each digit
 def fit_digit(digit, seed, nsamples,\
               fname, inalldir_rel, 
-              outdir_rel, exe_rel):
+              outdir_rel, exe_rel, method):
     print(fname.format(digit), seed, nsamples)
     mod = Pairwise_fitter(nsamples,inalldir_rel,fname.format(digit), outdir_rel)
     mod.setup(seed,input_spaced=False)
-    mod.fit("ace",exe_rel)
+    mod.fit(method,exe_rel)
 
 
-def main(nsamples, digit):
+def main(nsamples, digit, method):
     seed = 1
     seed_plus = True
-    exe_rel="../ace_utils/ace"
-
+    if method == "ace":
+        exe_rel="../ace_utils/ace"
+    elif method == "rise":
+        exe_rel="../ace_utils/rise"
+        
     fname = "full-images-unlabeled-{}"
     inalldir_rel="../data/INPUT_all/data/combined_data/"
-    sample_size_dir = os.path.join("../data/OUTPUT_mod/data/full_sample_sizes",str(nsamples))
+    sample_size_dir = os.path.join(f"../data/OUTPUT_mod/data/full_sample_sizes/{method}/",str(nsamples))
 
     os.makedirs(sample_size_dir, exist_ok=True)
     if seed_plus:
@@ -57,7 +60,7 @@ def main(nsamples, digit):
 
     start_time = time.time()
     fit_digit(digit=digit, seed=seed, nsamples=nsamples,\
-               fname=fname, inalldir_rel=inalldir_rel, outdir_rel=outdir_rel, exe_rel=exe_rel)
+               fname=fname, inalldir_rel=inalldir_rel, outdir_rel=outdir_rel, exe_rel=exe_rel, method=method)
     end_time = time.time()
     fitting_time = end_time - start_time
     with open(os.path.join(outdir_rel, fname.format(digit), 'fitting_time.txt',), 'w') as f:
@@ -69,11 +72,12 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Fit the ising model to the specified digit')
     parser.add_argument('--sample_s', type=int, help='Number of samples')
     parser.add_argument('--digit', type=int, help='Digit to fit')
+    parser.add_argument('--method',type=str, help="ace or rise")
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = parse_arguments()
-    main(args.sample_s, args.digit)
+    main(args.sample_s, args.digit, args.method)
 
 
 

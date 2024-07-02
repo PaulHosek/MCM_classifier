@@ -163,7 +163,7 @@ void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n, stri
 
 	ofstream myfile;
 
-	string fname_full = directory + fname + "_jij_fit.dat";
+	string fname_full = directory + fname + "_rise.dat";
 
 	myfile.open(fname_full);
 

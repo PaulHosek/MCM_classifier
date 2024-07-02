@@ -72,7 +72,9 @@ class Pairwise_fitter():
         self.subsample_cat_ace(seed, input_spaced)
         ACEtools.WriteCMSA("binary", self.fname_sep_path+".dat")
 
-        self.dat_shape = np.genfromtxt(self.fname_sep_path+".dat", delimiter=" ").shape
+        sep_data = np.genfromtxt(self.fname_sep_path+".dat", delimiter=" ")
+        self.dat_shape = sep_data.shape
+        np.savetxt(self.fname_sep_path[:-4] + ".dat", sep_data.astype(int), delimiter="", fmt="%s")
         self.__validate_input()
         self.is_setup = True
 
@@ -111,8 +113,6 @@ class Pairwise_fitter():
             raise ValueError("Invalid method. Please choose either 'ace' or 'qls'.")
         self.call_exec(cml_args)
 
-        p = self.call_exec(cml_args)
-
     def build_rise_args(self, path_to_exe):
         """
 
@@ -121,11 +121,10 @@ class Pairwise_fitter():
         :param path_to_exe: _description_
         :type path_to_exe: _type_
         """
-        
-        cml_args = [path_to_exe, "-n", self.dat_shape[1], "-i", self.fname+".dat", "-p", self.cat_dir]
-        pass
+        print("rise args built")
+        cml_args = [path_to_exe, "-n", str(self.dat_shape[1]), "-i", self.fname, "-p", self.cat_dir]
+        self.call_exec(cml_args)
 
-        # cm_args = [path_to_exe, "-d", p_dir, "-c", p_fname,"-w",p_fname,"-i",p_fname+"-out", "-o",p_fname+"-out-fit","-b",str(self.sample_size)]
 
     
 

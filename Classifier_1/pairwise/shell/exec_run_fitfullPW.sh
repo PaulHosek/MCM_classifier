@@ -10,7 +10,7 @@ for size in  6000;do
   echo $size
    # for digit in {0..9} 
    # do
-    python3 run_fitfullPW.py --sample_s $size --digit 0
+    python3 run_fitfullPW.py --sample_s $size --digit 0 --method "rise"
    # done
 done
 
