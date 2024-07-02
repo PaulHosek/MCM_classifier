@@ -110,7 +110,7 @@ class Pairwise_fitter():
         elif method == "rise":
             cml_args = self.build_rise_args(path_to_exe)
         else:
-            raise ValueError("Invalid method. Please choose either 'ace' or 'qls'.")
+            raise ValueError("Invalid method. Please choose either 'ace' or 'qls' or 'rise'.")
         self.call_exec(cml_args)
 
     def build_rise_args(self, path_to_exe):
@@ -122,8 +122,8 @@ class Pairwise_fitter():
         :type path_to_exe: _type_
         """
         print("rise args built")
-        cml_args = [path_to_exe, "-n", str(self.dat_shape[1]), "-i", self.fname, "-p", self.cat_dir]
-        self.call_exec(cml_args)
+        return tuple([path_to_exe, "-n", str(self.dat_shape[1]), "-i", self.fname, "-p", self.cat_dir])
+
 
 
     
