@@ -260,7 +260,7 @@ map<__uint128_t, double> optimize(unsigned int n, map<__uint128_t, double> &pdat
 
 	LBFGSParam<double> param;
 	param.epsilon = 1e-4;
-	param.max_iterations = 1000;
+	param.max_iterations = 10000;
 
 	LBFGSSolver<double> solver(param);
 
