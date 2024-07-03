@@ -3,26 +3,20 @@
 #include <fstream>
 #include <map>
 
-using namespace std;
-
 #include <Eigen/Core>
 #include <LBFGS.h>
 
+using namespace std;
 using namespace Eigen;
 using namespace LBFGSpp;
 
-// const int n = 100;
-// const unsigned int N = 1000;
 const __uint128_t ONE = 1;
-// const string fname = "../data/my_data_n100_N1000";
-
 
 // function declarations
 map<__uint128_t, unsigned int> read_data(string fname, unsigned int &N, unsigned int n, string directory);
 map<__uint128_t, double> get_pdata(map<__uint128_t, unsigned int> &Nset, unsigned int N);
 map<__uint128_t, double> optimize(unsigned int n, map<__uint128_t, double> &pdata);
 void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n, string directory);
-
 
 // MAIN FUNCTION
 int main(int argc, char **argv) {
@@ -156,6 +150,7 @@ map<__uint128_t, double> get_pdata(map<__uint128_t, unsigned int> &Nset, unsigne
 	return pdata;
 
 }
+
 // modifided function to fit my convention: 0s for the fields before and only the couplings not the bitstrings
 void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n, string directory) {
 
@@ -186,10 +181,10 @@ void write_jij(map<__uint128_t, double> &jij, string fname, unsigned int n, stri
 class rise_obj_func {
 private:
 	map<__uint128_t, double> pdata;
-	int node;
+	unsigned int node;
 	unsigned int n;
 public:
-	rise_obj_func(map<__uint128_t, double> pdata_, int node_, unsigned int n_) : pdata(pdata_), node(node_), n(n_) {}
+	rise_obj_func(map<__uint128_t, double> pdata_, unsigned int node_, unsigned int n_) : pdata(pdata_), node(node_), n(n_) {}
 
 	double operator()(const VectorXd &x, VectorXd &grad) {
 
@@ -220,6 +215,8 @@ public:
 			energy = 0;
 
 			for (unsigned int j = 0; j < n; j++) {
+
+				if (j == node) {continue;}
 
 				__uint128_t op = 0;
 				__uint128_t s1 = 0;
@@ -278,7 +275,9 @@ map<__uint128_t, double> optimize(unsigned int n, map<__uint128_t, double> &pdat
 		cout << "f: " << min_f << "\t";
 		cout << "iterations: " << niter << endl;
 
-		for (unsigned int j = node + 1; j < n; j++) {
+		for (unsigned int j = 0; j < n; j++) {
+
+			if (j == node) {continue;}
 
 			__uint128_t op = 0;
 			__uint128_t s1 = 0;
@@ -286,10 +285,9 @@ map<__uint128_t, double> optimize(unsigned int n, map<__uint128_t, double> &pdat
 
 			s1 = (ONE << node);
 			s2 = (ONE << j);
-
 			op = s1 + s2;
 
-			jij[op] = g[j];
+			jij[op] += g[j]/2;
 		}
 
 	}
