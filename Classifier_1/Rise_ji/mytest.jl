@@ -32,21 +32,40 @@ function create_histogram(file_path)
     
     # Sort the histogram by count, descending
     sort!(histogram, by=x->x[1], rev=true)
+    histogram_matrix = hcat(histogram...)'
     
-    return histogram
+    return histogram_matrix
+    
 end
 
 
 file_path = "./test/data/trivial.dat" # Replace with your actual file path
 histogram = create_histogram(file_path)
 println(histogram)
+println(typeof(histogram))
 
+learned = learn(histogram)
+println(typeof(learned))
+
+function save_matrix_to_file(matrix, file_path)
+    # Convert adjoint matrix to regular matrix
+    regular_matrix = Matrix(matrix)
+    
+    # Open the file for writing
+    open(file_path, "w") do file
+        for row in eachrow(regular_matrix)
+            println(file, join(row, " "))
+        end
+    end
+end
+
+save_matrix_to_file(learned, "./test/data/trival_couple.dat")
 
 # if abspath(PROGRAM_FILE) == @__FILE__
-model = FactorGraph([0.0 0.1 0.2; 0.1 0.0 0.3; 0.2 0.3 0.0])
-samples = sample(model, 100000)
-println(samples)
-
+# model = FactorGraph([0.0 0.1 0.2; 0.1 0.0 0.3; 0.2 0.3 0.0])
+# samples = sample(model, 100000)
+# println(samples)
+# println(typeof(samples))
 
 
 # learned = learn(samples)
