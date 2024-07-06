@@ -552,6 +552,40 @@ def get_cycle_fromcmap(cmap, N=None, use_index="auto"):
         return cycler("color",colors)
 
 
+# ----- more decision boundary -----
+def kmask(dists,comms, n_icc):
+    """
+    Return 2d binary mask of the k icc furthest from the decision boundary.
+    dists = 1d np array of distances for each community. index refers to community label
+    comms = 2d label np array of the communities
+    """
+    top_comms = np.argsort(dists)[-n_icc:]
+    mask = np.isin(comms, top_comms).astype(int)
+    return mask 
+
+def modelled_pixel_map(all_dists, all_comms, n_icc):
+    """Generated map to map the modelled pixels for each model into discrete sets.
+    k is the index there (so should be k-1 as input if k is the number of rank of the icc). K is the number of modelled spins.
+
+    Values in final map:
+    1 = only by mod A
+    2 = only by mod B
+    3 = by both models 
+
+    :param all_dists: _description_
+    :type all_dists: _type_
+    :param all_comms: _description_
+    :type all_comms: _type_
+    :param k: _description_
+    :type k: _type_
+    :return: _description_
+    :rtype: _type_
+    """
+    
+    out = kmask(all_dists[0], all_comms[0], n_icc) + kmask(all_dists[1], all_comms[1], n_icc)*2
+    return out
+
+
 
 
 
@@ -639,16 +673,16 @@ def plot_confusion_matrix(confusion_matrix, n_categories: int, title="Confusion 
         cmap (str, optional): Color map. Defaults to "Blues".
     """
     if logScale:
-        plt.matshow(confusion_matrix, interpolation="nearest", cmap=cmap, norm=mcolors.LogNorm(vmin=1, vmax=confusion_matrix.max()))
+        im = plt.matshow(confusion_matrix, interpolation="nearest", cmap=cmap, norm=mcolors.LogNorm(vmin=1, vmax=confusion_matrix.max()))
     else:
-        plt.matshow(confusion_matrix, interpolation="nearest", cmap=cmap)
+        im = plt.matshow(confusion_matrix, interpolation="nearest", cmap=cmap)
     plt.title(title)
-    plt.colorbar()
     tick_marks = np.arange(n_categories)
     plt.xticks(tick_marks, tick_marks)
     plt.yticks(tick_marks, tick_marks)
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
+    return im
     
 def plot_label_prob_diff(label1, label2, test_labels, probs, predicted_classes, title="Label probability difference"):
     correctly_classified_as_label1 = []
