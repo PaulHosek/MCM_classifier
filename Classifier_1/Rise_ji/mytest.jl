@@ -38,28 +38,34 @@ function create_histogram(file_path)
     
 end
 
-
-file_path = "./test/data/trivial.dat" # Replace with your actual file path
-histogram = create_histogram(file_path)
-println(histogram)
-println(typeof(histogram))
-
-learned = learn(histogram)
-println(typeof(learned))
-
 function save_matrix_to_file(matrix, file_path)
-    # Convert adjoint matrix to regular matrix
-    regular_matrix = Matrix(matrix)
-    
     # Open the file for writing
     open(file_path, "w") do file
-        for row in eachrow(regular_matrix)
-            println(file, join(row, " "))
+        # Write diagonal elements
+        for i in 1:size(matrix, 1)
+            println(file, matrix[i, i])
+        end
+        
+        # Write bottom triangle elements
+        for i in 2:size(matrix, 1)
+            for j in 1:i-1
+                println(file, matrix[i, j])
+            end
         end
     end
 end
 
-save_matrix_to_file(learned, "./test/data/trival_couple.dat")
+
+function fit_ising(file_path)
+    # file_path = "./test/data/trivial.dat" # Replace with your actual file path
+    histogram = create_histogram(file_path * ".dat")
+    println("Hist done")
+    learned = learn(histogram)
+    save_matrix_to_file(learned, file_path * "_rise.dat")
+end
+
+@time fit_ising("./test/data/trivial")
+
 
 # if abspath(PROGRAM_FILE) == @__FILE__
 # model = FactorGraph([0.0 0.1 0.2; 0.1 0.0 0.3; 0.2 0.3 0.0])
