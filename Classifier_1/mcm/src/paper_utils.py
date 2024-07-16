@@ -7,6 +7,7 @@ from shutil import copytree
 import src.plot as myplot
 import src.loaders as loaders
 import math
+import networkx as nx
 
 # 
 
@@ -620,3 +621,36 @@ def partition_to_str(mcm):
         x[idx] = 1
         out.append("".join(map(str, x)))
     return np.array(out, dtype=str)
+
+
+
+def cluster_partmap(G,seed, return_lcom = False):
+    """Cluster the graph using the louvain algorithm and return the 11x11 parition map
+
+    :param G: graph of pairwise model
+    :type G: nx.Graph() object
+    :return: parition map of the 11x11 image and integer labels
+    :rtype: np.array of shape (11,11)
+    """
+    lcom = nx.community.louvain_communities(G, seed=seed)
+
+    pmap = np.empty((121),dtype=int)
+
+    for i,pixels in enumerate(lcom):
+        pmap[list(pixels)] = i
+
+    if return_lcom:
+        return pmap.reshape((11,11)), lcom
+    return pmap.reshape((11,11))
+
+def community_avgJij(G, com):
+    sub_G = G.subgraph(com)
+
+    def get_edge_attributes(G, name="weight"):
+        edges = G.edges(data=True)
+        return [x[-1][name] for x in edges if name in x[-1]]
+    
+    comm_w = get_edge_attributes(sub_G,"weight")
+    if comm_w:
+        return np.nanmean(comm_w)
+    else: return 0
