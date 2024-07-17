@@ -654,3 +654,20 @@ def community_avgJij(G, com):
     if comm_w:
         return np.nanmean(comm_w)
     else: return 0
+
+def mean_test_acc_singlerun(test_probs):
+    per_image_prob = np.product(test_probs,axis=2,where=test_probs!=-1) # this correct be cause get_complete_testprobs gives the probability for each icc
+    max_decision_unit = np.argmax(per_image_prob,axis=0) # out of the 10 mcm seeing the same digit, which one was the most probable
+    digit_accu = [1-np.count_nonzero(max_decision_unit[k,:] - k)/892 for k in range(10)]
+    return np.mean(digit_accu)
+
+def mean_testacc_runmean(all_test_probs):
+    per_image_run_prob = np.product(all_test_probs, axis=4,where=all_test_probs!=-1)
+    nrun = per_image_run_prob.shape[2]
+    run_means = np.zeros((nrun))
+    for r in range(nrun):
+        res = per_image_run_prob[:,0,r]
+        max_decision_unit = np.argmax(res,axis=0) # out of the 10 mcm seeing the same digit, which one was the most probable
+        digit_accu = [1-np.count_nonzero(max_decision_unit[k,:] - k)/892 for k in range(10)]
+        run_means[r] = np.mean(digit_accu)
+    return run_means
