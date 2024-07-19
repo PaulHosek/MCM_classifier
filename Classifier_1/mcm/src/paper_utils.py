@@ -557,8 +557,10 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return
     all_byk_modspin = []
     all_comms = []
     all_dists = []
-    for mcm_idx in digit_pair:
-        _, comms,icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, digit_pair, mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True, return_comms=True)
+    for mi, mcm_idx in enumerate(digit_pair):
+        ord_digpair = [digit_pair, digit_pair[::-1]]
+        _, comms,icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, ord_digpair[mi], mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True, return_comms=True)
+
         ord_distidcs = np.argsort(dists)[::-1]
         by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
         all_byk_pair.append(by_k)
@@ -578,6 +580,59 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return
         out.append(all_dists)
     return out
 
+
+def get_all_byk_pair_symmetric(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return_comms=False, return_dists=False):
+    """Compare two MCM fitted on the digit_pair digits
+      on how many of the top ICC they need to differentiate the digit pair.
+
+    
+    Generates all_byk_pair list of np arrays.
+    Each element of the list is an mcm. Within each list, there is a np array of shape (nicc,ntestimg,digitpair).
+    The first index (nicc) is the cumprod of the top k icc for that binary difference.
+    The index of the last dimension is in the same order as the provided digit pair.
+    
+    Generates all_byk_modspin list of 1d np arrays.
+    Each eleent of the list is an mcm. Each np array is the commulative sum of SPINS in the k iccs modelled.
+    This list can be used to adjust the probabilities between k.
+
+    :param test_probs: result array from paper_utils.get_complete_testprobs. Probability on test set per icc, MCM, digit, run, sample size.
+    :type test_probs: np.ndarray
+    :param test_mcm: result array from paper_utils.get_complete_testprobs. MCMs for every run, digit, sample size.
+    :param digit_pair: the digits to test
+    :type digit_pair: tuple or list of len 2
+    :param sample_idx: which sample size to use. Provide index, not sample size.
+    :type sample_idx: int
+    :param return_comms: bool if should return communities of the mcms used
+    :param return_dists: bool if should return the distances for each icc
+    :param run_idx: Which run to use. Provide index.
+    :type run_idx: int
+    """
+    all_byk_pair = []
+    all_byk_modspin = []
+    all_comms = []
+    all_dists = []
+    for mi, mcm_idx in enumerate(digit_pair):
+        ord_digpair = [digit_pair, digit_pair[::-1]]
+        _, comms,icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, ord_digpair[mi], mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True, return_comms=True)
+
+        ord_distidcs = np.argsort(dists)[::-1]
+        by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
+        all_byk_pair.append(by_k)
+
+        # compute the number of spins in each model
+        icc_sizes = np.unique(comms,return_counts=True)[1]
+        modelled_spins = np.cumsum(icc_sizes[ord_distidcs])
+        all_byk_modspin.append(modelled_spins)
+
+        #optional returns
+        all_comms.append(comms)
+        all_dists.append(dists)
+    out = [all_byk_pair, all_byk_modspin]
+    if return_comms:
+        out.append(all_comms)
+    if return_dists:
+        out.append(all_dists)
+    return out
 
 
 def adjust_smaller_icc(all_byk,all_byk_modspin):
@@ -606,7 +661,7 @@ def adjust_smaller_icc(all_byk,all_byk_modspin):
         elif r_diff < 0:
             c_all_byk[mods_long_short[0]][i,...] *= 1/(2**np.abs(r_diff))
 
-    return c_all_byk
+    return c_all_byk, nspin_diff, mods_long_short
 
 
 
