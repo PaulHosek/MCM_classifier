@@ -573,7 +573,9 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return
         #optional returns
         all_comms.append(comms)
         all_dists.append(dists)
+
     out = [all_byk_pair, all_byk_modspin]
+    
     if return_comms:
         out.append(all_comms)
     if return_dists:
@@ -726,3 +728,17 @@ def mean_testacc_runmean(all_test_probs):
         digit_accu = [1-np.count_nonzero(max_decision_unit[k,:] - k)/892 for k in range(10)]
         run_means[r] = np.mean(digit_accu)
     return run_means
+
+
+def nestedlist3_to_numpy2d(run_own_label_pred, idx, nrun):
+    a = [rolp[:,idx] for rolp in run_own_label_pred]
+    b = np.full([len(a),len(max(a,key = lambda x: len(x)))], fill_value=np.nan)
+    for i,j in enumerate(a):
+        b[i][0:len(j)] = j
+    return b
+
+def nestedlist2_to_numpy2d(a):
+    b = np.zeros([len(a),len(max(a,key = lambda x: len(x)))])
+    for i,j in enumerate(a):
+        b[i][0:len(j)] = j
+    return b
