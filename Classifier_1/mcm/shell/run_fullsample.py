@@ -14,12 +14,12 @@ def main(sample_s):
   n_variables = 121  
   mcm_filename_format = "full-images-unlabeled-{}_bootstrap_comms.dat"
   data_filename_format = "full-images-unlabeled-{}.dat"
-  data_path = "../INPUT/data/"
-  communities_path = "../OUTPUT/comms/"
+  data_path = "../data/INPUT/data/"
+  communities_path = "../data/OUTPUT/mcm/comms/"
 
   clf_args = [n_categories, n_variables, mcm_filename_format, data_filename_format, data_path, communities_path] 
-  adp = "../INPUT_all/data/combined_data"
-  rssd = "../OUTPUT/sample_sizes_fromfull"
+  adp = "../data/INPUT_all/data/combined_data"
+  rssd = "../data/OUTPUT/mcm/sample_sizes_fromfull"
   utils.evaluate_subsample(sample_s, clf_args,all_data_path=adp, result_sample_sizes_dir=rssd, fname_start="full-", seed=seed, seed_plus=True)
 
 ##########3

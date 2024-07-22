@@ -8,7 +8,7 @@ import src.plot as myplot
 import src.loaders as loaders
 import math
 import networkx as nx
-
+import time
 # 
 
 
@@ -37,8 +37,10 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../d
     os.makedirs(nwdir, exist_ok=True)
     mcmdir = os.path.join(nwdir, "MCMs")
     countsdir = os.path.join(nwdir, "Counts")
+    timesdir = os.path.join(nwdir, "Fitting_times")
     os.makedirs(mcmdir, exist_ok=True)
     os.makedirs(countsdir, exist_ok=True)
+    os.makedirs(timesdir, exist_ok=True)
 
     if seed_plus:
         seed = 0 if seed is None else seed
@@ -49,8 +51,9 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../d
     subsample_data(sample_size, all_data_path=all_data_path, seed=seed, fname_start=fname_start, input_data_path=input_data_path)
     # Fit new classifier object
     classifier = MCM_Classifier(*MCM_Classifier_init_args)
+    before = time.time()
     classifier.fit(greedy=True, max_iter=1000000, max_no_improvement=100000, estimator=estimator)
-
+    fitting_time = time.time() - before
 
 
 
@@ -58,6 +61,7 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../d
     # Append the number of files + 1 to the file names
     mcm_file_name = "MCMs_" + str(len(os.listdir(mcmdir))) + ".json"
     counts_file_name = "Counts_" + str(len(os.listdir(countsdir))) + ".json"
+    fittingtime_file_name = "Fitting_time_" + ".txt"
 
     # Save MCMS and Counts with the updated file names
     with open(os.path.join(mcmdir, mcm_file_name), 'w') as f:
@@ -66,6 +70,8 @@ def evaluate_subsample(sample_size,MCM_Classifier_init_args, all_data_path="../d
     with open(os.path.join(countsdir, counts_file_name), 'w') as f:
         json.dump(classifier.get_Counts(), f, indent=2)
 
+    with open(os.path.join(timesdir, fittingtime_file_name), "a") as f:
+        f.write(f"{fitting_time}\n")
 
     # # Copy the new communities -> are also in MCM now
     # ncom = os.path.join(nwdir, "comms")
