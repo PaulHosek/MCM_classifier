@@ -22,10 +22,8 @@ function create_histogram(file_path)
     # Convert the dictionary to an array with individual bits as columns
     histogram = []
     for (binary_string, count) in counts
-        # Split the binary string into its bits and pad with zeros if necessary
         bits = lpad(binary_string, max_length, '0') |> collect |> x -> parse.(Int, x) .|> y -> y == 0 ? -1 : 1
-        
-        # Prepend the count to the bits array
+    
         row = [count; bits]
         push!(histogram, row)
     end

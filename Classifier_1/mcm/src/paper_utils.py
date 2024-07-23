@@ -503,7 +503,14 @@ def get_complete_testprobs(mcms_samplesizes,counts_samplesizes,sample_sizes,n_ru
                     test_mcms[mcm_digit][sample_size_idx][run_idx][test_digit][:len(mcm[mcm_digit])] = np.array(mcm[mcm_digit],dtype=str)
     return test_mcms, test_probs
 
-def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx, run_idx, return_comms = False, return_iccdata = False, return_avg_icc_prob=False,return_dists=False):
+def adjust_prob_icc_size(comms, avg_prob): 
+    # Adjust ICC probability by doing probabilities ^ 1/r
+
+    icc_idx, icc_size = np.unique(comms, return_counts=True)
+    # return (avg_prob.T ** (1/icc_size)).T
+    return (avg_prob.T ** (1/icc_size)).T
+
+def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx, run_idx, return_comms = False, return_iccdata = False, return_avg_icc_prob=False,return_dists=False, adjust_by_size=False):
 
     icc_data = test_probs[mcm_idx,sample_idx, run_idx]
 
@@ -512,10 +519,14 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
     icc_data = icc_data[:,:nr_icc,:]
     icc_data = np.transpose(icc_data, (1, 2, 0)) 
     avg_icc_prob = icc_data.mean(axis=1) # over test samples
-    dists = normalised_signed_distance_decisionbound(avg_icc_prob,digit_pair[0],digit_pair[1])
-    # find mcm and build map
+
     intr_mcm = test_mcms[mcm_idx,sample_idx, run_idx][0,:nr_icc] # get rid of unused rows, mcm_identical for every icc
     comms = myplot.generate_icc_comms_map(intr_mcm)
+    
+    if adjust_by_size:
+        avg_icc_prob = adjust_prob_icc_size(comms,avg_icc_prob)
+    dists = normalised_signed_distance_decisionbound(avg_icc_prob,digit_pair[0],digit_pair[1])
+    # find mcm and build map
     dist_map = dists[comms] 
     # plt.scatter(avg_prob[:,cat_a], avg_prob[:,cat_b])
     # plt.imshow(dist_map)
@@ -533,7 +544,7 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
     return tuple(out)
 
 
-def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return_comms=False, return_dists=False):
+def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return_comms=False, return_dists=False,adjust_by_size=False):
     """Compare two MCM fitted on the digit_pair digits
       on how many of the top ICC they need to differentiate the digit pair.
 
@@ -545,7 +556,9 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return
     
     Generates all_byk_modspin list of 1d np arrays.
     Each eleent of the list is an mcm. Each np array is the commulative sum of SPINS in the k iccs modelled.
-    This list can be used to adjust the probabilities between k.
+    This list can be used to adjust the probabilities between k (unmoddled spins).
+
+    Distance computation can also be adjusted by size of icc with adjust_by_size (P**1/r).
 
     :param test_probs: result array from paper_utils.get_complete_testprobs. Probability on test set per icc, MCM, digit, run, sample size.
     :type test_probs: np.ndarray
@@ -565,7 +578,7 @@ def get_all_byk_pair(test_probs, test_mcms, digit_pair,sample_idx,run_idx,return
     all_dists = []
     for mi, mcm_idx in enumerate(digit_pair):
         ord_digpair = [digit_pair, digit_pair[::-1]]
-        _, comms,icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, ord_digpair[mi], mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True, return_comms=True)
+        _, comms,icc_data,dists = distmap_from_testprobs(test_probs, test_mcms, ord_digpair[mi], mcm_idx, sample_idx,run_idx, return_iccdata=True,return_dists=True, return_comms=True,adjust_by_size=adjust_by_size)
 
         ord_distidcs = np.argsort(dists)[::-1]
         by_k = np.cumprod(icc_data[ord_distidcs],axis=0)[:,:,digit_pair]
