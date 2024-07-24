@@ -7,3 +7,5 @@
 /.vscode/
 Classifier_1/classifier/.DS_Store
 Classifier_1/classifier/INPUT/.DS_Store
+Classifier_1/mcm/paper_plots/data_for_plots/atest_mcms_5423.npy
+Classifier_1/mcm/paper_plots/data_for_plots/atest_probs_5423.npy
