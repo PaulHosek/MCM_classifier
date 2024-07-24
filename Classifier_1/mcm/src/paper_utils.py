@@ -719,7 +719,7 @@ def cluster_partmap(G,seed, return_lcom = False):
         return pmap.reshape((11,11)), lcom
     return pmap.reshape((11,11))
 
-def community_avgJij(G, com):
+def community_avgJij(G, com, return_all=False):
     sub_G = G.subgraph(com)
 
     def get_edge_attributes(G, name="weight"):
@@ -727,6 +727,8 @@ def community_avgJij(G, com):
         return [x[-1][name] for x in edges if name in x[-1]]
     
     comm_w = get_edge_attributes(sub_G,"weight")
+    if return_all:
+        return comm_w
     if comm_w:
         return np.nanmean(comm_w)
     else: return 0
