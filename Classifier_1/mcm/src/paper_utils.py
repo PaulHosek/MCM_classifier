@@ -524,8 +524,8 @@ def distmap_from_testprobs(test_probs,test_mcms,digit_pair, mcm_idx, sample_idx,
     comms = myplot.generate_icc_comms_map(intr_mcm)
     
     if adjust_by_size:
-        avg_icc_prob = adjust_prob_icc_size(comms,avg_icc_prob)
-    dists = normalised_signed_distance_decisionbound(avg_icc_prob,digit_pair[0],digit_pair[1])
+        avg_icc_prob_adj = adjust_prob_icc_size(comms,avg_icc_prob)
+    dists = normalised_signed_distance_decisionbound(avg_icc_prob_adj,digit_pair[0],digit_pair[1])
     # find mcm and build map
     dist_map = dists[comms] 
     # plt.scatter(avg_prob[:,cat_a], avg_prob[:,cat_b])
@@ -656,10 +656,11 @@ def get_all_byk_pair_symmetric(test_probs, test_mcms, digit_pair,sample_idx,run_
     return out
 
 
-def adjust_smaller_icc(all_byk,all_byk_modspin):
+def adjust_smaller_icc(all_byk,all_byk_modspin, dont_adjust=False):
     """For a comparision of two MCM over K icc, at each k adjust the size of
       the smaller sub-MCM to the size of the larger one by adding unmodelled spins.
 
+    dont_adjust parameter to keep output the same but dont adjust by unmoddled spins
     :param all_byk: Probabilities for ICC in two models over data.
     :type all_byk: list of two np arrays of shape (nicc, nimages, seedigit(of 2))
     :param all_byk_modspin: number spins in each sub-mcm
@@ -672,6 +673,8 @@ def adjust_smaller_icc(all_byk,all_byk_modspin):
     nspin_diff = all_byk_modspin[mods_long_short[0]][:np.min(nicc_mods)] - all_byk_modspin[mods_long_short[1]][:np.min(nicc_mods)]
 
     nspin_diff = np.append(nspin_diff,(  all_byk_modspin[mods_long_short[0]][np.min(nicc_mods):] - all_byk_modspin[mods_long_short[1]][-1]))
+    if dont_adjust:
+        return c_all_byk, nspin_diff, mods_long_short
 
     # print(( 121 - all_byk_modspin[long_mod][np.min(nicc_mods):]))
     assert len(nspin_diff) == np.max(nicc_mods)
