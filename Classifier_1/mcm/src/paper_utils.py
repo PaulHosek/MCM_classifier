@@ -411,7 +411,7 @@ def normalised_signed_distance_decisionbound(probs, own_cat, other_cat):
     assert own_cat <= probs.shape[1] and other_cat <= probs.shape[1], "IndexError: own_cat or other_cat are out of bounds of the probs array."
 
     x_coords, y_coords = zip(*[(x, y) for x, y in zip(probs[:, own_cat], probs[:, other_cat],)])
-    # distances = np.array(x_coords) - np.array(y_coords) / np.sqrt(2) # signed distance
+
     distances = (np.array(x_coords) - np.array(y_coords)) / np.sqrt(2) # signed distance
 
     x0, y0 = 0, 1
