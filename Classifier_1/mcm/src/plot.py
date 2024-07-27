@@ -281,7 +281,7 @@ def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="cool
     ax.spines['right'].set_linewidth(2)
     return im
 
-def cmap_to_gray(color, reverse=False):
+def cmap_to_gray(color, reverse=False,gray="whitesmoke"):
     """
     Create a colormap from the specified color to grey.
 
@@ -292,7 +292,7 @@ def cmap_to_gray(color, reverse=False):
     Returns:
     - A Matplotlib colormap.
     """
-    cmap = mcolors.LinearSegmentedColormap.from_list("", [color, "whitesmoke"])
+    cmap = mcolors.LinearSegmentedColormap.from_list("", [color, gray])
     if reverse:
         cmap = cmap.reversed()
     return cmap
@@ -420,7 +420,7 @@ def find_borders(arr):
     return borders
 
 # co-occurance
-def interesting_pix_map(mcms_ss, interesting_pix, nr_runs, digit, ax, map_kwargs={},show_letters=True):
+def interesting_pix_map(mcms_ss, interesting_pix, nr_runs, digit, ax, map_kwargs={},show_letters=True,cmap="viridis"):
     # borders around selected pixels
     b = np.zeros(121)
     b[interesting_pix] = 1
@@ -443,9 +443,9 @@ def interesting_pix_map(mcms_ss, interesting_pix, nr_runs, digit, ax, map_kwargs
     letters = int_to_letters(icc_loc.astype(int),first_ascii = 64)
     letters[letters == "@"] = "."
     if show_letters:
-        partition_map(ax, icc_sum/nr_runs,letters, b,cmap="viridis", normalise=False, **map_kwargs)
+        partition_map(ax, icc_sum/nr_runs,letters, b,cmap=cmap, normalise=False, **map_kwargs)
     else:         
-        partition_map(ax, icc_sum/nr_runs,None, b,cmap="viridis", normalise=False, **map_kwargs)
+        partition_map(ax, icc_sum/nr_runs,None, b,cmap=cmap, normalise=False, **map_kwargs)
 
 
 
