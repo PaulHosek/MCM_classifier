@@ -252,7 +252,7 @@ def generate_icc_comms_map(single_mcm):
 
 ## -- Partition Map: Drawing --
 
-def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="coolwarm",drawing_cond=lambda x:True,linewidth=2,cbar=True,normalise=True,global_vbounds=(None,None)):
+def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="coolwarm",drawing_cond=lambda x:True,linewidth=2,cbar=True,normalise=True,global_vbounds=(None,None),bcolor="black"):
 
     if colors_vals is None and text_vals is None: 
         raise ValueError("No color or text values provided. Dimensions of data unknown.")
@@ -261,7 +261,7 @@ def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="cool
         cmap = create_white_cmap()
 
     absmax = np.abs(colors_vals.flat[np.abs(colors_vals).argmax()])
-    draw_all_borders(borders, ax=ax,linewidth=linewidth) if borders is not None else None
+    draw_all_borders(borders, ax=ax,linewidth=linewidth, color=bcolor) if borders is not None else None
     draw_all_values(text_vals, color="black", cond=drawing_cond, ax=ax) if text_vals is not None else None
     if normalise:
         im = ax.imshow(colors_vals, cmap=cmap, vmin=-absmax, vmax=absmax)
@@ -342,7 +342,7 @@ def draw_all_borders(borders,ax=None, linewidth=2, color="black",offset=(0,0), *
     for i in range(len(borders)):
         for j in range(len(borders[i])):
             for side in borders[i][j]:
-                draw_border(j, i, side,ax=ax,linewidth=linewidth,color="black",offset=offset, **kwargs) # TODO Need to do -1/2 linewidth offset the in the direction of the border
+                draw_border(j, i, side,ax=ax,linewidth=linewidth,color=color,offset=offset, **kwargs) # TODO Need to do -1/2 linewidth offset the in the direction of the border
 
 def draw_all_values(vals, ax=None, color="white",cond=lambda x: True, **kwargs):
     """
@@ -443,9 +443,10 @@ def interesting_pix_map(mcms_ss, interesting_pix, nr_runs, digit, ax, map_kwargs
     letters = int_to_letters(icc_loc.astype(int),first_ascii = 64)
     letters[letters == "@"] = "."
     if show_letters:
-        partition_map(ax, icc_sum/nr_runs,letters, b,cmap=cmap, normalise=False, **map_kwargs)
+        im = partition_map(ax, icc_sum/nr_runs,letters, b,cmap=cmap, normalise=False, **map_kwargs)
     else:         
-        partition_map(ax, icc_sum/nr_runs,None, b,cmap=cmap, normalise=False, **map_kwargs)
+        im = partition_map(ax, icc_sum/nr_runs,None, b,cmap=cmap, normalise=False, **map_kwargs)
+    return im
 
 
 
