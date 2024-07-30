@@ -135,6 +135,74 @@ def label_communities(comms, ax, labels, fix_to_cellcenter=True, **kwargs):
                 
             ax.text(x, y, labels[community], ha='center', va='center', **kwargs)
 
+def label_communities_ace(comms, ax, labels, fix_to_cellcenter=True, **kwargs):
+    """
+    Label largest connected communities with centered text.
+
+    Parameters:
+    - comms (numpy.ndarray): An array containing the community assignments for each cell.
+    - ax (matplotlib.axes.Axes): The axes object on which the labels will be plotted.
+    - labels (list): A list of labels corresponding to each community.
+    - fix_to_cellcenter (bool, optional): Whether to fix the label position to the center of the cell. Defaults to True.
+    - **kwargs: Additional keyword arguments to be passed to the `ax.text()` function.
+
+    Returns:
+    None
+    """
+    def find_nearest_pixel(center, group_label):
+        y, x = np.round(center).astype(int)
+        if labeled_array[y, x] == group_label:
+            return y, x
+        else:
+            # Find all pixels in the group
+            group_pixels = np.argwhere(labeled_array == group_label)
+            # Calculate distances to the center
+            distances = np.linalg.norm(group_pixels - center, axis=1)
+            # Find the nearest pixel
+            nearest_pixel = group_pixels[np.argmin(distances)]
+            return nearest_pixel
+
+    communities = np.unique(comms)
+    average_size = np.mean([np.sum(comms == community) for community in communities])
+
+    for community in communities:
+        mask = comms == community
+        labeled_mask, num_labels = ndi.label(mask)
+
+        sizes = ndi.sum(mask, labeled_mask, range(num_labels + 1)) # size largest connected component
+        max_size = sizes.max()
+
+        if mask.sum() > 1:
+            # Label contiguous groups
+            labeled_array, num_features = ndi.label(mask)
+            # Calculate the center of mass for each group
+            centers = ndi.center_of_mass(mask, labeled_array, range(1, num_features + 1))
+
+
+            # Add labels at the center of each group
+            for i, (y, x) in enumerate(centers):
+                if fix_to_cellcenter:
+                    y, x = find_nearest_pixel(centers[i], i + 1)
+                ax.text(x, y, labels[community], ha='center', va='center', color='black')
+
+
+        # # label_communties with > 2 cells
+        # if mask.sum() > 1:
+        #     max_mask = labeled_mask == np.argmax(sizes)
+
+        #     y, x = ndi.center_of_mass(max_mask)
+
+        #     if fix_to_cellcenter:
+        #         # map to closest cell
+        #         y_indices, x_indices = np.where(max_mask)
+        #         distances = (y_indices - y)**2 + (x_indices - x)**2
+        #         y, x = y_indices[np.argmin(distances)], x_indices[np.argmin(distances)]
+
+        #     # circle = patches.Circle((x, y), radius=0.5, facecolor='black',alpha=.4, zorder=2)
+        #     # circle = patches.Rectangle((x-.5, y-.5),1,1, facecolor='black',alpha=.4, zorder=2)
+        #     # ax.add_patch(circle)
+                
+        #     ax.text(x, y, labels[community], ha='center', va='center', **kwargs)
 
 
 def compare_mcm_mutual_info_avg_vote(selected, all_P_icc, mcm_comms_map,mcm_idx,drawing_cond=lambda x: x!=0 ):

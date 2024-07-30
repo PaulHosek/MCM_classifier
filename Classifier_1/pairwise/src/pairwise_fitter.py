@@ -104,7 +104,7 @@ class Pairwise_fitter():
         assert self.is_setup, "Setup has not been completed. Please call the setup() method before fitting the model."
 
         if method == "ace":
-            cml_args = self.build_ace_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args)
+            cml_args = self.build_ace_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args, auto_l2=False, auto_l0=True)
         elif method == "qls":
             cml_args = self.build_qls_args(path_to_exe, p_dir=self.cat_dir, p_fname=self.fname+"_sep"+"-output", args=args)
         elif method == "rise":
@@ -152,7 +152,7 @@ class Pairwise_fitter():
             print(f"\N{check mark} Process done.")
         f.close()
 
-    def build_ace_args(self, path_to_exe:str, p_dir:str ,p_fname:str , args:list, auto_l2=True):
+    def build_ace_args(self, path_to_exe:str, p_dir:str ,p_fname:str , args:list, auto_l2=True, auto_l0=False):
         """Generate the arguments for the ACE algorithm.
 
         :param path_to_exe: path to the executable file. e.g., ./bin/ace or ./bin/qls
@@ -171,6 +171,8 @@ class Pairwise_fitter():
         cm_args = [path_to_exe, "-d",p_dir, "-i",p_fname,"-o", p_fname+"-out", "-b", str(self.sample_size)]
         if auto_l2:
             cm_args.append("-ag")
+        if auto_l0:
+            cm_args.append("-g0")
         # cm_args.append("-v") # debug verbose output
 
         cm_args.extend(args)
