@@ -173,7 +173,7 @@ class Pairwise_fitter():
         #     cm_args.append("-ag")
         # if auto_l0:
         cm_args.append("-g0")
-        cm_args.append("-tmax 0.003") # based on 4h runs
+        cm_args.append("-tmax 0.003") # after 3 hours
         # cm_args.append("-v") # debug verbose output
 
         cm_args.extend(args)
