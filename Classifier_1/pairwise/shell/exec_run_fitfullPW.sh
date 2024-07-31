@@ -18,9 +18,9 @@
 
 # done
 
-for size in 6315; do 
+for size in 5423; do 
   echo $size
-  for digit in 0; do 
-    timeout 3600 python3 run_fitfullPW.py --sample_s $size --digit $digit --method "ace" --trainfull "full"
+  for digit in 0 1 2 3 4 5 6 7 8 9; do 
+    timeout 3600 python3 run_fitfullPW.py --sample_s $size --digit $digit --method "ace" --trainfull "train"
   done
 done

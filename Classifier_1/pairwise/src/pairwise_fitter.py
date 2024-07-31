@@ -169,10 +169,11 @@ class Pairwise_fitter():
         :rtype: tuple
         """
         cm_args = [path_to_exe, "-d",p_dir, "-i",p_fname,"-o", p_fname+"-out", "-b", str(self.sample_size)]
-        if auto_l2:
-            cm_args.append("-ag")
-        if auto_l0:
-            cm_args.append("-g0")
+        # if auto_l2:
+        #     cm_args.append("-ag")
+        # if auto_l0:
+        cm_args.append("-g0")
+        cm_args.append("-tmax 0.003") # based on 4h runs
         # cm_args.append("-v") # debug verbose output
 
         cm_args.extend(args)
