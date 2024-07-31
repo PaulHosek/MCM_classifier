@@ -49,8 +49,13 @@ def get_pw_mod(digit,nspin,outdir,fname="train-images-unlabeled-{}",fileend="_se
     mod.load_ising_paramters()
     return mod
 
-# nspin = 121
-# digits = [0,1]
-# mods = [get_mod_digit(i,nspin) for i in digits]
 
+def partition_functions(traindatas,pw_mods,testdata_len=892):
+    # traindatas = [np.genfromtxt(utils.load_test_data(digit, all_data_path="../data/INPUT_all/data/combined_data/",fname="full-images-unlabeled-{}.dat"), dtype=int, delimiter=1) for digit in model_digits]
+    # pairwise_distrs = (np.exp(-1*pairwise_distrs)/ Zs[None,:,None]) # usage after
 
+    pairwise_distrs_Z = np.empty((len(pw_mods),len(traindatas[0])))
+    for i_md, mod in enumerate(pw_mods):
+        pairwise_distrs_Z[i_md,:] = np.array([mod.calc_energy(state) for state in traindatas[i_md]])
+    Zs = np.sum(np.exp(-1*pairwise_distrs_Z),axis=1)
+    return Zs*testdata_len/traindatas[0].shape[0]

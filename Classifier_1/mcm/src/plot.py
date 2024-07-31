@@ -749,8 +749,11 @@ def plot_confusion_matrix(confusion_matrix, n_categories: int, title="Confusion 
     tick_marks = np.arange(n_categories)
     plt.xticks(tick_marks, tick_marks)
     plt.yticks(tick_marks, tick_marks)
-    plt.ylabel("True label")
+    plt.gca().xaxis.tick_top()
+    plt.gca().xaxis.set_label_position('top')
+    plt.ylabel("True label", labelpad=10)
     plt.xlabel("Predicted label")
+
     return im
     
 def plot_label_prob_diff(label1, label2, test_labels, probs, predicted_classes, title="Label probability difference"):
