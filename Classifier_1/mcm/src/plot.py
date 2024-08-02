@@ -320,7 +320,7 @@ def generate_icc_comms_map(single_mcm):
 
 ## -- Partition Map: Drawing --
 
-def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="coolwarm",drawing_cond=lambda x:True,linewidth=2,cbar=True,normalise=True,global_vbounds=(None,None),bcolor="black"):
+def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="coolwarm",drawing_cond=lambda x:True,linewidth=2,cbar=True,normalise=True,global_vbounds=(None,None),bcolor="black", kwargs={}):
 
     if colors_vals is None and text_vals is None: 
         raise ValueError("No color or text values provided. Dimensions of data unknown.")
@@ -332,11 +332,11 @@ def partition_map(ax, colors_vals=None, text_vals=None, borders=None, cmap="cool
     draw_all_borders(borders, ax=ax,linewidth=linewidth, color=bcolor) if borders is not None else None
     draw_all_values(text_vals, color="black", cond=drawing_cond, ax=ax) if text_vals is not None else None
     if normalise:
-        im = ax.imshow(colors_vals, cmap=cmap, vmin=-absmax, vmax=absmax)
+        im = ax.imshow(colors_vals, cmap=cmap, vmin=-absmax, vmax=absmax,**kwargs)
     elif global_vbounds[0] != None:
-        im = ax.imshow(colors_vals, cmap=cmap, vmin=global_vbounds[0],vmax=global_vbounds[1])
+        im = ax.imshow(colors_vals, cmap=cmap, vmin=global_vbounds[0],vmax=global_vbounds[1],**kwargs)
     else: 
-        im = ax.imshow(colors_vals, cmap=cmap)
+        im = ax.imshow(colors_vals, cmap=cmap,**kwargs)
     
     if cbar:
         colorbar = plt.colorbar(im, ax=ax)
