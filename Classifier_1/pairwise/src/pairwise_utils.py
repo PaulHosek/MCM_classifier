@@ -58,4 +58,4 @@ def partition_functions(traindatas,pw_mods,testdata_len=892):
     for i_md, mod in enumerate(pw_mods):
         pairwise_distrs_Z[i_md,:] = np.array([mod.calc_energy(state) for state in traindatas[i_md]])
     Zs = np.sum(np.exp(-1*pairwise_distrs_Z),axis=1)
-    return Zs*testdata_len/traindatas[0].shape[0]
+    return Zs#*testdata_len/traindatas[0].shape[0]
